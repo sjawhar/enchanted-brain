@@ -1,4 +1,4 @@
-[The Enchanted Brain](Home)  
-&nbsp;&nbsp;[Mental Imagery](Mental-Imagery)  
-&nbsp;&nbsp;[Color Picker](Color-Picker)  
-&nbsp;&nbsp;**Goosebumps**  
+[**< Back**](Home)  
+[Mental Imagery](Mental-Imagery)  
+[Color Picker](Color-Picker)  
+**Goosebumps**  
