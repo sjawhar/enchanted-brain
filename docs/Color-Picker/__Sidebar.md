@@ -1,8 +1,24 @@
 [**< Back**](Home)  
 [Mental Imagery](Mental-Imagery)  
 **Color Picker**  
-&nbsp;&nbsp;[Requirements][#requirements]  
-&nbsp;&nbsp;&nbsp;&nbsp;[Part 1][#part-1-app-only]  
-&nbsp;&nbsp;&nbsp;&nbsp;[Part 2][#part-2-app--central-visualization]  
-&nbsp;&nbsp;&nbsp;&nbsp;[Part 3][#part-3-post-event]  
+&nbsp;&nbsp;[Requirements](#requirements)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Part 1](#part-1-app-only)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Part 2](#part-2-app--central-visualization)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Part 3](#part-3-post-event)  
+&nbsp;&nbsp;[API Contract](#api-contract)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Event](#event)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Connect](#connect)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Choose a color](#choose-a-color)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Get chosen colors](#get-chosen-colors)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Get aggregate choices](#get-aggregate-choices)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Event: active song changes](#event-active-song-changes)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Event: aggregate choices are updated](#event-aggregate-choices-are-updated)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Post-Event](#post-event)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Connect](#connect-1)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Start a new listen](#start-a-new-listen)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Choose a color](#choose-a-color-1)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Get list of songs](#get-list-of-songs)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Get list of listens for a song](#get-list-of-listens-for-a-song)  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Get list of choices for a listen](#get-list-of-choices-for-a-listen)  
+&nbsp;&nbsp;[Data Storage](#data-storage)  
 [Goosebumps](Goosebumps)  
