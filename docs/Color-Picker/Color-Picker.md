@@ -22,3 +22,198 @@
     * A static comparison of how the responses changed over time (the "results" screen)
     * A dynamic comparison used while listening to a song (the live visualization)
 * The total audience distribution will at first contain only the concert submissions, but an admin should be able to update this to include additional data points.
+
+## API Contract
+
+### Event
+#### Connect
+Send `REQUEST_AUTHENTICATE`
+```js
+{
+  token: String,
+}
+```
+
+**Response**
+```js
+{
+  currentSongId: String,
+  timestamp: String,
+}
+```
+
+#### Choose a color
+Send `COLOR_CHOSEN`
+```js
+{
+  songId: String,
+  color: String,
+  timeOffset: Number,
+}
+```
+
+#### Get chosen colors
+Send `REQUEST_MY_CHOICES`
+```js
+{
+  songId: String,
+}
+```
+
+**Response**
+```js
+[
+  {
+    songId: String,
+    color: String,
+    timeOffset: Number,
+  },
+  ...
+]
+```
+
+#### Get aggregate choices
+Send `REQUEST_AGGREGATE_CHOICES`
+```js
+{
+  songId: String,
+}
+```
+
+**Response**
+```js
+[
+  {
+    songId: String,
+    timeOffset: Number,
+    colors: {
+
+      COLOR_RED: Number,
+      COLOR_BLUE: Number,
+      COLOR_GREEN: Number,
+      ...
+    }
+  }
+]
+```
+
+#### Event: active song changes
+Listen for `ACTIVE_SONG_CHANGED`
+```js
+{
+    songId: String,
+    timestamp: String,
+}
+```
+
+#### Event: aggregate choices are updated
+Listen for `AGGREGATE_CHOICES_UPDATED`
+```js
+{
+  COLOR_RED: Number,
+  COLOR_BLUE: Number,
+  COLOR_GREEN: Number,
+  ...
+}
+```
+
+### Post-Event
+#### Connect
+Send `AUTHENTICATE`
+```js
+{
+  token: String,
+}
+```
+
+#### Start a new listen
+Send `REQUEST_CREATE_LISTEN`
+```js
+{
+  songId: String,
+  timestamp: String,
+}
+```
+
+**Response**
+```js
+{
+  listenId: String,
+  songId: String,
+  timestamp: String,
+}
+````
+
+#### Choose a color
+Send `COLOR_CHOSEN`
+```js
+{
+  listenId: String,
+  color: String,
+  timeOffset: Number,
+}
+```
+
+#### Get list of songs
+Send `REQUEST_GET_SONGS`
+
+**Response**
+```js
+[
+  {
+    id: String,
+    mediaUrl: String,
+    title: String,
+    artist: String,
+    length: Number,
+  }
+]
+```
+
+#### Get list of listens for a song
+Send `REQUEST_GET_LISTENS`
+```js
+{
+  songId: String,
+}
+```
+
+**Response**
+```js
+[
+  {
+    listenId: String,
+    songId: String,
+    timestamp: String,
+    choices: [
+      {
+        timeOffset: Number,
+        color: String,
+      }
+    ],
+  },
+  ...
+]
+```
+
+#### Get list of choices for a listen
+Send `REQUEST_GET_CHOICES`
+```js
+{
+  listendId: String,
+}
+```
+
+**Response**
+```js
+[
+  {
+    listenId: String,
+    color: String,
+    timeOffset: Number,
+  },
+  ...
+]
+```
+
+## Data Storage
