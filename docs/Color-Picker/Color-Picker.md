@@ -30,15 +30,7 @@
 Send `REQUEST_AUTHENTICATE`
 ```js
 {
-  token: String,
-}
-```
-
-**Response**
-```js
-{
-  currentSongId: String,
-  timestamp: String,
+  token: String,    // access token from AWS Cognito
 }
 ```
 
@@ -46,27 +38,20 @@ Send `REQUEST_AUTHENTICATE`
 Send `COLOR_CHOSEN`
 ```js
 {
-  songId: String,
   color: String,
-  timeOffset: Number,
+  timestamp: String,
 }
 ```
 
 #### Get chosen colors
 Send `REQUEST_MY_CHOICES`
-```js
-{
-  songId: String,
-}
-```
 
 **Response**
 ```js
 [
   {
-    songId: String,
     color: String,
-    timeOffset: Number,
+    timestamp: String,
   },
   ...
 ]
@@ -74,36 +59,30 @@ Send `REQUEST_MY_CHOICES`
 
 #### Get aggregate choices
 Send `REQUEST_AGGREGATE_CHOICES`
-```js
-{
-  songId: String,
-}
-```
 
 **Response**
 ```js
-[
-  {
-    songId: String,
-    timeOffset: Number,
-    colors: {
-
-      COLOR_RED: Number,
-      COLOR_BLUE: Number,
-      COLOR_GREEN: Number,
-      ...
-    }
-  }
-]
-```
-
-#### Event: active song changes
-Listen for `ACTIVE_SONG_CHANGED`
-```js
 {
-    songId: String,
-    timestamp: String,
-}
+  songs: [
+    {
+      id: String,
+      startTime: String,
+      endTime: Number,
+    },
+    ...
+  ],
+  choices: [
+    {
+      timestamp: Number,
+      colors: {
+        COLOR_RED: Number,
+        COLOR_BLUE: Number,
+        COLOR_GREEN: Number,
+        ...
+      },
+    },
+  ],
+},
 ```
 
 #### Event: new choices aggregated
@@ -139,7 +118,7 @@ Send `REQUEST_CREATE_LISTEN`
 **Response**
 ```js
 {
-  listenId: String,
+  id: String,
   songId: String,
   timestamp: String,
 }
@@ -183,7 +162,7 @@ Send `REQUEST_GET_LISTENS`
 ```js
 [
   {
-    listenId: String,
+    id: String,
     songId: String,
     timestamp: String,
     choices: [
@@ -227,18 +206,18 @@ Send `REQUEST_GET_CHOICES`
   songId: String,           // Partition key
   listenId: 'SONG_INFO',    // Range key
   title: String,            // Helpful for in-app displays
-  length: Number,           // Helpful for in-app displays
-  timestamp: String,        // Starting time of this song during the event
+  startTime: String,
+  endTime: String,
 }
 ```
 
 #### User choices
 ```js
 {
-  songId: String,
+  songId: String,           // Can be set to 'CONCERT_1' for the entire event
   listenId: String,         // equal to userId
   choices: {
-    [timeOffset]: color,    // Key is the number of milliseconds since the starting time of this song during the event
+    [timestamp]: color,     // Key is the timestamp of the choice
     Number: String,         // Value is the color choice
   },
 }
@@ -250,7 +229,7 @@ Send `REQUEST_GET_CHOICES`
   songId: String,
   listenId: 'AGGREGATE',
   choices: {
-    [timeOffset]: {
+    [timestamp]: {
       COLOR_RED: Number,
       COLOR_BLUE: Number,
       COLOR_GREEN: Number,
