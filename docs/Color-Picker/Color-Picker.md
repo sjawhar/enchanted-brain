@@ -15,7 +15,7 @@
     * In group B, the audience member will instead be picking emotions: Joy, sadness, anger, fear, [disgust].
 * There will also be a central display in the event venue visualizing the audience's choices as they come in. This should function like a "mood ring" in the sense that it shows the most recent audience choices.
 
-### Part 3: Post-Event
+### Part 3: After Event
 * After the event, the user should also be able to re-listen to each song and re-submit color or emotion choices.
 * The first time a user listens to a song, they should only have the ability to choose colors and should be blind to the existence of the emotion picker. The user can then choose which they'd like to do in future playbacks.
 * The user should be able to see their choices for each instance of listening to the song compared to the total audience. There are two parts to this:
@@ -25,7 +25,7 @@
 
 ## API Contract
 
-### Event
+### During Event
 #### Connect
 Send `REQUEST_AUTHENTICATE`
 ```js
@@ -106,7 +106,7 @@ Listen for `ACTIVE_SONG_CHANGED`
 }
 ```
 
-#### Event: aggregate choices are updated
+#### Event: new choices aggregated
 Listen for `AGGREGATE_CHOICES_UPDATED`
 ```js
 {
@@ -117,7 +117,8 @@ Listen for `AGGREGATE_CHOICES_UPDATED`
 }
 ```
 
-### Post-Event
+### After Event
+
 #### Connect
 Send `AUTHENTICATE`
 ```js
@@ -217,3 +218,89 @@ Send `REQUEST_GET_CHOICES`
 ```
 
 ## Data Storage
+
+### During Event
+
+#### Song information
+```js
+{
+  songId: String,           // Partition key
+  listenId: 'SONG_INFO',    // Range key
+  title: String,            // Helpful for in-app displays
+  length: Number,           // Helpful for in-app displays
+  timestamp: String,        // Starting time of this song during the event
+}
+```
+
+#### User choices
+```js
+{
+  songId: String,
+  listenId: String,         // equal to userId
+  choices: {
+    [timeOffset]: color,    // Key is the number of milliseconds since the starting time of this song during the event
+    Number: String,         // Value is the color choice
+  },
+}
+```
+
+#### Aggregated choices
+```js
+{
+  songId: String,
+  listenId: 'AGGREGATE',
+  choices: {
+    [timeOffset]: {
+      COLOR_RED: Number,
+      COLOR_BLUE: Number,
+      COLOR_GREEN: Number,
+      ...
+    },
+    Number: Map,
+  },
+}
+```
+
+### After Event
+
+#### Song information
+```js
+{
+  songId: String,           // Partition key
+  listenId: 'SONG_INFO',    // Range key
+  mediaUrl: String,         // Cached by app for playback
+  title: String,            // Helpful for in-app displays
+  artist: String,           // Helpful for in-app displays
+  length: Number,           // Helpful for in-app displays
+}
+```
+
+#### User choices
+```js
+{
+  songId: String,
+  listenId: String,         // Compound key: userId$timestamp
+  choiceType: String,       // CHOICE_COLOR | CHOICE_EMOTION
+  choices: {
+    [timeOffset]: choice,   // Key is the number of milliseconds since the starting time of this song during the event
+    Number: String,         // Value is the color or emotion choice
+  },
+}
+```
+
+#### Aggregated choices
+```js
+{
+  songId: String,
+  listenId: 'AGGREGATE',
+  choices: {
+    [timeOffset]: {
+      COLOR_RED: Number,
+      COLOR_BLUE: Number,
+      COLOR_GREEN: Number,
+      ...
+    },
+    Number: Map,
+  },
+}
+```
