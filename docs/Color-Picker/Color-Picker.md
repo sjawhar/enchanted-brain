@@ -81,6 +81,7 @@ Send `REQUEST_AGGREGATE_CHOICES`
         ...
       },
     },
+    ...
   ],
 },
 ```
@@ -146,7 +147,8 @@ Send `REQUEST_GET_SONGS`
     title: String,
     artist: String,
     length: Number,
-  }
+  },
+  ...
 ]
 ```
 
