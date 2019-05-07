@@ -1,4 +1,4 @@
 [**< Back**](Home)  
 **Mental Imagery**  
-[Color Picker](Color-Picker)  
+[Color/Emotion Picker](Color-Emotion-Picker)  
 [Goosebumps](Goosebumps)  

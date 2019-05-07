@@ -34,23 +34,25 @@ Send `REQUEST_AUTHENTICATE`
 }
 ```
 
-#### Choose a color
-Send `COLOR_CHOSEN`
+#### Make a choice
+Send `CHOICE_MADE`
 ```js
 {
-  color: String,
+  choiceType: String,  // CHOICE_COLOR | CHOICE_EMOTION
+  choice: String,
   timestamp: String,
 }
 ```
 
-#### Get chosen colors
+#### Get choices
 Send `REQUEST_MY_CHOICES`
 
 **Response**
 ```js
 [
   {
-    color: String,
+    choiceType: String,
+    choice: String,
     timestamp: String,
   },
   ...
@@ -71,29 +73,43 @@ Send `REQUEST_AGGREGATE_CHOICES`
     },
     ...
   ],
-  choices: [
+  colors: [
     {
-      timestamp: Number,
-      colors: {
-        COLOR_RED: Number,
+      timestamp: String,
+      choices: {
         COLOR_BLUE: Number,
         COLOR_GREEN: Number,
+        COLOR_RED: Number,
         ...
       },
     },
     ...
   ],
-},
+  emotions: [
+    {
+      timestamp: String,
+      choices: {
+        EMOTION_ANGER: Number,
+        EMOTION_JOY: Number,
+        EMOTION_SADNESS: Number,
+        ...
+      },
+    },
+    ...
+  ],
+}
 ```
 
 #### Event: new choices aggregated
 Listen for `AGGREGATE_CHOICES_UPDATED`
 ```js
 {
-  COLOR_RED: Number,
-  COLOR_BLUE: Number,
-  COLOR_GREEN: Number,
-  ...
+  colors: {
+    COLOR_BLUE: Number,
+    COLOR_GREEN: Number,
+    COLOR_RED: Number,
+    ...
+  }
 }
 ```
 
@@ -112,6 +128,7 @@ Send `REQUEST_CREATE_LISTEN`
 ```js
 {
   songId: String,
+  choiceType: String,
   timestamp: String,
 }
 ```
@@ -121,16 +138,17 @@ Send `REQUEST_CREATE_LISTEN`
 {
   id: String,
   songId: String,
+  choiceType: String,
   timestamp: String,
 }
 ````
 
-#### Choose a color
-Send `COLOR_CHOSEN`
+#### Make a choice
+Send `CHOICE_MADE`
 ```js
 {
   listenId: String,
-  color: String,
+  choice: String,
   timeOffset: Number,
 }
 ```
@@ -166,12 +184,14 @@ Send `REQUEST_GET_LISTENS`
   {
     id: String,
     songId: String,
+    choiceType: String,
     timestamp: String,
     choices: [
       {
         timeOffset: Number,
-        color: String,
-      }
+        choice: String,
+      },
+      ...
     ],
   },
   ...
@@ -188,14 +208,17 @@ Send `REQUEST_GET_CHOICES`
 
 **Response**
 ```js
-[
-  {
-    listenId: String,
-    color: String,
-    timeOffset: Number,
-  },
-  ...
-]
+{
+  listendId: String,
+  choiceType: String,
+  choices: [
+    {
+      choice: String,
+      timeOffset: Number,
+    },
+    ...
+  ],
+}
 ```
 
 ## Data Storage
@@ -218,9 +241,15 @@ Send `REQUEST_GET_CHOICES`
 {
   songId: String,           // Can be set to 'CONCERT_1' for the entire event
   listenId: String,         // equal to userId
-  choices: {
-    [timestamp]: color,     // Key is the timestamp of the choice
-    Number: String,         // Value is the color choice
+  colors: {
+    Number: String,         // Key is the timestamp of the choice
+    [timestamp]: color,     // Value is the color choice
+    ...
+  },
+  emotions: {
+    Number: String,         // Key is the timestamp of the choice
+    [timestamp]: color,     // Value is the color choice
+    ...
   },
 }
 ```
@@ -230,14 +259,25 @@ Send `REQUEST_GET_CHOICES`
 {
   songId: String,
   listenId: 'AGGREGATE',
-  choices: {
+  colors: {
+    Number: Map,
     [timestamp]: {
-      COLOR_RED: Number,
       COLOR_BLUE: Number,
       COLOR_GREEN: Number,
+      COLOR_RED: Number,
       ...
     },
+    ...
+  },
+  emotions: {
     Number: Map,
+    [timestamp]: {
+      EMOTION_ANGER: Number,
+      EMOTION_JOY: Number,
+      EMOTION_SADNESS: Number,
+      ...
+    },
+    ...
   },
 }
 ```
@@ -263,25 +303,45 @@ Send `REQUEST_GET_CHOICES`
   listenId: String,         // Compound key: userId$timestamp
   choiceType: String,       // CHOICE_COLOR | CHOICE_EMOTION
   choices: {
-    [timeOffset]: choice,   // Key is the number of milliseconds since the starting time of this song during the event
-    Number: String,         // Value is the color or emotion choice
+    Number: String,         // Key is the number of milliseconds since the starting time of this song during the event
+    [timeOffset]: choice,   // Value is the color or emotion choice
+    ...
   },
 }
 ```
 
-#### Aggregated choices
+#### Aggregated colors
 ```js
 {
   songId: String,
-  listenId: 'AGGREGATE',
-  choices: {
+  listenId: 'AGGREGATE_COLORS',
+  colors: {
+    Number: Map,
     [timeOffset]: {
-      COLOR_RED: Number,
       COLOR_BLUE: Number,
       COLOR_GREEN: Number,
+      COLOR_RED: Number,
       ...
     },
+    ...
+  },
+}
+```
+
+#### Aggregated emotions
+```js
+{
+  songId: String,
+  listenId: 'AGGREGATE_EMOTIONS',
+  emotions: {
     Number: Map,
+    [timeOffset]: {
+      EMOTION_ANGER: Number,
+      EMOTION_JOY: Number,
+      EMOTION_SADNESS: Number,
+      ...
+    },
+    ...
   },
 }
 ```
