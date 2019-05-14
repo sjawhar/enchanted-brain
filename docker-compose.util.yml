@@ -1,0 +1,21 @@
+version: '3.5'
+
+services:
+
+  install:
+    image: sjawhar/pipenv:3.7-2018.11.26
+    volumes:
+      - ./:/app
+      - ~/.local/share/virtualenvs:/root/.local/share/virtualenvs
+    working_dir: /app/lambdas/${FUNCTION_NAME}
+    entrypoint: [pipenv, install]
+    command: [--dev]
+
+  test:
+    image: sjawhar/pipenv:3.7-2018.11.26
+    volumes:
+      - ./:/app
+      - ~/.local/share/virtualenvs:/root/.local/share/virtualenvs
+    working_dir: /app/lambdas/${FUNCTION_NAME}
+    entrypoint: [pipenv, run, test]
+    command: [-v]

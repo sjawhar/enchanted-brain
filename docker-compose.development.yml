@@ -1,0 +1,89 @@
+version: '3.5'
+
+services:
+
+  api:
+    image: sjawhar/aws-cli:1.16.143
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/aws
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
+      AWS_SESSION_TOKEN:
+    ports:
+      - 3000:3000
+    user: root
+    entrypoint: [sam]
+    command:
+      - local
+      - start-api
+      - --host
+      - 0.0.0.0
+      - --template
+      - cloudformation.yml
+      - --env-vars
+      - env.local.json
+      - --docker-volume-basedir
+      - ${PWD}
+      - --docker-network
+      - enchanted-brain
+      - --region
+      - us-west-2
+
+  invoke-lambda:
+    image: sjawhar/aws-cli:1.16.143
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/aws
+      - ./sam-cache:${PWD}/sam-cache
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
+      AWS_SESSION_TOKEN:
+    user: root
+    entrypoint:
+      - sam
+      - local
+      - invoke
+      - --template
+      - cloudformation.yml
+      - --env-vars
+      - env.local.json
+      - --docker-volume-basedir
+      - ${PWD}
+      - --docker-network
+      - enchanted-brain
+      - --region
+      - us-west-2
+      - --layer-cache-basedir
+      - ${PWD}/sam-cache
+    command:
+      - --event
+      - event.local.json
+
+  db:
+    image: amazon/dynamodb-local:1.11.477
+    entrypoint:
+      - java
+      - -jar
+      - DynamoDBLocal.jar
+      - -inMemory
+    command:
+      - -sharedDb
+
+  setup-db:
+    image: lambci/lambda:nodejs8.10
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - ./setup:/app
+    working_dir: /app
+    entrypoint: [node]
+    command: [setup-db.js]
+    restart: on-failure
+
+networks:
+  default:
+    name: enchanted-brain
