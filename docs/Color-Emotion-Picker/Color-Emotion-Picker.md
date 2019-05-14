@@ -1,7 +1,14 @@
 ## Requirements
 
 ### Part 1: App-Only
-* The audience will listen to the orchestra play four pieces of music.
+| Emotions          | Artist       | Song                                                 | Duration |
+|-------------------|--------------|------------------------------------------------------|----------|
+| Serenity/Calm     | Fauré        | Pavane - initial excerpt                             | 2:30     |
+| Sadness/Nostalgia | Grieg        | Elegiac Melodies - No. 2, Last Spring excerpt        | 2:00     |
+| Happiness/Joy     | Beethoven    | Symphony No. 7 - 4th movement - finale excerpt.      | 2:00     |
+| Anger             | Shostakovich | Chamber Symphony in C minor, Op. 110a - 2nd movement | 3:00     |
+
+* The audience will listen to the orchestra play the above four pieces of music.
 * Each audience member will use the app to pick from six available colors (RGB, CMY).
 * It's possible that we will want audience members of the final rehearsal to be able to choose emotions instead.
 * The audience member can pick a new color at any time, but the app will give a gentle reminder every 20 seconds.
