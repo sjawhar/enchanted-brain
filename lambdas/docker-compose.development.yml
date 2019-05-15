@@ -6,7 +6,7 @@ services:
     image: sjawhar/aws-cli:1.16.143
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/aws
+      - ../:/aws
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
@@ -23,11 +23,11 @@ services:
       - --template
       - cloudformation.yml
       - --env-vars
-      - env.local.json
+      - lambdas/env.local.json
       - --docker-volume-basedir
-      - ${PWD}
+      - ${PWD}/..
       - --docker-network
-      - enchanted-brain
+      - enchanted-brain-lambdas
       - --region
       - us-west-2
 
@@ -35,7 +35,7 @@ services:
     image: sjawhar/aws-cli:1.16.143
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/aws
+      - ../:/aws
       - ./sam-cache:${PWD}/sam-cache
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
@@ -49,18 +49,18 @@ services:
       - --template
       - cloudformation.yml
       - --env-vars
-      - env.local.json
+      - lambdas/env.local.json
       - --docker-volume-basedir
-      - ${PWD}
+      - ${PWD}/..
       - --docker-network
-      - enchanted-brain
+      - enchanted-brain-lambdas
       - --region
       - us-west-2
       - --layer-cache-basedir
       - ${PWD}/sam-cache
-    command:
       - --event
-      - event.local.json
+    command:
+      - lambdas/event.local.json
 
   db:
     image: amazon/dynamodb-local:1.11.477
@@ -78,7 +78,7 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     volumes:
-      - ./setup:/app
+      - ./_local-setup:/app
     working_dir: /app
     entrypoint: [node]
     command: [setup-db.js]
@@ -86,4 +86,4 @@ services:
 
 networks:
   default:
-    name: enchanted-brain
+    name: enchanted-brain-lambdas

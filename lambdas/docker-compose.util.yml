@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+
+  pipenv:
+    image: sjawhar/pipenv:3.7-2018.11.26
+    volumes:
+      - ./:/app
+      - ~/.local/share/virtualenvs:/home/pipenv/.local/share/virtualenvs
+    working_dir: /app/${FUNCTION_NAME}
+    user: pipenv

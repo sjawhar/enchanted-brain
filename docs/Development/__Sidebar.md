@@ -6,7 +6,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[Setting up local DB](#setting-up-local-db)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Installing packages](#installing-packages)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Running tests](#running-tests)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Invoking non-API Lambda functions](#invoking-non-api-lambda-functions)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Invoking Lambda functions](#invoking-lambda-functions)  
 &nbsp;&nbsp;[Tips](#tips)  
 Usage  
 &nbsp;&nbsp;[Mental Imagery](Mental-Imagery)  
