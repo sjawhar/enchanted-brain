@@ -27,73 +27,21 @@ TODO
 ### Part 4: Chills
 TODO
 
-## Rest API
-All requests to APIs should include an `Authentication` header with the user's AWS Cognito ID JWT
-
-### Sign in/out
+## Authentication
 Use AWS Cognito libraries.
 
-### Make a color choice
-**Request**  
-`POST /Choices`
+## Websocket API
+### Report a choice
+Send `CHOICE_MADE`
 ```js
 {
-  songId: 'CONCERT_LAUSANNE_2019',
-  choiceType: 'CHOICE_COLOR',
-  choice: String,                   // COLOR_RED || COLOR_BLUE ...
+  choiceType: String,           // CHOICE_COLOR || CHOICE_EMOTION || CHOICE_CHILLS || CHOICE_IMAGERY
+  choice: String || Boolean,    // Boolean for chills, String for the rest
   timestamp: String,
 }
 ```
 
-**Response**  
-`204 No Content`
-
-### Make an emotion choice
-**Request**  
-`POST /Choices`
-```js
-{
-  songId: 'CONCERT_LAUSANNE_2019',
-  choiceType: 'CHOICE_EMOTION',
-  choice: String,                   // EMOTION_HAPINESS || EMOTION_SADNESS ...
-  timestamp: String,
-}
-```
-
-**Response**  
-`204 No Content`
-
-### Report chills starting/stopping
-**Request**  
-`POST /Choices`
-```js
-{
-  songId: 'CONCERT_LAUSANNE_2019',
-  choiceType: 'CHOICE_CHILLS',
-  choice: Boolean,                  // True for chills starting, false for stopping
-  timestamp: String,
-}
-```
-
-**Response**  
-`204 No Content`
-
-### Report mental imagery
-**Request**  
-`POST /Choices`
-```js
-{
-  songId: 'CONCERT_LAUSANNE_2019',
-  choiceType: 'CHOICE_IMAGERY',
-  choice: String,                   // Short answer response
-}
-```
-
-**Response**  
-`204 No Content`
-
-## Concert Experience Websocket API
-The websocket API will be used to guide the mobile app through the concert experience. At appropriate times, it will trigger the app to proceed to the next part of the concert.
+The websocket API will also be used to guide the mobile app through the concert experience. At appropriate times, it will trigger the app to proceed to the next part of the concert.
 
 ### 1 - Connect and welcome
 Send `authentication`
