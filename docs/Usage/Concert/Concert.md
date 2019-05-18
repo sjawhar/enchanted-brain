@@ -1,5 +1,4 @@
 ## Requirements
-
 ### Part 1: Mental Imagery
 TODO
 
@@ -87,13 +86,11 @@ Use AWS Cognito libraries.
   songId: 'CONCERT_LAUSANNE_2019',
   choiceType: 'CHOICE_IMAGERY',
   choice: String,                   // Short answer response
-  timestamp: String,
 }
 ```
 
 **Response**  
 `204 No Content`
-
 
 ## Concert Experience Websocket API
 The websocket API will be used to guide the mobile app through the concert experience. At appropriate times, it will trigger the app to proceed to the next part of the concert.
@@ -110,11 +107,13 @@ Send `authentication`
 **Response**
 ```js
 {
-  eventStage: 'WELCOME',
+  eventStage: String,
 }
 ```
 
-After the client connects, the mobile app should display a welcome screen that asks the user to just listen to the concert. The first part of the concert will be the mental imagery, which requires the user to close their eyes, listen to the song, and pay attention to the images that come to mind.
+After the client connects, the server should respond with the current stage of the event. This ensures that the app proceeds to the correct stage in case of a disconnect in the middle of the event.
+
+The first event stage will be `WELCOME`. The mobile app should display a welcome screen that asks the user to just listen to the concert. The first part of the concert will be the mental imagery, which requires the user to close their eyes, listen to the song, and pay attention to the images that come to mind.
 
 ### 2 - Ask for mental imagery response
 Listen for `EVENT_STAGE_CHANGED`
@@ -181,23 +180,28 @@ Listen for `EVENT_STAGE_CHANGED`
 The app will not be used in the concert after the intermission. At this point, the aggregated responses/visualizations will be available in the app and the websocket connection can be closed.
 
 ## Central Visualization Websocket API
-
-### Event: new choices aggregated
-Listen for `AGGREGATE_CHOICES_UPDATED`
+### Mental imagery aggregated
+Listen for `IMAGERY_AGGREGATED`
 ```js
 {
-  colors: {
-    COLOR_BLUE: Number,
-    COLOR_GREEN: Number,
-    COLOR_RED: Number,
-    ...
-  }
+  String: Number,
+  [word]: count,
+  ...
 }
 ```
-TODO
+
+### Colors aggregated
+Listen for `COLORS_AGGREGATED`
+```js
+{
+  COLOR_BLUE: Number,
+  COLOR_GREEN: Number,
+  COLOR_RED: Number,
+  ...
+}
+```
 
 ## Data Storage
-
 ### Song information
 ```js
 {

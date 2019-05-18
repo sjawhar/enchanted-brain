@@ -1,4 +1,7 @@
 ## Requirements
+### Mental Imagery
+TODO
+
 ### Color/Emotion Picker
 * The user should also be able to re-listen to each song and re-submit color or emotion choices.
 * The first time a user listens to a song, they should only have the ability to choose colors and should be blind to the existence of the emotion picker. The user can then choose which they'd like to do in future playbacks.
@@ -7,55 +10,30 @@
     * A dynamic comparison used while listening to a song (the live visualization)
 * The total audience distribution will at first contain only the concert submissions, but an admin should be able to update this to include additional data points.
 
+### Chills
+TODO
+
+### Composition Type
+TODO
+
 ## API contract
+All requests to APIs should include an `Authentication` header with the user's AWS Cognito ID JWT
 
-### Connect
-Send `AUTHENTICATE`
-```js
-{
-  token: String,
-}
-```
-
-### Start a new listen
-Send `REQUEST_CREATE_LISTEN`
-```js
-{
-  songId: String,
-  choiceType: String,
-  timestamp: String,
-}
-```
-
-**Response**
-```js
-{
-  id: String,
-  songId: String,
-  choiceType: String,
-  timestamp: String,
-}
-````
-
-### Make a choice
-Send `CHOICE_MADE`
-```js
-{
-  listenId: String,
-  choice: String,
-  timeOffset: Number,
-}
-```
+### Sign in/out
+Use AWS Cognito libraries.
 
 ### Get list of songs
-Send `REQUEST_GET_SONGS`
+**Request**  
+`GET /Songs`
 
-**Response**
+**Response**  
+`200 OK`  
 ```js
 [
   {
     id: String,
     mediaUrl: String,
+    choiceTypes: [String, ...],     // List of valid choice types for this song
     title: String,
     artist: String,
     length: Number,
@@ -64,58 +42,140 @@ Send `REQUEST_GET_SONGS`
 ]
 ```
 
-### Get list of listens for a song
-Send `REQUEST_GET_LISTENS`
+### Start a new listen
+**Request**  
+`POST /Listens`
 ```js
 {
   songId: String,
+  choiceType: String,
 }
 ```
 
-**Response**
+**Response**  
+`201 Created`  
+```js
+{
+  id: String,
+  songId: String,
+  choiceType: String,
+  createdAt: String,
+}
+````
+
+### Submit listen choice(s)
+**Request**  
+`PUT /Listens/:listenId/Choices`
+```js
+{
+  choiceType: String,
+  [choices: [           // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
+    {
+      timeOffset: Number,
+      choice: String,
+    },
+    ...
+  ]],
+  [choice: String],     // choiceType in [CHOICE_COMPOSITION, CHOICE_IMAGERY]
+}
+```
+
+**Response**  
+`204 No Content`
+
+### Get aggregate choices for a song
+**Request**  
+`GET /Songs/:songId/Choices`
+
+**Response**  
+`200 OK`
+```js
+{
+  [colors: [
+    {
+      timeOffset: Number,
+      choices: {
+        COLOR_BLUE: Number,
+        COLOR_GREEN: Number,
+        COLOR_RED: Number,
+        ...
+      },
+    },
+    ...
+  ]],
+  [emotions: [
+    {
+      timeOffset: Number,
+      choices: {
+        EMOTION_ANGER: Number,
+        EMOTION_JOY: Number,
+        EMOTION_SADNESS: Number,
+        ...
+      },
+    },
+    ...
+  ]],
+  [chills: [
+    {
+      timeOffset: Number,
+      chillRatio: Number,       // Percentage of respondents experiencing chills
+    },
+    ...
+  ]],
+  [imagery: {
+    String: Number,             // Key is the word to display in the word cloud
+    [word]: count,              // Value is the number of responses mentioning that word
+    ...
+  }],
+  [composition: {
+    COMPOSITION_RATIONAL: count,
+    COMPOSITION_INTUITIVE: count,
+  }],
+}
+```
+
+### Get list of listens for a song
+**Request**  
+`GET /Songs/:songId/Listens`
+
+**Response**  
+`200 OK`  
 ```js
 [
   {
     id: String,
     songId: String,
     choiceType: String,
-    timestamp: String,
-    choices: [
+    createdAt: String,
+    [choices: [           // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
       {
         timeOffset: Number,
         choice: String,
       },
       ...
-    ],
+    ]],
+    [choice: String],     // choiceType in [CHOICE_COMPOSITION, CHOICE_IMAGERY]
   },
   ...
 ]
 ```
 
-### Get list of choices for a listen
-Send `REQUEST_GET_CHOICES`
-```js
-{
-  listendId: String,
-}
-```
+### Get choice(s) for a listen
+**Request**  
+`GET /Listens/:listenId/Choices`
 
-**Response**
-```js
-{
-  listendId: String,
-  choiceType: String,
-  choices: [
-    {
-      choice: String,
-      timeOffset: Number,
-    },
-    ...
-  ],
-}
-```
+**Response**  
+Same as request body for [submitting listen choice(s)](#submit-listen-choices).
 
 ## Data Storage
+### List of Songs
+````js
+{
+  songId: 'SONG_LIST',
+  listenId: 'SONG_LIST',
+  songs: [String, ...],         // List of songIds
+}
+````
 
 ### Song information
 ```js
