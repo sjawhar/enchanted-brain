@@ -9,6 +9,5 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[Invoking Lambda functions](#invoking-lambda-functions)  
 &nbsp;&nbsp;[Tips](#tips)  
 Usage  
-&nbsp;&nbsp;[Mental Imagery](Mental-Imagery)  
-&nbsp;&nbsp;[Color/Emotion Picker](Color-Emotion-Picker)  
-&nbsp;&nbsp;[Goosebumps](Goosebumps)  
+&nbsp;&nbsp;[Concert](Concert)  
+&nbsp;&nbsp;[After Concert](After-Concert)  
