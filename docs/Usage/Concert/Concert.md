@@ -1,4 +1,8 @@
 ## Requirements
+### Overall
+* During the concert, the app will move from one section to the next (e.g. mental imagery, color/emotion, etc.) without requiring the user to navigate through the app.
+* During registration, we will collect the age and sex of each user
+
 ### Part 1: Mental Imagery
 TODO
 
@@ -11,21 +15,24 @@ TODO
 | Anger             | Shostakovich | Chamber Symphony in C minor, Op. 110a - 2nd movement | 3:00     |
 
 * The audience will listen to the orchestra play the above four pieces of music.
-* Each audience member will use the app to pick from six available colors (RGB, CMY).
-* It's possible that we will want audience members of the final rehearsal to be able to choose emotions instead.
-* The audience member can pick a new color at any time, but the app will give a gentle reminder every 20 seconds.
-* During the intermission (after the four songs), each audience member's app will display both their own choices as well as the overall audience distribution. Let's call this the "results" screen.
-* The app will move from one song to the next as the event progresses without user input
+* Each audience member will use the app to pick from a grid of 21 colors:
+  - 6 hues (red, orange, yellow, green, blue, purple) x 3 shades (light, medium, dark) + 3 neutrals (white, gray, black)
+* The audience member can pick a new color at any time, but the app will give a gentle reminder 15 seconds after the last choice.
 
 ### Part 3: Color/Emotion - App + Central Visualization
 * The audience will listen to the orchestra play the Coriolan overture.
 * The audience will be randomly split into two groups.
     * In group A, the functionality is the same as the app-only section.
-    * In group B, the audience member will instead be picking emotions: Joy, sadness, anger, fear, [disgust].
-* There will also be a central display in the event venue visualizing the audience's choices as they come in. This should function like a "mood ring" in the sense that it shows the most recent audience choices.
+    * In group B, the audience member will instead be picking emotions. **Emotion slection method TBD.**
+* There will also be a central display in the event venue visualizing the audience's choices as they come in. This should function like a "mood ring" in the sense that it shows the most recent audience choices. **Visualization details TBD.**
 
 ### Part 4: Chills
 TODO
+
+### Part 5: Intermission
+* Each audience member's app will thank the user for participating and signal the end of the part of the concert which uses the app.
+* The app will display the user's color choices compared to the overall audience distribution.
+* The app will also display the user's mental imagery response compared to the overall audience distribution.
 
 ## Authentication
 Use AWS Cognito libraries.
