@@ -6,7 +6,7 @@
 ### Part 1: Mental Imagery
 TODO
 
-### Part 2: Color/Emotion - App-Only
+### Part 2: Color/Emotion 1
 | Emotions          | Artist       | Song                                                 | Duration |
 |-------------------|--------------|------------------------------------------------------|----------|
 | Serenity/Calm     | Fauré        | Pavane - initial excerpt                             | 2:30     |
@@ -19,7 +19,7 @@ TODO
   - 6 hues (red, orange, yellow, green, blue, purple) x 3 shades (light, medium, dark) + 3 neutrals (white, gray, black)
 * The audience member can pick a new color at any time, but the app will give a gentle reminder 15 seconds after the last choice.
 
-### Part 3: Color/Emotion - App + Central Visualization
+### Part 3: Color/Emotion 2
 * The audience will listen to the orchestra play the Coriolan overture.
 * The audience will be randomly split into two groups.
     * In group A, the functionality is the same as the app-only section.
