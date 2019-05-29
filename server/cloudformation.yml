@@ -10,6 +10,8 @@ Parameters:
       - staging
       - testing
 
+  EventStageChangedSnsTopicArn:
+    Type: String
 
 Resources:
 
@@ -44,6 +46,14 @@ Resources:
       TemplateURL: cloudformation-stacks/aggregator-kinesis-stream.yml
       Parameters:
         Environment: !Ref Environment
+
+  SqsQueue:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/sqs-queue.yml
+      Parameters:
+        Environment: !Ref Environment
+        EventStageChangedSnsTopicArn: !Ref EventStageChangedSnsTopicArn
 
   ServerCluster:
     Type: AWS::CloudFormation::Stack

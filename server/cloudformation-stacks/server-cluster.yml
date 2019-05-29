@@ -22,7 +22,10 @@ Parameters:
   EventName:
     Type: String
 
-  EventStageChangedSnsTopicArn:
+  EventStageChangedSqsQueueArn:
+    Type: String
+
+  EventStageChangedSqsQueueUrl:
     Type: String
 
   LoadBalancerListenerArn:
@@ -186,7 +189,7 @@ Resources:
                   - sqs:ChangeMessageVisibility
                   - sqs:DeleteMessage
                   - sqs:ReceiveMessage
-                Resource: !GetAtt EventStageChangedSqsQueue.Arn
+                Resource: !Ref EventStageChangedSqsQueueArn
 
   EcsTaskDefinition:
     Type: AWS::ECS::TaskDefinition
@@ -212,7 +215,7 @@ Resources:
             - Name: DYNAMODB_TABLE_NAME
               Value: !Ref DynamodbTableName
             - Name: EVENT_STAGE_CHANGED_SQS_QUEUE_URL
-              Value: !Ref EventStageChangedSqsQueue
+              Value: !Ref EventStageChangedSqsQueueUrl
             - Name: EVENT_NAME
               Value: !Ref EventName
             - Name: REDIS_CLUSTER_ENDPOINT

@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - production
+      - development
+      - staging
+      - testing
+
+  EventStageChangedSnsTopicArn:
+    Type: String
+
+
+Resources:
+
+  EventStageChangedSqsQueueKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub ${Environment}-enchanted-brain-event-stage-changed
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: kms:*
+            Resource: '*'
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          - Effect: Allow
+            Action:
+              - kms:GenerateDataKey*
+              - kms:Decrypt
+            Resource: '*'
+            Principal:
+              Service: sns.amazonaws.com
+
+  EventStageChangedSqsQueueKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${Environment}/enchanted-brain/event-stage-changed
+      TargetKeyId: !Ref EventStageChangedSqsQueueKey
+
+  EventStageChangedSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${Environment}-enchanted-brain-event-stage-changed
+      KmsMasterKeyId: !Ref EventStageChangedSqsQueueKeyAlias
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 15
+
+  EventStageChangedSqsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref EventStageChangedSqsQueue
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sqs:SendMessage
+            Principal: '*'
+            Resource: !GetAtt EventStageChangedSqsQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref EventStageChangedSnsTopicArn
+
+  EventStageChangedSnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref EventStageChangedSnsTopicArn
+      Endpoint: !GetAtt EventStageChangedSqsQueue.Arn
+      Protocol: sqs
+      RawMessageDelivery: 'true'
+
+Outputs:
+
+  EventStageChangedSqsQueueUrl:
+    Value: !Ref EventStageChangedSqsQueue
+
+  EventStageChangedSqsQueueArn:
+    Value: !GetAtt EventStageChangedSqsQueue.Arn
