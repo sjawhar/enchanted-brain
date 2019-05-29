@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+
+Resources:
+
+  Vpc:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/vpc.yml
+      Parameters:
+        Environment: !Ref Environment
+
+  LoadBalancer:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/load-balancer.yml
+      Parameters:
+        Environment: !Ref Environment
+        VpcId: !GetAtt Vpc.Outputs.VpcId
+        SubnetIds: !GetAtt Vpc.Outputs.PublicSubnetIds
+
+  RedisCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/redis-cluster.yml
+      Parameters:
+        Environment: !Ref Environment
+        SubnetIds: !GetAtt Vpc.Outputs.PrivateSubnetIds
+        VpcId: !GetAtt Vpc.Outputs.VpcId
+
+  AggregatorKinesisStream:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/aggregator-kinesis-stream.yml
+      Parameters:
+        Environment: !Ref Environment
+
+  ServerCluster:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation-stacks/server-cluster.yml
+      Parameters:
+        Environment: !Ref Environment
+        LoadBalancerListenerArn: !GetAtt LoadBalancer.Outputs.ListenerArn
+        LoadBalancerSecurityGroupId: !GetAtt LoadBalancer.Outputs.SecurityGroupId
+        RedisClusterEndpoint: !GetAtt RedisCluster.Outputs.Endpoint
+        RedisClusterSecurityGroupId: !GetAtt RedisCluster.Outputs.SecurityGroupId
+        SubnetIds: !GetAtt Vpc.Outputs.PrivateSubnetIds
+        VpcId: !GetAtt Vpc.Outputs.VpcId

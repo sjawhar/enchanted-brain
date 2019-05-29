@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  EventName:
+    Type: String
+
+
+Resources:
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${Environment}-enchanted-brain
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: yes
+          RequireNumbers: yes
+          RequireSymbols: yes
+          RequireUppercase: yes
+      Schema:
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: age
+          AttributeDataType: Number
+          Mutable: true
+          Required: true
+        - Name: gender
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: color-perception
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+
+  AdminUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admin
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 20
+
+  EventUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: !Ref EventName
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 50
+
+  MobileUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${Environment}.enchanted-brain.app
+      UserPoolId: !Ref CognitoUserPool
+      ReadAttributes:
+        - name
+        - email
+        - phone_number
+        - age
+        - gender
+        - color-perception
+      WriteAttributes:
+        - name
+        - email
+        - phone_number
+        - age
+        - gender
+        - color-perception
+      RefreshTokenValidity: 30
+      GenerateSecret: true
+
+Outputs:
+
+  CongitoUserPoolId:
+    Value: !Ref CognitoUserPool
+
+  CongitoUserPoolArn:
+    Value: !GetAtt CongitoUserPool.Arn
+
+  AdminUserPoolGroupName:
+    Value: !Ref AdminUserPoolGroup
+
+  EventUserPoolGroupName:
+    Value: !Ref EventUserPoolGroup
+
+  MobileUserPoolClientId:
+    Value: !Ref MobileUserPoolClient

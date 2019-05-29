@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+
+Mappings:
+
+  ClusterParams:
+    production:
+      NodeType: cache.m4.large
+      NodeCount: 1
+
+
+Resources:
+
+  SubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Group of subnets to place Redis into
+      SubnetIds: !Ref SubnetIds
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub ${Environment}-enchanted-brain-redis
+      VpcId: !Ref VpcId
+
+  Cluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      Engine: redis
+      CacheNodeType: !FindInMap [ClusterParams, !Ref Environment, NodeType]
+      NumCacheNodes: !FindInMap [ClusterParams, !Ref Environment, NodeCount]
+      CacheSubnetGroupName: !Ref SubnetGroup
+      VpcSecurityGroupIds:
+        - !GetAtt SecurityGroup.GroupId
+
+
+Outputs:
+
+  Endpoint:
+    Value: !GetAtt Cluster.RedisEndpoint.Address
+
+  SecurityGroupId:
+    Value: !Ref SecurityGroup

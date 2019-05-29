@@ -1,0 +1,178 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  EventName:
+    Type: String
+
+  CongitoUserPoolArn:
+    Type: String
+
+
+Mappings:
+
+  DynamodbTableCapacities:
+    development:
+      ReadMin: 1
+      WriteMin: 1
+    production:
+      ReadMin: 1
+      WriteMin: 1
+    staging:
+      ReadMin: 1
+      WriteMin: 1
+
+
+Globals:
+
+  Api:
+    Auth:
+      DefaultAuthorizer: CognitoAuth
+      Authorizers:
+        CognitoAuth:
+          CongitoUserPoolArn: !Ref CongitoUserPoolArn
+
+  Function:
+    Handler: index.handler
+    Runtime: python3.7
+    Tracing: Active
+    Timeout: 10
+    AutoPublishAlias: live
+    Environment:
+      Variables:
+        DYNAMODB_ENDPOINT: ''
+        EVENT_NAME: !Ref EventName
+
+Resources:
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${Environment}-dead-letter-queue
+      KmsMasterKeyId: alias/aws/sqs
+
+  DynamodbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-choice
+      AttributeDefinitions:
+        - AttributeName: songId
+          AttributeType: S
+        - AttributeName: listenId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: songId
+          KeyType: HASH
+        - AttributeName: listenId
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !FindInMap [DynamodbTableCapacities, !Ref Environment, ReadMin]
+        WriteCapacityUnits: !FindInMap [DynamodbTableCapacities, !Ref Environment, WriteMin]
+      SSESpecification:
+        SSEEnabled: yes
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+
+  ChoiceMadeSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-choice-made
+      KmsMasterKeyId: alias/aws/sns
+
+  ChoiceWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-choice-writer
+      CodeUri: choice/src
+      Handler: writer.handler
+      Events:
+        SnsEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref ChoiceMadeSnsTopic
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref DynamodbTable
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: dynamodb:UpdateItem
+              Resource: !GetAtt DynamodbTable.Arn
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt DeadLetterQueue.Arn
+
+  EventStageChangedSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-event-stage-changed
+      KmsMasterKeyId: alias/aws/sns
+
+  EventStageChangerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-event-stage-changer
+      CodeUri: event-stage/src
+      Handler: changer.handler
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: /EventStages
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref DynamodbTable
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:PutItem
+              Resource: !GetAtt DynamodbTable.Arn
+
+  EventStagePublisherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-event-stage-publisher
+      CodeUri: event-stage/src
+      Handler: publisher.handler
+      Events:
+        StreamEvent:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt DynamodbTable.StreamArn
+            StartingPosition: TRIM_HORIZON
+      Environment:
+        Variables:
+          EVENT_STAGE_CHANGED_SNS_TOPIC_ARN: !GetAtt EventStageChangedSnsTopic.Arn
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: sns:Publish
+              Resource: !GetAtt EventStageChangedSnsTopic.Arn
+
+
+Outputs:
+
+  DynamodbTableName:
+    Value: !Ref DynamodbTable
+
+  EventStageChangedSnsTopicArn:
+    Value: !GetAtt EventStageChangedSnsTopic.Arn
+
+  RestApiUrl:
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/
