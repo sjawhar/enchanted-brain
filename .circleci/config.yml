@@ -9,16 +9,18 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd lambdas/choice && pipenv install
-      - run: cd lambdas/choice && pipenv run test
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: cd lambdas && ./test.sh test
 
   lambdas-lint:
     docker:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd lambdas/choice && pipenv install
-      - run: cd lambdas/choice && pipenv run lint
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: cd lambdas && ./test.sh lint
 
 
 workflows:
