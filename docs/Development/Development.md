@@ -8,7 +8,7 @@ We use Docker containers running SAM and DynamoDB for local development. Unit te
 ## Useful Commands
 ### Setting up local DB
 ```bash
-docker-compose -f docker-compose.development.yml up -d db setup-db
+docker-compose -f docker-compose.development.yml up -d db dbsetup dbadmin
 ```
 
 ### Installing packages
