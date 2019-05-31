@@ -72,8 +72,15 @@ services:
     command:
       - -sharedDb
 
-  setup-db:
-    image: lambci/lambda:nodejs8.10
+  dbadmin:
+    image: aaronshaf/dynamodb-admin
+    environment:
+      DYNAMO_ENDPOINT: http://db:8000
+    ports:
+      - 8001:8001
+
+  dbsetup:
+    image: lambci/lambda:nodejs10.x
     environment:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
