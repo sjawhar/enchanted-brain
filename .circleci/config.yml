@@ -11,7 +11,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 18.09.3
-      - run: cd lambdas && ./test.sh
+      - run: cd lambdas/choice && pipenv install && pipenv run test
 
   lambdas-lint:
     docker:
@@ -20,7 +20,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 18.09.3
-      - run: cd lambdas && ./test.sh lint
+      - run: cd lambdas/choice && pipenv install && pipenv run lint
 
 
 workflows:
