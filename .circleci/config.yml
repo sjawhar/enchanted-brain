@@ -1,37 +1,39 @@
-version: 2
+version: 2.1
+
+orbs:
+  github-wiki:sjawhar/github-wiki@0.2.1
+
 jobs:
-  deploy-wiki:
+  lambdas-test:
     docker:
-      - image: circleci/node
+      - image: circleci/python:3.7
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - '42:38:62:83:7e:81:3e:5f:b1:9c:5f:72:b3:78:9a:bc'
-      - run:
-          name: Clone wiki
-          command: git clone ${CIRCLE_REPOSITORY_URL/\.git/.wiki.git} wiki
-      - run:
-          name: Generate sidebars
-          command: cd docs && ./generate-sidebars.sh && rm ./generate-sidebars.sh
-      - run:
-          name: Commit changes
-          command: |
-            export COMMIT_MESSAGE="$(git log --format=%B -n 1 ${CIRCLE_SHA1})"
-            cp -r wiki/.git docs/
-            cd docs
-            git config user.email "circleci@enchanted-brain"
-            git config user.name "CircleCI"
-            git add .
-            git commit -m "${COMMIT_MESSAGE}" || changes=none
-            git push
+      - run: cd lambdas && ./test.sh
+
+  lambdas-lint:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run: cd lambdas && ./test.sh lint
 
 
 workflows:
-  version: 2
-  deploy-wiki:
+  test-and-deploy:
     jobs:
-      - deploy-wiki:
+      - lambdas-test
+      - lambdas-lint
+      - github-wiki/build-and-push:
+          push-wiki-repo: false
+          sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
+          filters:
+            branches:
+              ignore: master
+      - github-wiki/build-and-push:
+          commit-user-email: circleci@enchanted-brain
+          sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
+          ssh-key-fingerprint: 42:38:62:83:7e:81:3e:5f:b1:9c:5f:72:b3:78:9a:bc
           filters:
             branches:
               only: master
