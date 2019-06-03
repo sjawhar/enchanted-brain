@@ -13,12 +13,13 @@ docker-compose -f docker-compose.development.yml up -d db dbsetup dbadmin
 
 ### Installing packages
 ```bash
-FUNCTION_NAME=$FUNCTION_NAME docker-compose -f docker-compose.util.yml run --rm pipenv install [OPTIONS]
+docker-compose -f docker-compose.util.yml run --rm pipenv install [OPTIONS]
 ```
 
-### Running tests
+### Running Pipfile acripts
+See lambdas/Pipfile for a list of scripts. Run them using
 ```bash
-FUNCTION_NAME=$FUNCTION_NAME docker-compose -f docker-compose.util.yml run --rm pipenv run pytest [OPTIONS]
+docker-compose -f docker-compose.util.yml run --rm pipenv run SCRIPT [SCRIPT_OPTIONS]
 ```
 
 ### Invoking Lambda functions

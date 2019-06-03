@@ -9,7 +9,7 @@ const main = async () => {
   try {
     await dynamoDb
       .createTable({
-        TableName: 'local-colors',
+        TableName: 'local-choice'
         KeySchema: [
           { AttributeName: 'songId', KeyType: 'HASH' },
           { AttributeName: 'listenId', KeyType: 'RANGE' },
@@ -32,7 +32,7 @@ const main = async () => {
   await docuClient
     .batchWrite({
       RequestItems: {
-        'local-colors': [
+        'local-choice': [
           {
             PutRequest: {
               Item: {
@@ -42,18 +42,30 @@ const main = async () => {
                   1557820765214: 'COLOR_RED',
                   1557820769264: 'COLOR_BLUE',
                 },
+                emotions: {
+                  1557820771223: 'Sad',
+                  1557820771491: 'Angry',
+                },
+                chills: {
+                  1557820771285: True,
+                  1557820775421: False,
+                },
+                imagery: 'a slice of chocolate cake',
               },
             },
           },
           {
             PutRequest: {
               Item: {
-                songId: '1',
-                listenId: 'user-7475',
+                songId: 'CONCERT_LAUSANNE_2019',
+                listenId: 'user id',
                 colors: {
-                  1557820873087: 'COLOR_GREEN',
-                  1557820888093: 'COLOR_BLUE',
                 },
+                emotions: {
+                },
+                chills: {
+                },
+                imagery: '',
               },
             },
           },
@@ -62,7 +74,7 @@ const main = async () => {
     })
     .promise();
 
-  const records = await docuClient.scan({ TableName: 'local-colors' }).promise();
+  const records = await docuClient.scan({ TableName: 'local-choice' }).promise();
   console.log(JSON.stringify(records.Items, null, 2));
 };
 

@@ -7,5 +7,5 @@ services:
     volumes:
       - ./:/app
       - ~/.local/share/virtualenvs:/home/pipenv/.local/share/virtualenvs
-    working_dir: /app/${FUNCTION_NAME}
+    working_dir: /app
     user: pipenv
