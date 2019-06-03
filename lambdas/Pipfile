@@ -14,5 +14,6 @@ black = "==19.3b0"
 python_version = "3.7"
 
 [scripts]
+test = "pytest -v"
 format = "black --verbose --target-version py37 ."
 lint = "pipenv run format --check"
