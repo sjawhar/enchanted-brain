@@ -9,7 +9,7 @@ const main = async () => {
   try {
     await dynamoDb
       .createTable({
-        TableName: 'local-choice
+        TableName: 'local-choice',
         KeySchema: [
           { AttributeName: 'songId', KeyType: 'HASH' },
           { AttributeName: 'listenId', KeyType: 'RANGE' },
