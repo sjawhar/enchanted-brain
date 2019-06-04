@@ -86,7 +86,6 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_NAME: !Ref ChoiceTable
-          DYNAMODB_ENDPOINT:
           EVENT_NAME:
       Policies:
         - Version: '2012-10-17'
