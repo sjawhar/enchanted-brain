@@ -80,8 +80,9 @@ services:
       - 8001:8001
 
   dbsetup:
-    image: lambci/lambda:nodejs8.10
+    image: lambci/lambda:nodejs10.x
     environment:
+      NODE_PATH: /var/runtime/node_modules
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     volumes:
