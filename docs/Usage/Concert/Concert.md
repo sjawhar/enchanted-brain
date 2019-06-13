@@ -1,10 +1,23 @@
 ## Requirements
 ### Overall
+* 750 audience members
+* During registration, we will collect the age and sex of each user. We will also ask each user "to what extent, if any, do you have difficulty in telling colors apart that other people are easily able to tell apart":
+    * 0 = "No Difficulty at all"
+    * 1 = "Slight or Infrequent Difficulty" 
+    * 2 = "Moderate Difficulty"
+    * 3 = "Definite or Frequent Difficulty"
 * During the concert, the app will move from one section to the next (e.g. mental imagery, color/emotion, etc.) without requiring the user to navigate through the app.
-* During registration, we will collect the age and sex of each user
+* At intermission, each audience member's app will thank the user for participating and signal the end of the part of the concert which uses the app.
 
 ### Part 1: Mental Imagery
-TODO
+|                                       |                                        |
+|---------------------------------------|----------------------------------------|
+| **Number of songs**                   | 1                                      |
+| **Response timing**                   | Once, at end of song                   |
+| **Response type**                     | Text, between 1 and 3 words            |
+| **Central visualization type**        | Word cloud                             |
+| **Central visualization timing**      | 30 seconds after response window opens |
+| **Intermission visualization in app** | Word cloud                             |
 
 ### Part 2: Color/Emotion 1
 | Emotions          | Artist       | Song                                                 | Duration |
@@ -14,25 +27,33 @@ TODO
 | Happiness/Joy     | Beethoven    | Symphony No. 7 - 4th movement - finale excerpt.      | 2:00     |
 | Anger             | Shostakovich | Chamber Symphony in C minor, Op. 110a - 2nd movement | 3:00     |
 
-* The audience will listen to the orchestra play the above four pieces of music.
-* Each audience member will use the app to pick from a grid of 21 colors:
-  - 6 hues (red, orange, yellow, green, blue, purple) x 3 shades (light, medium, dark) + 3 neutrals (white, gray, black)
-* The audience member can pick a new color at any time, but the app will give a gentle reminder 15 seconds after the last choice.
+|                                       |                                                |
+|---------------------------------------|------------------------------------------------|
+| **Number of songs**                   | 4 (see above)                                  |
+| **Response timing**                   | TBD                                            |
+| **Response type**                     | Selection from a grid of TBD number of colors |
+| **Central visualization type**        | None                                           |
+| **Intermission visualization in app** | Choices over time compared to aggregate        |
 
 ### Part 3: Color/Emotion 2
-* The audience will listen to the orchestra play the Coriolan overture.
-* The audience will be randomly split into two groups.
-    * In group A, the functionality is the same as the app-only section.
-    * In group B, the audience member will instead be picking emotions. **Emotion slection method TBD.**
-* There will also be a central display in the event venue visualizing the audience's choices as they come in. This should function like a "mood ring" in the sense that it shows the most recent audience choices. **Visualization details TBD.**
+|                                       |                                                |
+|---------------------------------------|------------------------------------------------|
+| **Number of songs**                   | 1, Coriolan overture                           |
+| **Response timing**                   | TBD                                            |
+| **Response type, Group A (50%)**      | Selection from a grid of TBD number of colors  |
+| **Response type, Group B (25%)**      | Selection from five degrees of happy/sad       |
+| **Response type, Group C (25%)**      | Selection from five degrees of agitated/calm   |
+| **Central visualization type**        | Bees                                           |
+| **Intermission visualization in app** | Choices over time compared to aggregate        |
 
 ### Part 4: Chills
-TODO
-
-### Part 5: Intermission
-* Each audience member's app will thank the user for participating and signal the end of the part of the concert which uses the app.
-* The app will display the user's color choices compared to the overall audience distribution.
-* The app will also display the user's mental imagery response compared to the overall audience distribution.
+|                                       |                                                                 |
+|---------------------------------------|-----------------------------------------------------------------|
+| **Number of songs**                   | 2 \n Adagio from Barber \n "Summer" from Vivaldi's Four Seasons |
+| **Response timing**                   | Any time                                                        |
+| **Response type**                     | TBD                                                             |
+| **Central visualization type**        | TBD                                                             |
+| **Intermission visualization in app** | TBD                                                             |
 
 ## Authentication
 Use AWS Cognito libraries.
