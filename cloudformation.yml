@@ -24,7 +24,7 @@ Resources:
         Environment: !Ref Environment
         EventName: !Ref EventName
 
-  Lambdas:
+  Server:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: lambdas/cloudformation.yml
