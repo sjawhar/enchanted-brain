@@ -33,8 +33,6 @@ Mappings:
       Key: $disconnect
     EventStageChanged:
       Key: EVENT_STAGE_CHANGED
-    PromptResponse:
-      Key: PROMPT_RESPONSE
 
 
 Globals:
@@ -83,22 +81,10 @@ Resources:
       CompatibleRuntimes:
         - nodejs10.x
 
-  CallbackGlobalSnsTopic:
+  CallbackSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: !Sub ${Environment}-enchanted-brain-callback-global
-      KmsMasterKeyId: alias/aws/sns
-
-  CallbackAudienceSnsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-audience
-      KmsMasterKeyId: alias/aws/sns
-
-  CallbackVisualizationSnsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-visualization
       KmsMasterKeyId: alias/aws/sns
 
   CallbackFunction:
@@ -135,11 +121,7 @@ Resources:
             StartingPosition: TRIM_HORIZON
       Policies:
         - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackGlobalSnsTopic.TopicName
-        - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackAudienceSnsTopic.TopicName
-        - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackVisualizationSnsTopic.TopicName
+            TopicName: !GetAtt CallbackSnsTopic.TopicName
 
   OnConnectFunction:
     Type: AWS::Serverless::Function
@@ -150,10 +132,8 @@ Resources:
       Environment:
         Variables:
           APP_ENVIRONMENT: !Ref Environment
-          CALLBACK_AUDIENCE_SNS_TOPIC_ARN: !Ref CallbackAudienceSnsTopic
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
-          CALLBACK_GLOBAL_SNS_TOPIC_ARN: !Ref CallbackGlobalSnsTopic
-          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
           TABLE_NAME: !Ref Table
       Policies:
         # TODO
@@ -212,8 +192,8 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
-          CHOICE_MADE_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
@@ -275,31 +255,11 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
 
-  OnPromptResponseFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/functions/on-prompt-response
-      Environment:
-        Variables:
-          CALLBACK_AUDIENCE_SNS_TOPIC_ARN: !Ref CallbackAudienceSnsTopic
-      Policies:
-        - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackAudienceSnsTopic.TopicName
-
 
 Outputs:
 
-  TableArn:
-    Value: !GetAtt Table.Arn
-
-  ConnectFunctionArn:
-    Value: !GetAtt ConnectFunction.Arn
-
-  DisconnectFunctionArn:
-    Value: !GetAtt DisconnectFunction.Arn
-
-  ChoiceMadeFunctionArn:
-    Value: !GetAtt ChoiceMadeFunction.Arn
+  TableName:
+    Value: !Ref Table
 
   WebSocketURI:
     Value: !Sub wss://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
