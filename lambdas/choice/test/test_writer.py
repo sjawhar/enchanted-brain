@@ -8,15 +8,18 @@ dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 20
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
 song_id = os.environ["EVENT_NAME"]
 test_user_id = "user id"
-test_timestamp = "999999"
+test_timestamp = "2019-05-14T21:20:03.000Z"
 
 # Test that color choice event results in DynamoDB write with expected parameters
 def test_handler_color_chosen():
     event = {
-        "userId": test_user_id,
-        "choiceType": "CHOICE_COLOR",
-        "choice": "chartreuse",
-        "timestamp": test_timestamp,
+        "Records": [
+            {
+                "Sns": {
+                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_COLOR\",\"choice\":\"COLOR_RED\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                }
+            }
+        ]
     }
 
     expected_params = {
@@ -27,7 +30,7 @@ def test_handler_color_chosen():
             "#choice_key": "colors",
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": event["choice"]},
+        "ExpressionAttributeValues": {":choice_value": "COLOR_RED"},
         "ReturnValues": "NONE",
     }
 
@@ -42,10 +45,13 @@ def test_handler_color_chosen():
 # Test that emotion choice event results in DynamoDB write with expected parameters
 def test_handler_emotion_chosen():
     event = {
-        "userId": test_user_id,
-        "choiceType": "CHOICE_EMOTION",
-        "choice": "sad",
-        "timestamp": test_timestamp,
+        "Records": [
+            {
+                "Sns": {
+                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_EMOTION\",\"choice\":\"sad\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                }
+            }
+        ]
     }
 
     expected_params = {
@@ -56,7 +62,7 @@ def test_handler_emotion_chosen():
             "#choice_key": "emotions",
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": event["choice"]},
+        "ExpressionAttributeValues": {":choice_value": "sad"},
         "ReturnValues": "NONE",
     }
 
@@ -71,10 +77,13 @@ def test_handler_emotion_chosen():
 # Test that imagery choice event results in DynamoDB write with expected parameters
 def test_handler_imagery_chosen():
     event = {
-        "userId": test_user_id,
-        "choiceType": "CHOICE_IMAGERY",
-        "choice": "a sunset",
-        "timestamp": test_timestamp,
+        "Records": [
+            {
+                "Sns": {
+                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_IMAGERY\",\"choice\":\"a sunset\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                }
+            }
+        ]
     }
 
     expected_params = {
@@ -82,7 +91,7 @@ def test_handler_imagery_chosen():
         "Key": {"songId": song_id, "listenId": test_user_id},
         "UpdateExpression": "SET #choice_key = :choice_value",
         "ExpressionAttributeNames": {"#choice_key": "imagery"},
-        "ExpressionAttributeValues": {":choice_value": event["choice"]},
+        "ExpressionAttributeValues": {":choice_value": "a sunset"},
         "ReturnValues": "NONE",
     }
 
@@ -97,10 +106,13 @@ def test_handler_imagery_chosen():
 # Test that chills choice event results in DynamoDB write with expected parameters
 def test_handler_chills_chosen():
     event = {
-        "userId": test_user_id,
-        "choiceType": "CHOICE_CHILLS",
-        "choice": True,
-        "timestamp": test_timestamp,
+        "Records": [
+            {
+                "Sns": {
+                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_CHILLS\",\"choice\":\"True\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                }
+            }
+        ]
     }
 
     expected_params = {
@@ -111,7 +123,7 @@ def test_handler_chills_chosen():
             "#choice_key": "chills",
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": event["choice"]},
+        "ExpressionAttributeValues": {":choice_value": "True"},
         "ReturnValues": "NONE",
     }
 
@@ -127,10 +139,13 @@ def test_handler_chills_chosen():
 def test_handler_invalid_input():
     with pytest.raises(ValueError):
         event = {
-            "userId": test_user_id,
-            "choiceType": "INVALID CHOICE",
-            "choice": "(ツ)",
-            "timestamp": test_timestamp,
+            "Records": [
+                {
+                    "Sns": {
+                        "Message": "{\"userId\":\"user id\",\"choiceType\":\"INVALID CHOICE\",\"choice\":\"(ツ)\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                    }
+                }
+            ]
         }
 
         handler(event, None)

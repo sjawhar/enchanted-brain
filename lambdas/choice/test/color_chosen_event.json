@@ -1,6 +1,9 @@
 {
-  "userId": "user id",
-  "choiceType": "CHOICE_COLOR",
-  "choice": "chartreuse",
-  "timestamp": "9999999"
+  "Records": [
+    {
+      "Sns": {
+        "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_COLOR\",\"choice\":\"COLOR_RED\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+      }
+    }
+  ]
 }

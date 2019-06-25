@@ -39,16 +39,16 @@ const main = async () => {
                 songId: '1',
                 listenId: 'user-1342',
                 colors: {
-                  '1557820765214': 'COLOR_RED',
-                  '1557820769264': 'COLOR_BLUE',
+                  '2019-05-14T21:20:03.000Z': 'COLOR_RED',
+                  '2019-05-14T21:20:23.000Z': 'COLOR_BLUE',
                 },
                 emotions: {
-                  '1557820771223': 'Sad',
-                  '1557820771491': 'Angry',
+                  '2019-05-14T21:20:43.000Z': 'Sad',
+                  '2019-05-14T21:21:03.000Z': 'Angry',
                 },
                 chills: {
-                  '1557820771285': 'True',
-                  '1557820775421': 'False',
+                  '2019-05-14T21:21:23.000Z': 'True',
+                  '2019-05-14T21:21:43.000Z': 'False',
                 },
                 imagery: 'a slice of chocolate cake',
               },

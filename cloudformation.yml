@@ -36,6 +36,7 @@ Globals:
     Environment:
       Variables:
         DYNAMODB_ENDPOINT: ''
+        EVENT_NAME:
 
 
 Resources:
@@ -86,7 +87,6 @@ Resources:
       Environment:
         Variables:
           DYNAMODB_TABLE_NAME: !Ref ChoiceTable
-          EVENT_NAME:
       Policies:
         - Version: '2012-10-17'
           Statement:
