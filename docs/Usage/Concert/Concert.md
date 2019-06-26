@@ -1,136 +1,109 @@
-## Requirements
-### Overall
-* 750 audience members
-* During registration, we will collect the age and sex of each user. We will also ask each user "to what extent, if any, do you have difficulty in telling colors apart that other people are easily able to tell apart":
-    * 0 = "No Difficulty at all"
-    * 1 = "Slight or Infrequent Difficulty" 
-    * 2 = "Moderate Difficulty"
-    * 3 = "Definite or Frequent Difficulty"
-* During the concert, the app will move from one section to the next (e.g. mental imagery, color/emotion, etc.) without requiring the user to navigate through the app.
-* At intermission, each audience member's app will thank the user for participating and signal the end of the part of the concert which uses the app.
-
-### Part 1: Mental Imagery
-|                                       |                                        |
-|---------------------------------------|----------------------------------------|
-| **Number of songs**                   | 1                                      |
-| **Response timing**                   | Once, at end of song                   |
-| **Response type**                     | Text, between 1 and 3 words            |
-| **Central visualization type**        | Word cloud                             |
-| **Central visualization timing**      | 30 seconds after response window opens |
-| **Intermission visualization in app** | Word cloud                             |
-
-### Part 2: Color/Emotion 1
-| Emotions          | Artist       | Song                                                 | Duration |
-|-------------------|--------------|------------------------------------------------------|----------|
-| Serenity/Calm     | Fauré        | Pavane - initial excerpt                             | 2:30     |
-| Sadness/Nostalgia | Grieg        | Elegiac Melodies - No. 2, Last Spring excerpt        | 2:00     |
-| Happiness/Joy     | Beethoven    | Symphony No. 7 - 4th movement - finale excerpt.      | 2:00     |
-| Anger             | Shostakovich | Chamber Symphony in C minor, Op. 110a - 2nd movement | 3:00     |
-
-|                                       |                                                |
-|---------------------------------------|------------------------------------------------|
-| **Number of songs**                   | 4 (see above)                                  |
-| **Response timing**                   | TBD                                            |
-| **Response type**                     | Selection from a grid of TBD number of colors |
-| **Central visualization type**        | None                                           |
-| **Intermission visualization in app** | Choices over time compared to aggregate        |
-
-### Part 3: Color/Emotion 2
-|                                       |                                                |
-|---------------------------------------|------------------------------------------------|
-| **Number of songs**                   | 1, Coriolan overture                           |
-| **Response timing**                   | TBD                                            |
-| **Response type, Group A (50%)**      | Selection from a grid of TBD number of colors  |
-| **Response type, Group B (25%)**      | Selection from five degrees of happy/sad       |
-| **Response type, Group C (25%)**      | Selection from five degrees of agitated/calm   |
-| **Central visualization type**        | Bees                                           |
-| **Intermission visualization in app** | Choices over time compared to aggregate        |
-
-### Part 4: Chills
-|                                       |                                                                 |
-|---------------------------------------|-----------------------------------------------------------------|
-| **Number of songs**                   | 2 \n Adagio from Barber \n "Summer" from Vivaldi's Four Seasons |
-| **Response timing**                   | Any time                                                        |
-| **Response type**                     | TBD                                                             |
-| **Central visualization type**        | TBD                                                             |
-| **Intermission visualization in app** | TBD                                                             |
-
 ## Authentication
-Use AWS Cognito libraries.
+Authenticate with AWS Cognito. Include the Cognito ID JWT in the Authorization header of all API requests.
 
 ## Websocket API
-### Report a choice
-Send `CHOICE_MADE`
+The guided concert experience uses a websocket API for realtime communication between the client and server. Requests to the server are routed based on the `event` attribute of the request body. For example, a request with the following body would be treated as a FOO request:
 ```js
 {
-  choiceType: String,           // CHOICE_COLOR || CHOICE_EMOTION || CHOICE_CHILLS || CHOICE_IMAGERY
-  choice: String || Boolean,    // Boolean for chills, String for the rest
-  timestamp: String,
+  event: 'FOO',
+  data: {
+    bar: true,
+  },
 }
 ```
 
-The websocket API will also be used to guide the mobile app through the concert experience. At appropriate times, it will trigger the app to proceed to the next part of the concert.
-
-### 1 - Connect and welcome
-Send `authentication`
+The websocket API will also be used to guide the mobile app through the concert experience. At appropriate times, it will trigger the app to proceed to the next part of the concert by sending the EVENT_STAGE_CHANGED event. This event will contain the `stageId` as well as other attributes of the stage. For more details, see the event stages below.
 ```js
 {
-  eventId: 'CONCERT_LAUSANNE_2019',
-  token: String,                        // access token from AWS Cognito
+  event: 'EVENT_STAGE_CHANGED',
+  data: {
+    stageId: String,    // The ID of the current stage
+    ...                 // Other attributes of the stage
+  },
 }
 ```
 
-**Response**
+### Connecting
+On connection, the server will respond with the current event stage. This can be used to ensure the app is in the correct state when reconnecting after being disconnected.
 ```js
 {
-  eventStage: String,
+  stageId: String,    // The ID of the current stage
+  ...                 // Other attributes of the stage
 }
 ```
 
-After the client connects, the server should respond with the current stage of the event. This ensures that the app proceeds to the correct stage in case of a disconnect in the middle of the event.
-
-The first event stage will be `WELCOME`. The mobile app should display a welcome screen that asks the user to just listen to the concert. The first part of the concert will be the mental imagery, which requires the user to close their eyes, listen to the song, and pay attention to the images that come to mind.
-
-### 2 - Ask for mental imagery response
-Listen for `EVENT_STAGE_CHANGED`
+### Reporting a choice
+To report a user's choice, send the CHOICE_MADE event:
 ```js
 {
-  eventStage: 'CHOICE_IMAGERY',
+  event: 'CHOICE_MADE',
+  data: {
+    choiceType: String,         // CHOICE_COLOR || CHOICE_EMOTION_HAPPINESS || CHOICE_EMOTION_AGITATION || CHOICE_CHILLS
+    choice: String || Number,   // String for color, Number for the rest
+    timestamp: String,
+  },
 }
 ```
 
-After the response is submitted, display a thank you screen and ask the user to wait for the next part of the concert.
+For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_AGITATION events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
 
-### 3 - Ask for color choices
-Listen for `EVENT_STAGE_CHANGED`
+### Event Stages
+#### 1 - Welcome
+The first event stage will be `STAGE_WAITING`. The mobile app should display a welcome screen that asks the user to just listen to the concert and wait to be prompted for a response.
+
+#### 2 - Prompt for mental imagery
 ```js
 {
-  eventStage: 'CHOICE_COLOR',
+  stageId: 'STAGE_CHOICE_IMAGERY',
+  formUrl: String,
+}
+```
+The user should be displayed the survey form found at `formUrl`, where they will submit their mental imagery responses. After the response is submitted, display a thank you screen and ask the user to wait for the next part of the concert.
+
+**TODO**: How can we track the user to whom each response belongs, for later analysis?
+
+#### 3 - Prompt for colors and emotions
+```js
+{
+  stageId: 'STAGE_CHOICE_COLOR_EMOTION',
+  startTime: String,
+  endTime: String,
+  frequency: Number,
+  timeout: Number,
+  choiceTypes: {
+    CHOICE_COLOR: Number,
+    CHOICE_EMOTION_AGITATION: Number,
+    CHOICE_EMOTION_HAPPINESS: Number,
+  },
 }
 ```
 
-At this point, display the color picker UI and allow the user to start picking away.
+This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `frequency` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
+ 
+When first receiving this event, each user should be randomly assigned to make **one** of the choice types indicated in `choiceTypes`. In `choiceType`, the key indicates the choice type and the value is the percentages of the audience that should take that type.
 
-### 4 - Ask for emotion choices
-Listen for `EVENT_STAGE_CHANGED`
+When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `frequency` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
+
+#### 4 - Prompt for chills
 ```js
 {
-  eventStage: 'CHOICE_EMOTION',
+  stageId: 'STAGE_CHOICE_CHILLS',
+  startTime: String,
+  endTime: String,
 }
 ```
 
-After the concert attendees are told just what the heck all this color picking is all about, there will be one more piece of music in this section. For this song, some users will be asked to submit emotions instead of colors. Those users will receive this event.
+Display the chills UI and send CHOICE_MADE events as the user makes their choices. Since the user can make choices at any time, the `timestamp` property of the CHOICE_MADE event should correspond to the actual choice time.
 
-### 5 - Intermission and end
-Listen for `EVENT_STAGE_CHANGED`
+#### 5 - Intermission and end
 ```js
 {
-  eventStage: 'END',
+  stageId: 'STAGE_END',
   songs: [
     {
       displayName: String,
       startTime: String,
-      endTime: Number,
+      endTime: String,
     },
     ...
   ],
@@ -146,73 +119,39 @@ Listen for `EVENT_STAGE_CHANGED`
     },
     ...
   ],
-  imagery: {
-    [String]: Number,
-    [word]: count,
-  },
-}
-```
-
-The app will not be used in the concert after the intermission. At this point, the aggregated responses/visualizations will be available in the app and the websocket connection can be closed.
-
-## Central Visualization Websocket API
-### Mental imagery aggregated
-Listen for `IMAGERY_AGGREGATED`
-```js
-{
-  String: Number,
-  [word]: count,
-  ...
-}
-```
-
-### Colors aggregated
-Listen for `COLORS_AGGREGATED`
-```js
-{
-  COLOR_BLUE: Number,
-  COLOR_GREEN: Number,
-  COLOR_RED: Number,
-  ...
-}
-```
-
-## Data Storage
-### Song information
-```js
-{
-  songId: 'CONCERT_LAUSANNE_2019',  // Partition key
-  listenId: 'SONG_LIST',            // Range key
-  songs: [
-    {
-      displayName: String,          // Helpful for in-app displays
-      startTime: String,
-      endTime: String,
-    },
-    ...
+  chills: [
+   {
+     timestamp: String,
+     chills: Number,
+   },
+   ...
   ],
 }
 ```
 
+This indicates the end of the part of the concert that uses the app. At this point, the aggregated responses/visualizations should be made available in the app and the websocket connection can be closed.
+
+`songs` contains the names, start times, and end times of each of the performed pieces. By storing a user's responses locally, the app can assign them to the appropriate song and display them back to the user. In addition, aggregated choices are available under `colors` and `chills` and can be visualized in the app.
+
+#### User choice made (visualization)
+The event body here is the same as the CHOICE_MADE event [sent by the mobile app](#reporting-a-choice).
+
+## Data Storage
 ### User choices
 ```js
 {
-  songId: 'CONCERT_LAUSANNE_2019'
-  listenId: `${userId}`,
+  userId: `${userId}`,
   colors: {
-    Number: String,         // Key is the timestamp of the choice
-    [timestamp]: color,     // Value is the color choice
+    [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
     ...
   },
+  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_AGITATION
   emotions: {
-    Number: String,         // Key is the timestamp of the choice
-    [timestamp]: emotion,   // Value is the emotion choice
+    [timestamp]: intensity,
     ...
   },
-  imagery: String,          // Short-answer response  
   chills: {
-    Number: Boolean,        // Key is the timestamp of the event
-    [timestamp]: isChills,  // Value is true if chills started and false if they stopped
+    [timestamp]: intensity,
     ...
   },
 }
@@ -221,12 +160,10 @@ Listen for `COLORS_AGGREGATED`
 ### Aggregated choices
 ```js
 {
-  songId: 'CONCERT_LAUSANNE_2019',
-  listenId: 'AGGREGATE',
+  userId: 'AGGREGATE',
   colors: {
-    Number: Map,
     [timestamp]: {
-      COLOR_BLUE: Number,
+      COLOR_BLUE: Number,           // Number of audience members whose latest color choice as of this time was COLOR_BLUE
       COLOR_GREEN: Number,
       COLOR_RED: Number,
       ...
@@ -234,19 +171,39 @@ Listen for `COLORS_AGGREGATED`
     ...
   },
   emotions: {
-    Number: Map,
     [timestamp]: {
-      EMOTION_ANGER: Number,
-      EMOTION_JOY: Number,
-      EMOTION_SADNESS: Number,
-      ...
+      EMOTION_HAPPINESS: Number,    // Average audience happiness intensity
+      EMOTION_AGITATION: Number,
     },
     ...
   },
-  imagery: {
-    String: Number,     // Key is the word/concept
-    [word]: count,      // Value is the number of responses with that word/concept
+  chills: {
+    [timestamp]: Number,            // Total audience chill intensity
     ...
   },
+}
+```
+
+### Event Stage
+```js
+{
+  userId: 'EVENT_STAGE',
+  stageId: String,
+  ...                       // Other attributes of the stage
+}
+```
+
+### Song information
+```js
+{
+  userId: 'SONG_LIST',
+  songs: [
+    {
+      displayName: String,  // Helpful for in-app displays
+      startTime: String,
+      endTime: String,
+    },
+    ...
+  ],
 }
 ```

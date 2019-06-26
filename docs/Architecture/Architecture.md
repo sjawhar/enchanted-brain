@@ -1,0 +1,2 @@
+## Diagram
+[[resources/architecture.png]]
