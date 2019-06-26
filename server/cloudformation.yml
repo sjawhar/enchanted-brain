@@ -7,7 +7,7 @@ Parameters:
   AdminUserPoolGroupName:
     Type: String
 
-  CognitoUserPoolArn:
+  CognitoUserPoolId:
     Type: String
 
   Environment:
@@ -44,7 +44,9 @@ Globals:
     Timeout: 3
     AutoPublishAlias: live
     Environment:
-
+      Variables:
+        EVENT_NAME: !Ref EventName
+        DYNAMODB_ENDPOINT: ''
 
 Resources:
 
@@ -72,6 +74,15 @@ Resources:
       Name: !Sub ${Environment}-enchanted-brain
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.event
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/functions/authorizer
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_ADMIN_GROUP_NAME: !Ref AdminUserPoolGroupName
 
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion

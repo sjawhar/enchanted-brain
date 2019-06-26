@@ -14,6 +14,7 @@ Parameters:
     Type: String
     Default: CONCERT_LAUSANNE_2019
 
+
 Resources:
 
   UserPool:
@@ -27,29 +28,18 @@ Resources:
   Server:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: lambdas/cloudformation.yml
-      Parameters:
-        AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
-        CognitoUserPoolArn: !GetAtt UserPool.Outputs.CognitoUserPoolArn
-        Environment: !Ref Environment
-        EventName: !Ref EventName
-
-  Server:
-    Type: AWS::CloudFormation::Stack
-    Properties:
       TemplateURL: server/cloudformation.yml
       Parameters:
-        DynamodbTableName: !GetAtt Lambdas.Outputs.DynamodbTableName
+        AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
+        CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
         Environment: !Ref Environment
         EventName: !Ref EventName
-        EventStageChangedSnsTopicArn: !GetAtt Lambdas.Outputs.EventStageChangedSnsTopicArn
-        CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
 
 
 Outputs:
 
-  RestApiUrl:
-    Value: !GetAtt Lambdas.Outputs.RestApiUrl
+  WebSocketURI:
+    Value: !GetAtt Server.Outputs.WebSocketURI
 
   CognitoUserPoolId:
     Value: !GetAtt UserPool.Outputs.CognitoUserPoolId
