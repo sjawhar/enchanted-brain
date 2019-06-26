@@ -1,5 +1,5 @@
 [**< Back**](Home)  
-**Architecture**
+**Architecture**  
 [Development](Development)  
 [Requirements](Requirements)  
 Usage  
