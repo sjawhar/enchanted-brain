@@ -91,11 +91,11 @@ Resources:
 
 Outputs:
 
-  CongitoUserPoolId:
+  CognitoUserPoolId:
     Value: !Ref CognitoUserPool
 
-  CongitoUserPoolArn:
-    Value: !GetAtt CongitoUserPool.Arn
+  CognitoUserPoolArn:
+    Value: !GetAtt CognitoUserPool.Arn
 
   AdminUserPoolGroupName:
     Value: !Ref AdminUserPoolGroup

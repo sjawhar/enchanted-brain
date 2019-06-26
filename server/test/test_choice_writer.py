@@ -1,4 +1,4 @@
-from src.writer import handler
+from src.functions.choice_writer.index import handler
 
 
 def test_handler():

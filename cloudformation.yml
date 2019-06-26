@@ -30,7 +30,7 @@ Resources:
       TemplateURL: lambdas/cloudformation.yml
       Parameters:
         AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
-        CongitoUserPoolArn: !GetAtt UserPool.Outputs.CongitoUserPoolArn
+        CognitoUserPoolArn: !GetAtt UserPool.Outputs.CognitoUserPoolArn
         Environment: !Ref Environment
         EventName: !Ref EventName
 
