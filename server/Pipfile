@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+boto3 = "~=1.9.148"
+pytest = "~=4.5.0"
+black = "==19.3b0"
+
+[packages]
+
+[requires]
+python_version = "3.7"
+
+[scripts]
+test = "pytest -v"
+format = "black --verbose --target-version py37 ."
+lint = "pipenv run format --check"
