@@ -40,18 +40,18 @@ Resources:
           AttributeDataType: String
           Mutable: true
           Required: true
-        - Name: age
-          AttributeDataType: Number
-          Mutable: true
-          Required: true
         - Name: gender
           AttributeDataType: String
           Mutable: true
           Required: true
+        - Name: age
+          AttributeDataType: Number
+          Mutable: true
+          Required: false
         - Name: color-perception
           AttributeDataType: String
           Mutable: true
-          Required: true
+          Required: false
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
@@ -76,16 +76,16 @@ Resources:
         - name
         - email
         - phone_number
-        - age
         - gender
-        - color-perception
+        - custom:age
+        - custom:color-perception
       WriteAttributes:
         - name
         - email
         - phone_number
-        - age
         - gender
-        - color-perception
+        - custom:age
+        - custom:color-perception
       RefreshTokenValidity: 30
       GenerateSecret: true
 
@@ -93,15 +93,25 @@ Outputs:
 
   CognitoUserPoolId:
     Value: !Ref CognitoUserPool
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-cognito-user-pool-id-v1
 
   CognitoUserPoolArn:
     Value: !GetAtt CognitoUserPool.Arn
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-cognito-user-pool-arn-v1
 
   AdminUserPoolGroupName:
     Value: !Ref AdminUserPoolGroup
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-admin-user-pool-group-name-v1
 
   EventUserPoolGroupName:
     Value: !Ref EventUserPoolGroup
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-event-user-pool-group-name-v1
 
   MobileUserPoolClientId:
     Value: !Ref MobileUserPoolClient
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-mobile-user-pool-client-id-v1

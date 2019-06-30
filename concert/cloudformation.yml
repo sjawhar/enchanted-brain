@@ -12,7 +12,7 @@ Parameters:
 
   Environment:
     Type: String
-    AllowedValue:
+    AllowedValues:
       - development
       - production
       - staging
@@ -33,6 +33,10 @@ Mappings:
       Key: $disconnect
     EventStageChanged:
       Key: EVENT_STAGE_CHANGED
+
+  ApiParams:
+    ServerlessRestApi:
+      StageName: Prod
 
 
 Globals:
@@ -61,11 +65,11 @@ Resources:
         - AttributeName: userId
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
       SSESpecification:
         SSEEnabled: True
-      StreamSpecifiecation:
+      StreamSpecification:
         StreamViewType: NEW_IMAGE
 
   Api:
@@ -88,9 +92,9 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub ${Environment}-enchanted-brain
-      ContentUri: app/dist/layer
+      ContentUri: src/layer
       CompatibleRuntimes:
-        - nodejs10.x
+        - python3.7
 
   CallbackSnsTopic:
     Type: AWS::SNS::Topic
@@ -104,7 +108,9 @@ Resources:
       CodeUri: src/functions/callback
       Environment:
         Variables:
-          API_URL: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}/@connections
+          API_URL: !Sub
+            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
+            - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -116,7 +122,7 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt CallbackFunction.Alias
+      FunctionName: !Ref CallbackFunction.Alias
       Principal: sqs.amazonaws.com
       SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
 
@@ -161,7 +167,7 @@ Resources:
       Parameters:
         ApiId: !Ref Api
         FunctionName: !Ref OnConnectFunction
-        FunctionArn: !GetAtt OnConnectFunction.Alias
+        FunctionArn: !Ref OnConnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Connect, Key]
 
   OnDisconnectFunction:
@@ -186,7 +192,7 @@ Resources:
       Parameters:
         ApiId: !Ref Api
         FunctionName: !Ref OnDisconnectFunction
-        FunctionArn: !GetAtt OnDisconnectFunction.Alias
+        FunctionArn: !Ref OnDisconnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Disconnect, Key]
 
   ChoiceMadeSnsTopic:
@@ -216,15 +222,39 @@ Resources:
       Parameters:
         ApiId: !Ref Api
         FunctionName: !Ref OnChoiceMadeFunction
-        FunctionArn: !GetAtt OnChoiceMadeFunction.Alias
+        FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
+
+  OnEventStageChangedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/functions/on_event_stage_changed
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+
+  OnEventStageChangedRoute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation.ws-route.yml
+      Parameters:
+        ApiId: !Ref Api
+        FunctionName: !Ref OnEventStageChangedFunction
+        FunctionArn: !Ref OnEventStageChangedFunction.Alias
+        RouteKey: !FindInMap [RouteKeys, EventStageChanged, Key]
 
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
-      - ChoiceMadeRoute
-      - ConnectRoute
-      - DisconnectRoute
+      - OnChoiceMadeRoute
+      - OnConnectRoute
+      - OnDisconnectRoute
+      - OnEventStageChangedRoute
     Properties:
       ApiId: !Ref Api
 
@@ -233,7 +263,7 @@ Resources:
     Properties:
       ApiId: !Ref Api
       DeploymentId: !Ref ApiDeployment
-      StageName: Prod
+      StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
 
   ChoiceWriterFunction:
     Type: AWS::Serverless::Function
@@ -246,19 +276,6 @@ Resources:
           Type: SNS
           Properties:
             Topic: !Ref ChoiceMadeSnsTopic
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref Table
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
-
-  OnEventStageChangedFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: src/functions/on_event_stage_changed
-      Layers:
-        - !Ref LambdaLayer
       Environment:
         Variables:
           TABLE_NAME: !Ref Table

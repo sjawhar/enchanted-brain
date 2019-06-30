@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
+Transform: AWS::Serverless-2016-10-31
+
 Parameters:
 
   Environment:
@@ -25,10 +27,10 @@ Resources:
         Environment: !Ref Environment
         EventName: !Ref EventName
 
-  Server:
-    Type: AWS::CloudFormation::Stack
+  LausanneConcert:
+    Type: AWS::Serverless::Application
     Properties:
-      TemplateURL: server/cloudformation.yml
+      Location: concert/cloudformation.yml
       Parameters:
         AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
         CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
@@ -38,8 +40,8 @@ Resources:
 
 Outputs:
 
-  WebSocketURI:
-    Value: !GetAtt Server.Outputs.WebSocketURI
+  ConcertWebSocketURI:
+    Value: !GetAtt LausanneConcert.Outputs.WebSocketURI
 
   CognitoUserPoolId:
     Value: !GetAtt UserPool.Outputs.CognitoUserPoolId

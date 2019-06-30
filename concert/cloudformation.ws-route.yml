@@ -20,8 +20,8 @@ Resources:
   Integration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
-      ApiId: !Ref Api
-      Description: !RouteKey
+      ApiId: !Ref ApiId
+      Description: !Ref RouteKey
       IntegrationType: AWS_PROXY
       IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations
 
