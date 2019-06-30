@@ -82,7 +82,7 @@ Resources:
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/authorizer
+      CodeUri: app/src/functions/authorizer
       Environment:
         Variables:
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
@@ -92,7 +92,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub ${Environment}-enchanted-brain
-      ContentUri: src/layer
+      ContentUri: app/src/layer
       CompatibleRuntimes:
         - python3.7
 
@@ -105,7 +105,7 @@ Resources:
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/callback
+      CodeUri: app/src/functions/callback
       Environment:
         Variables:
           API_URL: !Sub
@@ -129,7 +129,7 @@ Resources:
   PublisherFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/publisher
+      CodeUri: app/src/functions/publisher
       Events:
         StreamEvent:
           Type: DynamoDB
@@ -143,7 +143,7 @@ Resources:
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/on_connect
+      CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
       Environment:
@@ -173,7 +173,7 @@ Resources:
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/on_disconnect
+      CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
       Environment:
@@ -204,7 +204,7 @@ Resources:
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/on_choice_made
+      CodeUri: app/src/functions/on_choice_made
       Layers:
         - !Ref LambdaLayer
       Environment:
@@ -228,7 +228,7 @@ Resources:
   OnEventStageChangedFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/on_event_stage_changed
+      CodeUri: app/src/functions/on_event_stage_changed
       Layers:
         - !Ref LambdaLayer
       Environment:
@@ -268,7 +268,7 @@ Resources:
   ChoiceWriterFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/functions/choice_writer
+      CodeUri: app/src/functions/choice_writer
       Layers:
         - !Ref LambdaLayer
       Events:

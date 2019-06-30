@@ -5,8 +5,8 @@ services:
   pipenv:
     image: sjawhar/pipenv:3.7-2018.11.26
     volumes:
-      - ./:/app
-      - ./src/layer/python:/opt/python
+      - ./app:/app
+      - ./app/src/layer/python:/opt/python
       - ~/.local/share/virtualenvs:/home/pipenv/.local/share/virtualenvs
     environment:
       PYTHONPATH: /opt/python

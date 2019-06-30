@@ -9,7 +9,7 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd concert && pipenv install --dev && pipenv run test
+      - run: cd concert && ./test.sh
 
   lambdas-lint:
     docker:
