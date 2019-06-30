@@ -9,14 +9,14 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd server && pipenv install --dev && pipenv run test
+      - run: cd concert && pipenv install --dev && pipenv run test
 
   lambdas-lint:
     docker:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd server && pipenv install --dev && pipenv run lint
+      - run: cd concert && pipenv install --dev && pipenv run lint
 
 
 workflows:
