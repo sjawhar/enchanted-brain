@@ -3,6 +3,7 @@ version: 2.1
 orbs:
   github-wiki: sjawhar/github-wiki@0.3.0
 
+
 jobs:
   lambdas-test:
     docker:
@@ -20,12 +21,25 @@ jobs:
       - checkout
       - run: cd concert/app && pipenv install --dev && pipenv run lint
 
+  cloudformation-validate:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install --user awscli==1.16.35
+      - run:
+          name: Validate CloudFormation template
+          command: PATH="~/.local/bin:${PATH}" ./validate-templates.sh
+
 
 workflows:
   test-and-deploy:
     jobs:
       - lambdas-test
       - lambdas-lint
+      - cloudformation-validate
       - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
