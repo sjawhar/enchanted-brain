@@ -1,0 +1,293 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+
+  AdminUserPoolGroupName:
+    Type: String
+
+  CognitoUserPoolId:
+    Type: String
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  EventName:
+    Type: String
+
+
+Mappings:
+
+  RouteKeys:
+    ChoiceMade:
+      Key: CHOICE_MADE
+    Connect:
+      Key: $connect
+    Disconnect:
+      Key: $disconnect
+    EventStageChanged:
+      Key: EVENT_STAGE_CHANGED
+
+  ApiParams:
+    ServerlessRestApi:
+      StageName: Prod
+
+
+Globals:
+
+  Function:
+    Runtime: python3.7
+    Handler: index.handler
+    MemorySize: 128
+    Timeout: 3
+    AutoPublishAlias: live
+    Environment:
+      Variables:
+        EVENT_NAME: !Ref EventName
+        DYNAMODB_ENDPOINT: ''
+
+Resources:
+
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Environment}-enchanted-brain
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      SSESpecification:
+        SSEEnabled: True
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+
+  Api:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub ${Environment}-enchanted-brain
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.event
+
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/authorizer
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
+          COGNITO_ADMIN_GROUP_NAME: !Ref AdminUserPoolGroupName
+
+  LambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ${Environment}-enchanted-brain
+      ContentUri: app/src/layer
+      CompatibleRuntimes:
+        - python3.7
+
+  CallbackSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-enchanted-brain-callback-global
+      KmsMasterKeyId: alias/aws/sns
+
+  CallbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/callback
+      Environment:
+        Variables:
+          API_URL: !Sub
+            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
+            - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: execute-api:ManageConnections
+              Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*
+
+  CallbackFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CallbackFunction.Alias
+      Principal: sqs.amazonaws.com
+      SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+
+  PublisherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/publisher
+      Events:
+        StreamEvent:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt Table.StreamArn
+            StartingPosition: TRIM_HORIZON
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt CallbackSnsTopic.TopicName
+
+  OnConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/on_connect
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          APP_ENVIRONMENT: !Ref Environment
+          CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          TABLE_NAME: !Ref Table
+      Policies:
+        # TODO
+        # Deploy stack
+        # Create SQS queue
+        # Create subscription to SNS topics for SQS queues
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
+
+  OnConnectRoute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation.ws-route.yml
+      Parameters:
+        ApiId: !Ref Api
+        FunctionName: !Ref OnConnectFunction
+        FunctionArn: !Ref OnConnectFunction.Alias
+        RouteKey: !FindInMap [RouteKeys, Connect, Key]
+
+  OnDisconnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/on_disconnect
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies: !Ref AWS::NoValue
+        # TODO Policies
+        # Delete stack
+        # Delete SQS queue
+        # Delete subscription to SNS topics for SQS queues
+
+  OnDisconnectRoute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation.ws-route.yml
+      Parameters:
+        ApiId: !Ref Api
+        FunctionName: !Ref OnDisconnectFunction
+        FunctionArn: !Ref OnDisconnectFunction.Alias
+        RouteKey: !FindInMap [RouteKeys, Disconnect, Key]
+
+  ChoiceMadeSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-enchanted-brain-choice-made
+      KmsMasterKeyId: alias/aws/sns
+
+  OnChoiceMadeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/on_choice_made
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
+
+  OnChoiceMadeRoute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation.ws-route.yml
+      Parameters:
+        ApiId: !Ref Api
+        FunctionName: !Ref OnChoiceMadeFunction
+        FunctionArn: !Ref OnChoiceMadeFunction.Alias
+        RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
+
+  OnEventStageChangedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/on_event_stage_changed
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+
+  OnEventStageChangedRoute:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: cloudformation.ws-route.yml
+      Parameters:
+        ApiId: !Ref Api
+        FunctionName: !Ref OnEventStageChangedFunction
+        FunctionArn: !Ref OnEventStageChangedFunction.Alias
+        RouteKey: !FindInMap [RouteKeys, EventStageChanged, Key]
+
+  ApiDeployment:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - OnChoiceMadeRoute
+      - OnConnectRoute
+      - OnDisconnectRoute
+      - OnEventStageChangedRoute
+    Properties:
+      ApiId: !Ref Api
+
+  ApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref Api
+      DeploymentId: !Ref ApiDeployment
+      StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
+
+  ChoiceWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app/src/functions/choice_writer
+      Layers:
+        - !Ref LambdaLayer
+      Events:
+        SnsEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref ChoiceMadeSnsTopic
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+
+
+Outputs:
+
+  TableName:
+    Value: !Ref Table
+
+  WebSocketURI:
+    Value: !Sub wss://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}

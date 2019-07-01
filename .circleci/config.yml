@@ -1,7 +1,8 @@
 version: 2.1
 
 orbs:
-  github-wiki: sjawhar/github-wiki@0.2.1
+  github-wiki: sjawhar/github-wiki@0.3.0
+
 
 jobs:
   lambdas-test:
@@ -9,14 +10,28 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd lambdas && pipenv install --dev && pipenv run test
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: cd concert && ./test.sh
 
   lambdas-lint:
     docker:
       - image: circleci/python:3.7
     steps:
       - checkout
-      - run: cd lambdas && pipenv install --dev && pipenv run lint
+      - run: cd concert/app && pipenv install --dev && pipenv run lint
+
+  cloudformation-validate:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install --user awscli==1.16.35
+      - run:
+          name: Validate CloudFormation template
+          command: PATH="~/.local/bin:${PATH}" ./validate-templates.sh
 
 
 workflows:
@@ -24,15 +39,8 @@ workflows:
     jobs:
       - lambdas-test
       - lambdas-lint
-      - github-wiki/build-and-push:
-          name: wiki-build
-          push-wiki-repo: false
-          sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
-          filters:
-            branches:
-              ignore: master
-      - github-wiki/build-and-push:
-          name: wiki-deploy
+      - cloudformation-validate
+      - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
           ssh-key-fingerprint: 42:38:62:83:7e:81:3e:5f:b1:9c:5f:72:b3:78:9a:bc

@@ -1,8 +1,8 @@
 [**< Back**](Home)  
 [Architecture](Architecture)  
-**Development**  
+[Development](Development)  
+**Requirements**  
 {{SIDEBAR_GENERATE}}
-[Requirements](Requirements)  
 Usage  
 &nbsp;&nbsp;[Concert](Concert)  
 &nbsp;&nbsp;[After Concert](After-Concert)  

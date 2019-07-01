@@ -1,7 +1,6 @@
 [**< Back**](Home)  
-[Architecture](Architecture)  
-**Development**  
-{{SIDEBAR_GENERATE}}
+**Architecture**  
+[Development](Development)  
 [Requirements](Requirements)  
 Usage  
 &nbsp;&nbsp;[Concert](Concert)  
