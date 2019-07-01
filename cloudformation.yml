@@ -12,90 +12,39 @@ Parameters:
       - staging
       - testing
 
-Mappings:
-
-  ChoiceTableCapacities:
-    development:
-      ReadMin: 1
-      WriteMin: 1
-    production:
-      ReadMin: 1
-      WriteMin: 1
-    staging:
-      ReadMin: 1
-      WriteMin: 1
-
-Globals:
-
-  Function:
-    Handler: index.handler
-    Runtime: python3.7
-    Tracing: Active
-    Timeout: 10
-    AutoPublishAlias: live
-    Environment:
-      Variables:
-        DYNAMODB_ENDPOINT: ''
+  EventName:
+    Type: String
+    Default: CONCERT_LAUSANNE_2019
 
 
 Resources:
 
-  DeadLetterQueue:
-    Type: AWS::SQS::Queue
+  UserPool:
+    Type: AWS::CloudFormation::Stack
     Properties:
-      QueueName: !Sub ${Environment}-dead-letter-queue
-      KmsMasterKeyId: alias/aws/sqs
+      TemplateURL: users/cloudformation.yml
+      Parameters:
+        Environment: !Ref Environment
+        EventName: !Ref EventName
 
-  ChoiceTable:
-    Type: AWS::DynamoDB::Table
+  LausanneConcert:
+    Type: AWS::Serverless::Application
     Properties:
-      TableName: !Sub ${Environment}-choice
-      AttributeDefinitions:
-        - AttributeName: songId
-          AttributeType: S
-        - AttributeName: listenId
-          AttributeType: S
-      KeySchema:
-        - AttributeName: songId
-          KeyType: HASH
-        - AttributeName: listenId
-          KeyType: RANGE
-      ProvisionedThroughput:
-        ReadCapacityUnits: !FindInMap [ChoiceTableCapacities, !Ref Environment, ReadMin]
-        WriteCapacityUnits: !FindInMap [ChoiceTableCapacities, !Ref Environment, WriteMin]
-      SSESpecification:
-        SSEEnabled: yes
+      Location: concert/cloudformation.yml
+      Parameters:
+        AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
+        CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
+        Environment: !Ref Environment
+        EventName: !Ref EventName
 
-  ChoiceMadeSnsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub ${Environment}-choice-made
-      KmsMasterKeyId: alias/aws/sns
-
-  ChoiceWriterFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-choice-writer
-      CodeUri: lambdas/choice/src
-      Handler: writer.handler
-      Events:
-        SnsEvent:
-          Type: SNS
-          Properties:
-            Topic: !Ref ChoiceMadeSnsTopic
-      Environment:
-        Variables:
-          CHOICE_TABLE_NAME: !Ref ChoiceTable
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action: dynamodb:UpdateItem
-              Resource: !GetAtt ChoiceTable.Arn
-      DeadLetterQueue:
-        Type: SQS
-        TargetArn: !GetAtt DeadLetterQueue.Arn
 
 Outputs:
-  RestApiUrl:
-    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/
+
+  ConcertWebSocketURI:
+    Value: !GetAtt LausanneConcert.Outputs.WebSocketURI
+
+  CognitoUserPoolId:
+    Value: !GetAtt UserPool.Outputs.CognitoUserPoolId
+
+  MobileUserPoolClientId:
+    Value: !GetAtt UserPool.Outputs.MobileUserPoolClientId

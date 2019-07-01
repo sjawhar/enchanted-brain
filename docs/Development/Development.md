@@ -16,10 +16,9 @@ docker-compose -f docker-compose.development.yml up -d db dbsetup dbadmin
 docker-compose -f docker-compose.util.yml run --rm pipenv install [OPTIONS]
 ```
 
-### Running Pipfile acripts
-See lambdas/Pipfile for a list of scripts. Run them using
+### Running tests
 ```bash
-docker-compose -f docker-compose.util.yml run --rm pipenv run SCRIPT [SCRIPT_OPTIONS]
+docker-compose -f docker-compose.util.yml run --rm pipenv run pytest [OPTIONS]
 ```
 
 ### Invoking Lambda functions
@@ -29,13 +28,11 @@ docker-compose -f docker-compose.development.yml run --rm invoke-lambda $EVENT_F
 **NOTE**: `$EVENT_FILE` should be specified from the repo root (e.g. `lambdas/event.local.json`).
 
 ## Tips
-* `export FUNCTION_NAME` is your friend
 * Useful bash aliases:
     ```bash
     pipenv() {
         docker run --rm -it --log-driver none --user pipenv \
-            -v "`dwd`:/app" --workdir /app \
-            -v "$HOME/.npm:/home/node/.npm" \
+            -v "`pwd`:/app" --workdir /app \
             -v "$HOME/.local/share/virtualenvs:/home/pipenv/.local/share/virtualenvs" \
             sjawhar/pipenv:3.7-2018.11.26 $@
     }

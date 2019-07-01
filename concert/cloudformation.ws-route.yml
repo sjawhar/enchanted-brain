@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  ApiId:
+    Type: String
+
+  FunctionArn:
+    Type: String
+
+  FunctionName:
+    Type: String
+
+  RouteKey:
+    Type: String
+
+
+Resources:
+
+  Integration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiId
+      Description: !Ref RouteKey
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations
+
+  Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref FunctionName
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+
+  Route:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiId
+      RouteKey: !Ref RouteKey
+      AuthorizationType: NONE #TODO
+      Target: !Sub integrations/${Integration}

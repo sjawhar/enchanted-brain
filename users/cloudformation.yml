@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  EventName:
+    Type: String
+
+
+Resources:
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${Environment}-enchanted-brain
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: yes
+          RequireNumbers: yes
+          RequireSymbols: yes
+          RequireUppercase: yes
+      Schema:
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: gender
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: age
+          AttributeDataType: Number
+          Mutable: true
+          Required: false
+        - Name: color-perception
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+
+  AdminUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admin
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 20
+
+  EventUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: !Ref EventName
+      UserPoolId: !Ref CognitoUserPool
+      Precedence: 50
+
+  MobileUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${Environment}.enchanted-brain.app
+      UserPoolId: !Ref CognitoUserPool
+      ReadAttributes:
+        - name
+        - email
+        - phone_number
+        - gender
+        - custom:age
+        - custom:color-perception
+      WriteAttributes:
+        - name
+        - email
+        - phone_number
+        - gender
+        - custom:age
+        - custom:color-perception
+      RefreshTokenValidity: 30
+      GenerateSecret: true
+
+Outputs:
+
+  CognitoUserPoolId:
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-cognito-user-pool-id-v1
+
+  CognitoUserPoolArn:
+    Value: !GetAtt CognitoUserPool.Arn
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-cognito-user-pool-arn-v1
+
+  AdminUserPoolGroupName:
+    Value: !Ref AdminUserPoolGroup
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-admin-user-pool-group-name-v1
+
+  EventUserPoolGroupName:
+    Value: !Ref EventUserPoolGroup
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-event-user-pool-group-name-v1
+
+  MobileUserPoolClientId:
+    Value: !Ref MobileUserPoolClient
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-mobile-user-pool-client-id-v1
