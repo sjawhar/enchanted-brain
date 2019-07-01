@@ -151,7 +151,7 @@ Resources:
           APP_ENVIRONMENT: !Ref Environment
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         # TODO
         # Deploy stack
@@ -178,7 +178,7 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies: !Ref AWS::NoValue
         # TODO Policies
         # Delete stack
@@ -233,7 +233,7 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
@@ -278,7 +278,7 @@ Resources:
             Topic: !Ref ChoiceMadeSnsTopic
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
