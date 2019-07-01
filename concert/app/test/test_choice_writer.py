@@ -16,7 +16,7 @@ def test_handler_color_chosen():
         "Records": [
             {
                 "Sns": {
-                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_COLOR\",\"choice\":\"COLOR_RED\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                    "Message": '{"userId":"user id","choiceType":"CHOICE_COLOR","choice":"COLOR_RED","timestamp":"2019-05-14T21:20:03.000Z"}'
                 }
             }
         ]
@@ -48,7 +48,7 @@ def test_handler_emotion_chosen():
         "Records": [
             {
                 "Sns": {
-                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_EMOTION\",\"choice\":\"sad\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                    "Message": '{"userId":"user id","choiceType":"CHOICE_EMOTION","choice":"sad","timestamp":"2019-05-14T21:20:03.000Z"}'
                 }
             }
         ]
@@ -80,7 +80,7 @@ def test_handler_imagery_chosen():
         "Records": [
             {
                 "Sns": {
-                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_IMAGERY\",\"choice\":\"a sunset\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                    "Message": '{"userId":"user id","choiceType":"CHOICE_IMAGERY","choice":"a sunset","timestamp":"2019-05-14T21:20:03.000Z"}'
                 }
             }
         ]
@@ -109,7 +109,7 @@ def test_handler_chills_chosen():
         "Records": [
             {
                 "Sns": {
-                    "Message": "{\"userId\":\"user id\",\"choiceType\":\"CHOICE_CHILLS\",\"choice\":\"True\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                    "Message": '{"userId":"user id","choiceType":"CHOICE_CHILLS","choice":"True","timestamp":"2019-05-14T21:20:03.000Z"}'
                 }
             }
         ]
@@ -142,7 +142,7 @@ def test_handler_invalid_input():
             "Records": [
                 {
                     "Sns": {
-                        "Message": "{\"userId\":\"user id\",\"choiceType\":\"INVALID CHOICE\",\"choice\":\"(ツ)\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+                        "Message": '{"userId":"user id","choiceType":"INVALID CHOICE","choice":"(ツ)","timestamp":"2019-05-14T21:20:03.000Z"}'
                     }
                 }
             ]
