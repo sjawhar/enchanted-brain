@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.writer import handler, dynamodb
+from src.functions.choice_writer.index import handler, dynamodb
 from botocore.stub import Stubber
 
 dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 200}}
