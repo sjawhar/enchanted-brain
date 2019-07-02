@@ -12,7 +12,7 @@ client_sqs = boto3.client("sqs")
 
 
 def handler(event, context):
-    connection_id = event.requestContext.connectionId
+    connection_id = event["requestContext"]["connectionId"]
     queue_arn = "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1])
     client_sqs.create_queue(QueueName=queue_arn.split(":")[-1])
     client_lambda.create_event_source_mapping(
