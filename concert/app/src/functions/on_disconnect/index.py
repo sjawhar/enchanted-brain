@@ -14,8 +14,10 @@ table = dynamodb.Table(TABLE_NAME)
 
 
 def handler(event, context):
-    connection_id = event["requestContext"]["connectionId"]
-    resources = table.get_item(Key={"userId": "CONN${}".format(connection_id)})["Item"]
+    connection_key = {
+        "userId": "CONN${}".format(event["requestContext"]["connectionId"])
+    }
+    resources = table.get_item(Key=connection_key)["Item"]
 
     client_lambda.update_event_source_mapping(
         UUID=resources["mapping_uuid"], Enabled=False
@@ -30,5 +32,7 @@ def handler(event, context):
         except Exception as e:
             print(e)
             time.sleep(2 ** i)
+
+    table.delete_item(Key=connection_key)
 
     return {"statusCode": 204}
