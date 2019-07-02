@@ -53,6 +53,6 @@ Resources:
     Type: AWS::ApiGatewayV2::RouteResponse
     Condition: IsCreateRouteResponse
     Properties:
-      ApiId: !Ref MyApi
+      ApiId: !Ref ApiId
       RouteId: !Ref Route
       RouteResponseKey: $default
