@@ -24,4 +24,4 @@ def handler(event, context):
     #     MessageStructure="string",
     # )
 
-    return {"statusCode": 204}
+    return "received message {}".format(json.dumps(event))
