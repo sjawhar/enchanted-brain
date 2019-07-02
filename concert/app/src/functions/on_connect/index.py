@@ -20,7 +20,6 @@ def handler(event, context):
         FunctionName=CALLBACK_FUNCTION_ARN,
         Enabled=True,
         BatchSize=1,
-        StartingPosition="TRIM_HORIZON",
     )
     client_sns.subscribe(
         TopicArn=CALLBACK_SNS_TOPIC_ARN, Protocol="sqs", Endpoint=queue_arn
