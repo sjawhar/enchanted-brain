@@ -24,10 +24,10 @@ const sixBasicColorTerms = [
   "#743493",
   "#FFFFFF",
   "#A5A5A5",
-  Color("#A5A5A5")
-    .darken(0.5)
-    .rgb()
-    .string(),
+  // Color("#A5A5A5")
+  //   .darken(0.5)
+  //   .rgb()
+  //   .string(),
   "#000000"
 ];
 
@@ -86,10 +86,10 @@ const materialColorsWithGrayscale = [
   // greyscale
   "#FFFFFF",
   "#A5A5A5",
-  Color("#A5A5A5")
-    .darken(0.5)
-    .rgb()
-    .string(),
+  // Color("#A5A5A5")
+  //   .darken(0.5)
+  //   .rgb()
+  //   .string(),
   "#000000"
 ];
 
