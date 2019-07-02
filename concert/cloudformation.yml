@@ -157,7 +157,7 @@ Resources:
       Policies:
         # TODO
         # Deploy stack
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - Version: '2012-10-17'
           Statement:
@@ -204,7 +204,8 @@ Resources:
       Policies:
         # TODO Policies
         # Delete stack
-        # Delete subscription to SNS topics for SQS queues
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -213,6 +214,15 @@ Resources:
                 - sqs:GetQueueAttributes
                 - sqs:SetQueueAttributes
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: sns:Unsubscribe
+              Resource: '*'
+            - Effect: Allow
+              Action: lambda:DeleteEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
 
   OnDisconnectRoute:
     Type: AWS::CloudFormation::Stack
