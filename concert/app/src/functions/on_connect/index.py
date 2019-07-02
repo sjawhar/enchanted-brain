@@ -19,7 +19,7 @@ def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
     queue_arn = "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1])
 
-    queue_url = client_sqs.create_queue(QueueName=queue_arn.split(":")[-1]).url
+    queue_url = client_sqs.create_queue(QueueName=queue_arn.split(":")[-1])["QueueUrl"]
     mapping_uuid = client_lambda.create_event_source_mapping(
         EventSourceArn=queue_arn,
         FunctionName=CALLBACK_FUNCTION_ARN,
