@@ -40,7 +40,7 @@ jobs:
       - checkout
       - run:
           name: Install dependencies
-          command: pip install --user awscli==1.16.35
+          command: pip install --user aws-sam-cli==0.17.0 awscli==1.16.192
       - run:
           name: Validate CloudFormation template
           command: PATH="~/.local/bin:${PATH}" ./deploy.sh development us-east-1
