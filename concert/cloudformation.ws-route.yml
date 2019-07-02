@@ -8,9 +8,6 @@ Parameters:
   FunctionArn:
     Type: String
 
-  FunctionName:
-    Type: String
-
   RouteKey:
     Type: String
 
@@ -28,7 +25,7 @@ Resources:
   Permission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref FunctionName
+      FunctionName: !Ref FunctionArn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
 
