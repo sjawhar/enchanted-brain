@@ -164,7 +164,6 @@ Resources:
             - Effect: Allow
               Action:
                 - sqs:CreateQueue
-                - sqs:DeleteQueue
                 - sqs:GetQueueAttributes
                 - sqs:SetQueueAttributes
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
@@ -201,11 +200,18 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
-      Policies: !Ref AWS::NoValue
+      Policies:
         # TODO Policies
         # Delete stack
-        # Delete SQS queue
         # Delete subscription to SNS topics for SQS queues
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sqs:DeleteQueue
+                - sqs:GetQueueAttributes
+                - sqs:SetQueueAttributes
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
 
   OnDisconnectRoute:
     Type: AWS::CloudFormation::Stack

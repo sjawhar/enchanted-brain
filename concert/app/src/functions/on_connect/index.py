@@ -14,6 +14,8 @@ client_sqs = boto3.client("sqs")
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
     queue_arn = "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1])
+
+    # TODO: Store event source mapping and subscription arn
     client_sqs.create_queue(QueueName=queue_arn.split(":")[-1])
     client_lambda.create_event_source_mapping(
         EventSourceArn=queue_arn,
@@ -22,6 +24,10 @@ def handler(event, context):
         BatchSize=1,
     )
     client_sns.subscribe(
-        TopicArn=CALLBACK_SNS_TOPIC_ARN, Protocol="sqs", Endpoint=queue_arn
+        TopicArn=CALLBACK_SNS_TOPIC_ARN,
+        Protocol="sqs",
+        Endpoint=queue_arn,
+        Attributes={"RawMessageDelivery": "true"},
+        ReturnSubscriptionArn=True,
     )
     return {"statusCode": 204}
