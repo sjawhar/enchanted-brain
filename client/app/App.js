@@ -6,6 +6,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
 import layout from './constants/Layout';
+import ConcertApi from './util/ConcertApi';
 
 const SCREEN_WIDTH = layout.window.width;
 
