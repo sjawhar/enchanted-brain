@@ -6,6 +6,7 @@ Parameters:
     Type: String
 
   CreateRouteResponse:
+    Type: String
     AllowedValues:
       - 'yes'
       - 'no'
