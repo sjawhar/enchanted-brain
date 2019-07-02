@@ -265,8 +265,7 @@ const styles = EStyleSheet.create({
   container: {
     width: WINDOW_WIDTH,
     height: "100%",
-    backgroundColor: "rgba(0,0,0,1)",
-    // backgroundColor: "rgb(95, 95, 95)",
+    backgroundColor: "rgb(95, 95, 95)",
     justifyContent: "center"
   },
 
