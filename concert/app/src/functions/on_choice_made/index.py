@@ -18,12 +18,12 @@ def handler(event, context):
     print(event)
     print(os.environ)
 
-    data = event["data"]
-    print(data)
+    # data = event["data"]
+    # print(data)
     # response = sns.publish(
     #     TopicArn=SNS_CHOICE_MADE_ARN,
     #     Message=json.dumps(data),
     #     MessageStructure="string",
     # )
 
-    return {"statusCode": 204}
+    return {"statusCode": 200, "body": json.dumps(event)}
