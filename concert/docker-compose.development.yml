@@ -23,11 +23,11 @@ services:
       - --template
       - cloudformation.yml
       - --env-vars
-      - lambdas/env.local.json
+      - env.local.json
       - --docker-volume-basedir
       - ${PWD}
       - --docker-network
-      - enchanted-brain-lambdas
+      - enchanted-brain-concert
       - --region
       - us-west-2
 
@@ -49,18 +49,18 @@ services:
       - --template
       - cloudformation.yml
       - --env-vars
-      - lambdas/env.local.json
+      - env.local.json
       - --docker-volume-basedir
       - ${PWD}
       - --docker-network
-      - enchanted-brain-lambdas
+      - enchanted-brain-concert
       - --region
       - us-west-2
       - --layer-cache-basedir
       - ${PWD}/sam-cache
       - --event
     command:
-      - lambdas/event.local.json
+      - event.local.json
 
   db:
     image: amazon/dynamodb-local:1.11.477
@@ -93,4 +93,4 @@ services:
 
 networks:
   default:
-    name: enchanted-brain-lambdas
+    name: enchanted-brain-concert

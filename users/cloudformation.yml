@@ -87,7 +87,7 @@ Resources:
         - custom:age
         - custom:color-perception
       RefreshTokenValidity: 30
-      GenerateSecret: true
+      GenerateSecret: false
 
 Outputs:
 
