@@ -173,8 +173,9 @@ Resources:
               Resource: !Ref CallbackSnsTopic
               Condition:
                 ForAnyValue:StringEquals:
-                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
                   sns:Protocol: sqs
+                ForAnyValue:StringLike:
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action: lambda:CreateEventSourceMapping
               Resource: '*'
