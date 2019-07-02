@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+
+  npm:
+    image: node:10
+    container_name: enchanted-brain
+    volumes:
+      - ./app:/app
+    ports:
+      - 8080:8080
+    working_dir: /app
+    entrypoint: [npm]
+    command: [install]
+
