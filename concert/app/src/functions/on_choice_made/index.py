@@ -26,5 +26,4 @@ def handler(event, context):
     #     MessageStructure="string",
     # )
 
-    return {"statusCode": 200,
-            "body": json.dumps(event)}
+    return {"statusCode": 200, "body": json.dumps(event)}
