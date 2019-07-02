@@ -150,7 +150,7 @@ Resources:
         Variables:
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
-          CALLBACK_SQS_QUEUE_NAME_PREFIX: !Sub ${Environment]-enchanted-brain-callback-
+          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
           TABLE_NAME: !Ref Table
       Policies:
         # TODO
