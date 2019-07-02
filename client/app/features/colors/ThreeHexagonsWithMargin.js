@@ -207,55 +207,29 @@ class ThreeStaggeredHexagons extends Component {
             />
           </View>
         </View>
-
-        {/* Special grayscale row containing 4 hexagons */}
-        <View style={[styles.row, styles.grayscaleRow]}>
-          <Hexagon
-            onPress={onChoice(colors[18])}
-            width={HEXAGON_WIDTH}
-            fill={colors[18]}
-          />
-
-          <Hexagon
-            onPress={onChoice(colors[19])}
-            width={HEXAGON_WIDTH}
-            fill={colors[19]}
-          />
-
-          <Hexagon
-            onPress={onChoice(colors[20])}
-            width={HEXAGON_WIDTH}
-            fill={colors[20]}
-          />
-
-          <Hexagon
-            onPress={onChoice(colors[21])}
-            width={HEXAGON_WIDTH}
-            fill={colors[21]}
-            bordered
-          />
+        <View style={[styles.row, styles.rowLeft]}>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[18])}
+              width={HEXAGON_WIDTH}
+              fill={colors[18]}
+            />
+          </View>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[19])}
+              width={HEXAGON_WIDTH}
+              fill={colors[19]}
+            />
+          </View>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[20])}
+              width={HEXAGON_WIDTH}
+              fill={colors[20]}
+            />
+          </View>
         </View>
-
-        {/* Regular final row (that happens to contain grayscale colors) */}
-        {/* <View style={[styles.row, styles.rowLeft]}>
-          <View
-            style={[
-              styles.hexagonContainerLeft,
-              styles.lastHexagonContainerLeft
-            ]}
-          >
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[18]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[19]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[20]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[21]} bordered />
-          </View>
-        </View> */}
       </View>
     );
   }
