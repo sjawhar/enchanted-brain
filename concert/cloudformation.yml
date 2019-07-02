@@ -112,6 +112,8 @@ Resources:
             - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
+        - SQSPollerPolicy:
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -146,6 +148,7 @@ Resources:
       CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 10
       Environment:
         Variables:
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
@@ -155,14 +158,13 @@ Resources:
       Policies:
         # TODO
         # Deploy stack
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action:
                 - sqs:CreateQueue
-                - sqs:DeleteQueue
                 - sqs:GetQueueAttributes
                 - sqs:SetQueueAttributes
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
@@ -171,8 +173,15 @@ Resources:
               Resource: !Ref CallbackSnsTopic
               Condition:
                 ForAnyValue:StringEquals:
-                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
                   sns:Protocol: sqs
+                ForAnyValue:StringLike:
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: lambda:CreateEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
 
   OnConnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -180,6 +189,7 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
+        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnConnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Connect, Key]
 
@@ -189,14 +199,32 @@ Resources:
       CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 20
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
-      Policies: !Ref AWS::NoValue
+      Policies:
         # TODO Policies
         # Delete stack
-        # Delete SQS queue
-        # Delete subscription to SNS topics for SQS queues
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sqs:DeleteQueue
+                - sqs:GetQueueAttributes
+                - sqs:SetQueueAttributes
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: sns:Unsubscribe
+              Resource: '*'
+            - Effect: Allow
+              Action: lambda:DeleteEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
 
   OnDisconnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -233,6 +261,7 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
+        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
 
