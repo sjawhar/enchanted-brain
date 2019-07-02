@@ -1,8 +1,18 @@
 import React, { Component } from "react";
-import { SafeAreaView, Text, View } from "react-native";
+import { SafeAreaView, Text } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 
+import concertApi from "../api/concertApi";
+
 class WelcomeScreen extends Component {
+  constructor(props) {
+    super(props);
+    const { navigation } = props;
+    concertApi.on("SHOW_COLOR_PICKER", stream => {
+      navigation.navigate("Colors"); // temporary
+    });
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
