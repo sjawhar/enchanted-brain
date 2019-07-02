@@ -3,10 +3,10 @@ version: '3.5'
 services:
 
   api:
-    image: sjawhar/aws-cli:1.16.143
+    image: sjawhar/aws-cli:1.16.160
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/aws
+      - ./:/${PWD}
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
@@ -14,6 +14,7 @@ services:
     ports:
       - 3000:3000
     user: root
+    working_dir: ${PWD}
     entrypoint: [sam]
     command:
       - local
@@ -32,16 +33,17 @@ services:
       - us-west-2
 
   invoke-lambda:
-    image: sjawhar/aws-cli:1.16.143
+    image: sjawhar/aws-cli:1.16.160
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/aws
+      - ./:/${PWD}
       - ./sam-cache:${PWD}/sam-cache
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
       AWS_SESSION_TOKEN:
     user: root
+    working_dir: ${PWD}
     entrypoint:
       - sam
       - local
