@@ -49,13 +49,13 @@ jobs:
 workflows:
   test-and-deploy:
     jobs:
-      - lambdas-test
+      # - lambdas-test
       - lambdas-lint
       - cloudformation-validate
       - deploy:
           requires:
             - lambdas-lint
-            - lambdas-test
+            # - lambdas-test
             - cloudformation-validate
       - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
