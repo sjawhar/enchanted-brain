@@ -46,6 +46,10 @@ Resources:
     Properties:
       ApiId: !Ref ApiId
       RouteKey: !Ref RouteKey
+      RouteResponseSelectionExpression: !If
+        - IsCreateRouteResponse
+        - $default
+        - !Ref AWS::NoValue
       AuthorizationType: NONE #TODO
       Target: !Sub integrations/${Integration}
 
