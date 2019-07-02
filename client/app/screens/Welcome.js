@@ -2,14 +2,13 @@ import React, { Component } from "react";
 import { SafeAreaView, Text } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 
-import concertApi from "../util/concertApi";
+import concertApi from "../api/concertApi";
 
 class WelcomeScreen extends Component {
   constructor(props) {
     super(props);
     const { navigation } = props;
-    navigation.navigate("Colors"); // temporary
-    concertApi.on("EVENT_STAGE_CHANGED", stream => {
+    concertApi.on("SHOW_COLOR_PICKER", stream => {
       navigation.navigate("Colors"); // temporary
     });
   }
