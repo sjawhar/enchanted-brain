@@ -112,6 +112,8 @@ Resources:
             - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
+        - SQSPollerPolicy:
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -173,6 +175,12 @@ Resources:
                 ForAnyValue:StringEquals:
                   sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
                   sns:Protocol: sqs
+            - Effect: Allow
+              Action: lambda:CreateEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
 
   OnConnectRoute:
     Type: AWS::CloudFormation::Stack
