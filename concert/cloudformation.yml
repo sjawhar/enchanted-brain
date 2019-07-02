@@ -112,6 +112,8 @@ Resources:
             - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
+        - SQSPollerPolicy:
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
