@@ -33,6 +33,18 @@ jobs:
           name: Validate CloudFormation template
           command: PATH="~/.local/bin:${PATH}" ./validate-templates.sh
 
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: pip install --user aws-sam-cli==0.17.0 awscli==1.16.192
+      - run:
+          name: Validate CloudFormation template
+          command: PATH="~/.local/bin:${PATH}" ./deploy.sh development us-east-1
+
 
 workflows:
   test-and-deploy:
@@ -40,6 +52,11 @@ workflows:
       - lambdas-test
       - lambdas-lint
       - cloudformation-validate
+      - deploy:
+          requires:
+            - lambdas-lint
+            - lambdas-test
+            - cloudformation-validate
       - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'

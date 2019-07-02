@@ -5,7 +5,8 @@ import { withAuthenticator } from "aws-amplify-react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
 import AppNavigator from "./navigation/AppNavigator";
-import layout from "./constants/Layout";
+import layout from './constants/Layout';
+import ConcertApi from './util/ConcertApi';
 
 Amplify.configure({
   Auth: {
