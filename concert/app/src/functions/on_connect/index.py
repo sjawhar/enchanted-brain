@@ -15,7 +15,7 @@ def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
     queue_arn = "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1])
 
-    # TODO: Store event source mapping and subscription arn
+    # TODO: Store queue URL, event source mapping UUID, and subscription arn
     client_sqs.create_queue(QueueName=queue_arn.split(":")[-1])
     client_lambda.create_event_source_mapping(
         EventSourceArn=queue_arn,
