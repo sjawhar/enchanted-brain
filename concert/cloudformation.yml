@@ -148,17 +148,31 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          APP_ENVIRONMENT: !Ref Environment
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CALLBACK_SQS_QUEUE_NAME_PREFIX: !Sub ${Environment]-enchanted-brain-callback-
           TABLE_NAME: !Ref Table
       Policies:
         # TODO
         # Deploy stack
-        # Create SQS queue
-        # Create subscription to SNS topics for SQS queues
         - DynamoDBReadPolicy:
             TableName: !Ref Table
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - sqs:CreateQueue
+                - sqs:DeleteQueue
+                - sqs:GetQueueAttributes
+                - sqs:SetQueueAttributes
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: sns:Subscribe
+              Resource: !Ref CallbackSnsTopic
+              Condition:
+                ForAnyValue:StringEquals:
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+                  sns:Protocol: sqs
 
   OnConnectRoute:
     Type: AWS::CloudFormation::Stack
