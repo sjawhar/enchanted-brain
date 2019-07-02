@@ -148,6 +148,7 @@ Resources:
       CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 10
       Environment:
         Variables:
           CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
@@ -198,6 +199,7 @@ Resources:
       CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 20
       Environment:
         Variables:
           TABLE_NAME: !Ref Table
