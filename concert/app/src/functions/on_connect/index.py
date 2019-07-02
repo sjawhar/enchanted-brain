@@ -12,7 +12,7 @@ client_sns = boto3.client("sns")
 client_sqs = boto3.client("sqs")
 
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.table(TABLE_NAME)
+table = dynamodb.Table(TABLE_NAME)
 
 
 def handler(event, context):
