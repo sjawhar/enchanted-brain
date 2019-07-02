@@ -1,5 +1,6 @@
 import boto3
 import os
+import time
 
 
 TABLE_NAME = os.environ.get("TABLE_NAME")
@@ -21,6 +22,13 @@ def handler(event, context):
     )
     client_sns.unsubscribe(SubscriptionArn=resources["subscription_arn"])
     client_sqs.delete_queue(QueueUrl=resources["queue_url"])
-    client_lambda.delete_event_source_mapping(UUID=resources["mapping_uuid"])
+
+    for i in range(5):
+        try:
+            client_lambda.delete_event_source_mapping(UUID=resources["mapping_uuid"])
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(2 ** i)
 
     return {"statusCode": 204}
