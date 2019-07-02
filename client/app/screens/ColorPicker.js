@@ -3,7 +3,7 @@ import { ScrollView } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import ThreeHexagonsWithMargin from "../features/colors/ThreeHexagonsWithMargin";
 import { Constants } from "expo";
-import concertApi from "../util/concertApi";
+import concertApi from "../api/concertApi";
 
 class ColorsScreen extends Component {
   handleChoice = color => () => {
