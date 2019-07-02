@@ -1,5 +1,5 @@
-import os
 import boto3
+import os
 
 
 CALLBACK_FUNCTION_ARN = os.environ.get("CALLBACK_FUNCTION_ARN")
