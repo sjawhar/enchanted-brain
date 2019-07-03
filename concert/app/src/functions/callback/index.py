@@ -1,24 +1,25 @@
+import json
 import os
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from urllib import request, parse
 
-websocket_uri = "wss://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod"
+websocket_uri = "https://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod"
 
 
 def handler(event, context):
-    print(event)
-    print(os.environ)
+    # print(event)
+    # print(os.environ)
 
     records = event["Records"]
     for record in records:
         source_arn = record["eventSourceARN"]
         connectionId = source_arn.split("callback-")[1]
         body = record["body"]
-        request = Request(
-            websocket_uri + "/@connections/" + connectionId, urlencode(body).encode()
+        data = parse.urlencode(body).encode()
+        req = request.Request(
+            websocket_uri + "/@connections/" + connectionId, data=data
         )
-        response = urlopen(request).read().decode()
-        print(response)
+        resp = request.urlopen(req)
+        print(resp)
     return {"statusCode": 204}
 
 
@@ -31,7 +32,7 @@ SQS event shape:
         {
             "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
             "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
-            "body": "test",
+            "body": {"field: "value"},
             "attributes": {
                 "ApproximateReceiveCount": "1",
                 "SentTimestamp": "1545082649183",
