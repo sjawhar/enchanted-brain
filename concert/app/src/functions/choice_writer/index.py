@@ -41,6 +41,7 @@ choice_type_to_choice_key = {
     CHOICE_IMAGERY: ATTR_CHOICE_VALUE_IMAGERY,
 }
 
+
 def handler(event, context):
     update_args = get_update_args(event)
     table.update_item(**update_args)

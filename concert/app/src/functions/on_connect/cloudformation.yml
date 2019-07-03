@@ -10,23 +10,16 @@ Parameters:
       - staging
       - testing
 
-  SqsQueueName:
-    Type: String
-
 
 Resources:
 
   SqsQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Join
-        - '-'
-        - - Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-sqs-queue-name-prefix-v1
-          - !Ref SqsQueueName
+      QueueName: !Ref AWS::StackName
       KmsMasterKeyId:
         Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-kms-key-alias-v1
-      ReceiveMessageWaitTimeSeconds: 20
-      VisibilityTimeout: 15
+      VisibilityTimeout: 10
 
   SqsQueuePolicy:
     Type: AWS::SQS::QueuePolicy

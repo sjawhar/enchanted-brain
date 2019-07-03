@@ -29,18 +29,7 @@ with open("cloudformation.yml", "r") as file:
 
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
-    queue_name = connection_id[:-1]
-    stack_name = [CLOUDFORMATION_STACK_NAME_PREFIX, queue_name].join("-")
-    stack_id = cloudformation.create_stack(
-        StackName=stack_name,
-        TemplateBody=CLOUDFORMATION_STACK_TEMPLATE_BODY,
-        Parameters=[
-            {"ParameterKey": "Environment", "ParameterValue": APP_ENVIRONMENT},
-            {"ParameterKey": "SqsQueueName", "ParameterValue": queue_name},
-        ],
-        Tags=CLOUDFORMATION_STACK_TAGS,
-    )["StackId"]
-
+    stack_name = "-".join([CLOUDFORMATION_STACK_NAME_PREFIX, connection_id[:-1]])
     table.put_item(
         Item={
             ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
@@ -48,4 +37,11 @@ def handler(event, context):
             ATTR_CONNECTION_STACK_NAME: stack_name,
         }
     )
+    stack_id = cloudformation.create_stack(
+        StackName=stack_name,
+        TemplateBody=CLOUDFORMATION_STACK_TEMPLATE_BODY,
+        Parameters=[{"ParameterKey": "Environment", "ParameterValue": APP_ENVIRONMENT}],
+        Tags=CLOUDFORMATION_STACK_TAGS,
+    )["StackId"]
+
     return {"statusCode": 204}
