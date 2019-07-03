@@ -1,5 +1,6 @@
 import json
 import os
+import request as vendor_request
 from urllib import request, parse
 
 websocket_uri = "https://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod"
@@ -8,6 +9,7 @@ websocket_uri = "https://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod"
 def handler(event, context):
     # print(event)
     # print(os.environ)
+    print(vendor_request)
 
     records = event["Records"]
     for record in records:

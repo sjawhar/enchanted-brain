@@ -569,3 +569,5 @@ env.local.json
 event.local.json
 sam-cache
 cloudformation-generated.yml
+vendor
+Pipfile.*.bak
