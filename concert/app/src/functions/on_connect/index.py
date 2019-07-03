@@ -10,11 +10,11 @@ from enchanted_brain.attributes import (
 
 APP_ENVIRONMENT = os.environ.get("APP_ENVIRONMENT")
 CLOUDFORMATION_STACK_NAME_PREFIX = os.environ.get("CLOUDFORMATION_STACK_NAME_PREFIX")
-TABLE_NAME = os.environ.get("TABLE_NAME")
+DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
 cloudformation = boto3.client("cloudformation")
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(TABLE_NAME)
+table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 CLOUDFORMATION_STACK_TEMPLATE_BODY = ""
 CLOUDFORMATION_STACK_TAGS = [

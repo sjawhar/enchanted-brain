@@ -8,12 +8,12 @@ from enchanted_brain.attributes import (
 )
 
 
-TABLE_NAME = os.environ.get("TABLE_NAME")
+DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
 cloudformation = boto3.client("cloudformation")
 
 dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(TABLE_NAME)
+table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 
 def handler(event, context):
