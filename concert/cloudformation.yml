@@ -38,12 +38,6 @@ Mappings:
     EventStageChanged:
       Key: EVENT_STAGE_CHANGED
 
-  ResourceNames:
-    CallbackCloudformationStack:
-      NamePrefix: ${Environment}-enchanted-brain-callback
-    CallbackSqsQueue:
-      NamePrefix: ${Environment}-enchanted-brain-callback
-
 
 Globals:
 
@@ -94,6 +88,7 @@ Resources:
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-authorizer
       CodeUri: app/src/functions/authorizer
       Environment:
         Variables:
@@ -144,6 +139,7 @@ Resources:
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-callback
       CodeUri: app/src/functions/callback
       Environment:
         Variables:
@@ -152,10 +148,7 @@ Resources:
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
         - SQSPollerPolicy:
-            QueueName: !Sub
-              - ${NamePrefix}-*
-              - NamePrefix:
-                  Fn::Sub: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -171,14 +164,12 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref CallbackFunction.Alias
       Principal: sqs.amazonaws.com
-      SourceArn: !Sub
-        - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${NamePrefix}-*
-        - NamePrefix:
-            Fn::Sub: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
+      SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
 
   PublisherFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-publisher
       CodeUri: app/src/functions/publisher
       Events:
         StreamEvent:
@@ -193,13 +184,14 @@ Resources:
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-connect
       CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
       Timeout: 10
       Environment:
         Variables:
-          CLOUDFORMATION_STACK_NAME_PREFIX: !FindInMap [ResourceNames, CallbackCloudformationStack, NamePrefix]
+          CLOUDFORMATION_STACK_NAME_PREFIX: !Sub ${Environment}-enchanted-brain-callback
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
@@ -208,19 +200,13 @@ Resources:
           Statement:
             - Effect: Allow
               Action: cloudformation:CreateStack
-              Resource: !Sub
-                - arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${NamePrefix}-*
-                - NamePrefix:
-                    Fn::Sub: !FindInMap [ResourceNames, CallbackCloudformationStack, NamePrefix]
+              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action:
                 - sqs:CreateQueue
                 - sqs:GetQueueAttributes
                 - sqs:SetQueueAttributes
-              Resource: !Sub
-                - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${NamePrefix}-*
-                - NamePrefix:
-                    Fn::Sub: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action: sns:Subscribe
               Resource: !Ref CallbackSnsTopic
@@ -228,16 +214,15 @@ Resources:
                 ForAnyValue:StringEquals:
                   sns:Protocol: sqs
                 ForAnyValue:StringLike:
-                  sns:Endpoint: !Sub
-                    - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${NamePrefix}-*
-                    - NamePrefix:
-                        Fn::Sub: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
-              Action: lambda:CreateEventSourceMapping
+              Action:
+                - lambda:CreateEventSourceMapping
+                - lambda:GetEventSourceMapping
               Resource: '*'
               Condition:
                 ForAnyValue:ArnEquals:
-                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
+                  lambda:FunctionArn: !Ref CallbackFunction.Alias
 
   OnConnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -252,6 +237,7 @@ Resources:
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-disconnect
       CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
@@ -266,22 +252,21 @@ Resources:
           Statement:
             - Effect: Allow
               Action: cloudformation:DeleteStack
-              Resource: !Sub
-                - arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${NamePrefix}-*
-                - NamePrefix:
-                    Fn::Sub: !FindInMap [ResourceNames, CallbackCloudformationStack, NamePrefix]
+              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action:
                 - sqs:DeleteQueue
                 - sqs:GetQueueAttributes
                 - sqs:SetQueueAttributes
-              Resource: !Sub
-                - arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${NamePrefix}-*
-                - NamePrefix:
-                    Fn::Sub: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
-              Action: sns:Unsubscribe
+              Action:
+                - sns:Unsubscribe
+                - lambda:GetEventSourceMapping
               Resource: '*'
+            - Effect: Allow
+              Action: sns:ListSubscriptionsByTopic
+              Resource: !Ref CallbackSnsTopic
             - Effect: Allow
               Action:
                 - lambda:DeleteEventSourceMapping
@@ -289,7 +274,7 @@ Resources:
               Resource: '*'
               Condition:
                 ForAnyValue:ArnEquals:
-                  lambda:FunctionArn: !GetAtt CallbackFunction.Arn
+                  lambda:FunctionArn: !Ref CallbackFunction.Alias
 
   OnDisconnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -309,6 +294,7 @@ Resources:
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-choice-made
       CodeUri: app/src/functions/on_choice_made
       Layers:
         - !Ref LambdaLayer
@@ -333,6 +319,7 @@ Resources:
   OnEventStageChangedFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-event-stage-changed
       CodeUri: app/src/functions/on_event_stage_changed
       Layers:
         - !Ref LambdaLayer
@@ -355,9 +342,13 @@ Resources:
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
+      - OnChoiceMadeFunctionAliaslive
       - OnChoiceMadeRoute
+      - OnConnectFunctionAliaslive
       - OnConnectRoute
+      - OnDisconnectFunctionAliaslive
       - OnDisconnectRoute
+      - OnEventStageChangedFunctionAliaslive
       - OnEventStageChangedRoute
     Properties:
       ApiId: !Ref Api
@@ -372,6 +363,7 @@ Resources:
   ChoiceWriterFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
       CodeUri: app/src/functions/choice_writer
       Layers:
         - !Ref LambdaLayer
@@ -400,11 +392,6 @@ Outputs:
     Value: !Ref CallbackKmsKeyAlias
     Export:
       Name: !Sub ${Environment}-enchanted-brain-callback-kms-key-alias-v1
-
-  CallbackSqsQueueNamePrefix:
-    Value: !FindInMap [ResourceNames, CallbackSqsQueue, NamePrefix]
-    Export:
-      Name: !Sub ${Environment}-enchanted-brain-callback-sqs-queue-name-prefix-v1
 
   CallbackSnsTopicArn:
     Value: !Ref CallbackSnsTopic

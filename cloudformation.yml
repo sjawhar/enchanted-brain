@@ -40,8 +40,7 @@ Resources:
         Environment: !Ref Environment
         EventName: !Ref EventName
       Tags:
-        - Key: component
-          Value: concert
+        component: concert
 
 
 Outputs:

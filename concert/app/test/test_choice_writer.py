@@ -24,7 +24,7 @@ def test_handler_color_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"songId": song_id, "listenId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "colors",
@@ -56,7 +56,7 @@ def test_handler_emotion_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"songId": song_id, "listenId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "emotions",
@@ -88,7 +88,7 @@ def test_handler_imagery_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"songId": song_id, "listenId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
         "UpdateExpression": "SET #choice_key = :choice_value",
         "ExpressionAttributeNames": {"#choice_key": "imagery"},
         "ExpressionAttributeValues": {":choice_value": "a sunset"},
@@ -117,7 +117,7 @@ def test_handler_chills_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"songId": song_id, "listenId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "chills",
