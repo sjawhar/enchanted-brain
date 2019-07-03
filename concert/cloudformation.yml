@@ -49,6 +49,7 @@ Globals:
     AutoPublishAlias: live
     Environment:
       Variables:
+        APP_ENVIRONMENT: !Ref Environment
         EVENT_NAME: !Ref EventName
         DYNAMODB_ENDPOINT: ''
         PYTHONPATH: /var/task/vendor:/opt/python:/var/runtime
@@ -60,11 +61,15 @@ Resources:
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
-        - AttributeName: userId
+        - AttributeName: record_type
+          AttributeType: S
+        - AttributeName: record_id
           AttributeType: S
       KeySchema:
-        - AttributeName: userId
+        - AttributeName: record_type
           KeyType: HASH
+        - AttributeName: record_id
+          KeyType: range
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
@@ -182,17 +187,16 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
-          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
-          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
+          CLOUDFORMATION_STACK_NAME_PREFIX: !Sub ${Environment}-enchanted-brain-callback
           TABLE_NAME: !Ref Table
       Policies:
-        # TODO
-        # Deploy stack
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - Version: '2012-10-17'
           Statement:
+            - Effect: Allow
+              Action: cloudformation:CreateStack
+              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action:
                 - sqs:CreateQueue
@@ -235,12 +239,13 @@ Resources:
         Variables:
           TABLE_NAME: !Ref Table
       Policies:
-        # TODO Policies
-        # Delete stack
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - Version: '2012-10-17'
           Statement:
+            - Effect: Allow
+              Action: cloudformation:DeleteStack
+              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action:
                 - sqs:DeleteQueue
