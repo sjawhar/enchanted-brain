@@ -9,7 +9,7 @@ const main = async () => {
   try {
     await dynamoDb
       .createTable({
-        TableName: 'local-colors',
+        TableName: 'local-choice',
         KeySchema: [
           { AttributeName: 'songId', KeyType: 'HASH' },
           { AttributeName: 'listenId', KeyType: 'RANGE' },
@@ -32,27 +32,38 @@ const main = async () => {
   await docuClient
     .batchWrite({
       RequestItems: {
-        'local-colors': [
+        'local-choice': [
           {
             PutRequest: {
               Item: {
                 songId: '1',
                 listenId: 'user-1342',
                 colors: {
-                  1557820765214: 'COLOR_RED',
-                  1557820769264: 'COLOR_BLUE',
+                  '2019-05-14T21:20:03.000Z': 'COLOR_RED',
+                  '2019-05-14T21:20:23.000Z': 'COLOR_BLUE',
                 },
+                emotions: {
+                  '2019-05-14T21:20:43.000Z': 'Sad',
+                  '2019-05-14T21:21:03.000Z': 'Angry',
+                },
+                chills: {
+                  '2019-05-14T21:21:23.000Z': 'True',
+                  '2019-05-14T21:21:43.000Z': 'False',
+                },
+                imagery: 'a slice of chocolate cake',
               },
             },
           },
           {
             PutRequest: {
               Item: {
-                songId: '1',
-                listenId: 'user-7475',
+                songId: 'CONCERT_LAUSANNE_2019',
+                listenId: 'user id',
                 colors: {
-                  1557820873087: 'COLOR_GREEN',
-                  1557820888093: 'COLOR_BLUE',
+                },
+                emotions: {
+                },
+                chills: {
                 },
               },
             },
@@ -62,7 +73,7 @@ const main = async () => {
     })
     .promise();
 
-  const records = await docuClient.scan({ TableName: 'local-colors' }).promise();
+  const records = await docuClient.scan({ TableName: 'local-choice' }).promise();
   console.log(JSON.stringify(records.Items, null, 2));
 };
 

@@ -200,7 +200,7 @@ Resources:
       Environment:
         Variables:
           CLOUDFORMATION_STACK_NAME_PREFIX: !FindInMap [ResourceNames, CallbackCloudformationStack, NamePrefix]
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
@@ -258,7 +258,7 @@ Resources:
       Timeout: 120
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
@@ -338,7 +338,7 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
@@ -382,7 +382,7 @@ Resources:
             Topic: !Ref ChoiceMadeSnsTopic
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
