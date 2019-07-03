@@ -103,6 +103,33 @@ Resources:
       TopicName: !Sub ${Environment}-enchanted-brain-callback-global
       KmsMasterKeyId: alias/aws/sns
 
+  CallbackKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub ${Environment}-enchanted-brain-callback
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: kms:*
+            Resource: '*'
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          - Effect: Allow
+            Action:
+              - kms:GenerateDataKey*
+              - kms:Decrypt
+            Resource: '*'
+            Principal:
+              Service: sns.amazonaws.com
+
+  CallbackKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${Environment}/enchanted-brain/callback
+      TargetKeyId: !Ref CallbackKmsKey
+
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -120,6 +147,9 @@ Resources:
             - Effect: Allow
               Action: execute-api:ManageConnections
               Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource: !GetAtt CallbackKmsKey.Arn
 
   CallbackFunctionPermission:
     Type: AWS::Lambda::Permission
@@ -333,3 +363,23 @@ Outputs:
 
   WebSocketURI:
     Value: !Sub wss://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
+
+  CallbackKmsKeyAlias:
+    Value: !Ref CallbackKmsKeyAlias
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-callback-kms-key-alias-v1
+
+  CallbackSqsQueueNamePrefix:
+    Value: !Sub ${Environment}-enchanted-brain-callback
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-callback-sqs-queue-name-prefix-v1
+
+  CallbackSnsTopicArn:
+    Value: !Ref CallbackSnsTopic
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-callback-sns-topic-arn-v1
+
+  CallbackFunctionArn:
+    Value: !Ref CallbackFunction.Alias
+    Export:
+      Name: !Sub ${Environment}-enchanted-brain-callback-function-arn-v1

@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  SqsQueueName:
+    Type: String
+
+
+Resources:
+
+  SqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Join
+        - '-'
+        - - Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-sqs-queue-name-prefix-v1
+          - !Ref SqsQueueName
+      KmsMasterKeyId:
+        Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-kms-key-alias-v1
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 15
+
+  SqsQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref SqsQueue
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sqs:SendMessage
+            Principal: '*'
+            Resource: !GetAtt SqsQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn:
+                  Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-sns-topic-arn-v1
+
+  SnsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn:
+        Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-sns-topic-arn-v1
+      Endpoint: !GetAtt SqsQueue.Arn
+      Protocol: sqs
+      RawMessageDelivery: 'true'
+
+  EventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      BatchSize: 1
+      Enabled: true
+      EventSourceArn: !GetAtt SqsQueue.Arn
+      FunctionName:
+        Fn::ImportValue: !Sub ${Environment}-enchanted-brain-callback-function-arn-v1
+
+
+Outputs:
+
+  EventSourceMappingUuid:
+    Value: !Ref EventSourceMapping
+
+  SnsSubscriptionArn:
+    Value: !Ref SnsSubscription
+
+  SqsQueueUrl:
+    Value: !Ref SqsQueue
