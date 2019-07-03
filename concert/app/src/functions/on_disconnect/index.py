@@ -1,5 +1,6 @@
 import boto3
 import os
+import time
 
 
 TABLE_NAME = os.environ.get("TABLE_NAME")
@@ -13,11 +14,25 @@ table = dynamodb.Table(TABLE_NAME)
 
 
 def handler(event, context):
-    connection_id = event["requestContext"]["connectionId"]
-    resources = table.get_item(Key={"userId": "CONN${}".format(connection_id)})["Item"]
+    connection_key = {
+        "userId": "CONN${}".format(event["requestContext"]["connectionId"])
+    }
+    resources = table.get_item(Key=connection_key)["Item"]
 
+    client_lambda.update_event_source_mapping(
+        UUID=resources["mapping_uuid"], Enabled=False
+    )
     client_sns.unsubscribe(SubscriptionArn=resources["subscription_arn"])
     client_sqs.delete_queue(QueueUrl=resources["queue_url"])
-    client_lambda.delete_event_source_mapping(UUID=resources["mapping_uuid"])
+
+    for i in range(5):
+        try:
+            client_lambda.delete_event_source_mapping(UUID=resources["mapping_uuid"])
+            break
+        except Exception as e:
+            print(e)
+            time.sleep(2 ** i)
+
+    table.delete_item(Key=connection_key)
 
     return {"statusCode": 204}

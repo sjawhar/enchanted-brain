@@ -1,4 +1,5 @@
 import boto3
+import json
 import os
 
 
@@ -19,7 +20,27 @@ def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
     queue_arn = "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1])
 
-    queue_url = client_sqs.create_queue(QueueName=queue_arn.split(":")[-1])["QueueUrl"]
+    queue_url = client_sqs.create_queue(
+        QueueName=queue_arn.split(":")[-1],
+        Attributes={
+            "Policy": json.dumps(
+                {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "sqs:SendMessage",
+                            "Resource": queue_arn,
+                            "Principal": "*",
+                            "Condition": {
+                                "ArnEquals": {"aws:SourceArn": CALLBACK_SNS_TOPIC_ARN}
+                            },
+                        }
+                    ],
+                }
+            )
+        },
+    )["QueueUrl"]
     mapping_uuid = client_lambda.create_event_source_mapping(
         EventSourceArn=queue_arn,
         FunctionName=CALLBACK_FUNCTION_ARN,
