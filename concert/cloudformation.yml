@@ -51,6 +51,7 @@ Globals:
       Variables:
         EVENT_NAME: !Ref EventName
         DYNAMODB_ENDPOINT: ''
+        PYTHONPATH: /var/task/vendor:/opt/python:/var/runtime
 
 Resources:
 
