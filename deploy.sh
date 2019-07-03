@@ -58,6 +58,7 @@ do
 
   mv "Pipfile.${PACKAGE_NAME}.bak" "./${PACKAGE_NAME}/Pipfile"
   mv "Pipfile.${PACKAGE_NAME}.lock.bak" "./${PACKAGE_NAME}/Pipfile.lock"
+  rm -r "./${PACKAGE_NAME}/vendor"
   popd
 done
 
@@ -67,8 +68,8 @@ aws cloudformation deploy \
   --stack-name "${ENVIRONMENT}-enchanted-brain" \
   $REGION_FLAG \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-  --tags "threatspan-environment=${ENVIRONMENT}" \
-    "threatspan-system=enchanted-brain" \
+  --tags "environment=${ENVIRONMENT}" \
+    "system=enchanted-brain" \
   --parameter-overrides "Environment=${ENVIRONMENT}" \
   "${@:3}"
 
