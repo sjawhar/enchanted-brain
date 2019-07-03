@@ -1,5 +1,6 @@
 import os
-import requests
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 websocket_uri = "wss://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod"
 
@@ -13,8 +14,11 @@ def handler(event, context):
         source_arn = record["eventSourceARN"]
         connectionId = source_arn.split("callback-")[1]
         body = record["body"]
-        r = requests.post(websocket_uri + "/@connections/" + connectionId, data=body)
-
+        request = Request(
+            websocket_uri + "/@connections/" + connectionId, urlencode(body).encode()
+        )
+        response = urlopen(request).read().decode()
+        print(response)
     return {"statusCode": 204}
 
 
