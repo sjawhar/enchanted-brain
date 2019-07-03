@@ -1,13 +1,16 @@
 import boto3
 import os
-import time
+from enchanted_brain.attributes import (
+    ATTR_CONNECTION_STACK_NAME,
+    ATTR_RECORD_ID,
+    ATTR_RECORD_TYPE,
+    RECORD_TYPE_CONNECTION,
+)
 
 
 TABLE_NAME = os.environ.get("TABLE_NAME")
 
-client_lambda = boto3.client("lambda")
-client_sns = boto3.client("sns")
-client_sqs = boto3.client("sqs")
+cloudformation = boto3.client("cloudformation")
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(TABLE_NAME)
@@ -15,24 +18,12 @@ table = dynamodb.Table(TABLE_NAME)
 
 def handler(event, context):
     connection_key = {
-        "userId": "CONN${}".format(event["requestContext"]["connectionId"])
+        ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
+        ATTR_RECORD_ID: event["requestContext"]["connectionId"],
     }
-    resources = table.get_item(Key=connection_key)["Item"]
 
-    client_lambda.update_event_source_mapping(
-        UUID=resources["mapping_uuid"], Enabled=False
-    )
-    client_sns.unsubscribe(SubscriptionArn=resources["subscription_arn"])
-    client_sqs.delete_queue(QueueUrl=resources["queue_url"])
-
-    for i in range(5):
-        try:
-            client_lambda.delete_event_source_mapping(UUID=resources["mapping_uuid"])
-            break
-        except Exception as e:
-            print(e)
-            time.sleep(2 ** i)
-
+    stack_name = table.get_item(Key=connection_key)["Item"][ATTR_CONNECTION_STACK_NAME]
+    cloudformation.delete_stack(StackName=stack_name)
     table.delete_item(Key=connection_key)
 
     return {"statusCode": 204}
