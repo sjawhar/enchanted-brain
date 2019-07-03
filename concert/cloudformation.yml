@@ -61,15 +61,15 @@ Resources:
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
-        - AttributeName: record_type
+        - AttributeName: recordType
           AttributeType: S
-        - AttributeName: record_id
+        - AttributeName: recordId
           AttributeType: S
       KeySchema:
-        - AttributeName: record_type
+        - AttributeName: recordType
           KeyType: HASH
-        - AttributeName: record_id
-          KeyType: range
+        - AttributeName: recordId
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
