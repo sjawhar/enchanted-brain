@@ -4,6 +4,7 @@ from urllib import parse
 # this will look like https://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod/@connections
 websocket_conections_url = os.environ["API_URL"]
 
+
 def handler(event, context):
 
     records = event["Records"]
@@ -11,7 +12,6 @@ def handler(event, context):
         source_arn = record["eventSourceARN"]
         connectionId = source_arn.split("callback-")[-1]
         body = record["body"]
-
 
         # ************* REQUEST VALUES *************
         method = "POST"
@@ -64,7 +64,17 @@ def handler(event, context):
         # Step 4: Create the canonical headers. Header names must be trimmed
         # and lowercase, and sorted in code point order from low to high.
         # Note that there is a trailing \n.
-        canonical_headers = "content-type:" + content_type + "\n" + "host:" + host + "\n" + "x-amz-date:" + amz_date + "\n"
+        canonical_headers = (
+            "content-type:"
+            + content_type
+            + "\n"
+            + "host:"
+            + host
+            + "\n"
+            + "x-amz-date:"
+            + amz_date
+            + "\n"
+        )
 
         # Step 5: Create the list of signed headers. This lists the headers
         # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -79,33 +89,71 @@ def handler(event, context):
         payload_hash = hashlib.sha256(request_parameters.encode("utf-8")).hexdigest()
 
         # Step 7: Combine elements to create canonical request
-        canonical_request = method + "\n" + canonical_uri + "\n" + canonical_querystring + "\n" + canonical_headers + "\n" + signed_headers + "\n" + payload_hash
+        canonical_request = (
+            method
+            + "\n"
+            + canonical_uri
+            + "\n"
+            + canonical_querystring
+            + "\n"
+            + canonical_headers
+            + "\n"
+            + signed_headers
+            + "\n"
+            + payload_hash
+        )
 
         # ************* TASK 2: CREATE THE STRING TO SIGN*************
         # Match the algorithm to the hashing algorithm you use, either SHA-1 or
         # SHA-256 (recommended)
         algorithm = "AWS4-HMAC-SHA256"
-        credential_scope = date_stamp + "/" + region + "/" + service + "/" + "aws4_request"
-        string_to_sign = algorithm + "\n" + amz_date + "\n" + credential_scope + "\n" + hashlib.sha256(
-            canonical_request.encode("utf-8")).hexdigest()
+        credential_scope = (
+            date_stamp + "/" + region + "/" + service + "/" + "aws4_request"
+        )
+        string_to_sign = (
+            algorithm
+            + "\n"
+            + amz_date
+            + "\n"
+            + credential_scope
+            + "\n"
+            + hashlib.sha256(canonical_request.encode("utf-8")).hexdigest()
+        )
         # ************* TASK 3: CALCULATE THE SIGNATURE *************
         # Create the signing key using the function defined above.
         signing_key = getSignatureKey(secret_key, date_stamp, region, service)
 
         # Sign the string_to_sign using the signing_key
-        signature = hmac.new(signing_key, (string_to_sign).encode("utf-8"), hashlib.sha256).hexdigest()
+        signature = hmac.new(
+            signing_key, (string_to_sign).encode("utf-8"), hashlib.sha256
+        ).hexdigest()
 
         # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
         # Put the signature information in a header named Authorization.
-        authorization_header = algorithm + " " + "Credential=" + access_key + "/" + credential_scope + ", " + "SignedHeaders=" + signed_headers + ", " + "Signature=" + signature
+        authorization_header = (
+            algorithm
+            + " "
+            + "Credential="
+            + access_key
+            + "/"
+            + credential_scope
+            + ", "
+            + "SignedHeaders="
+            + signed_headers
+            + ", "
+            + "Signature="
+            + signature
+        )
         # For DynamoDB, the request can include any headers, but MUST include "host", "x-amz-date",
         # "x-amz-target", "content-type", and "Authorization". Except for the authorization
         # header, the headers must be included in the canonical_headers and signed_headers values, as
         # noted earlier. Order here is not significant.
         # # Python note: The "host" header is added automatically by the Python "requests" library.
-        headers = {"Content-Type": content_type,
-                   "X-Amz-Date": amz_date,
-                   "Authorization": authorization_header}
+        headers = {
+            "Content-Type": content_type,
+            "X-Amz-Date": amz_date,
+            "Authorization": authorization_header,
+        }
 
         r = requests.post(endpoint, data=request_parameters, headers=headers)
         print(r.text)
