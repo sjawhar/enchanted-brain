@@ -8,7 +8,7 @@ black = "==19.3b0"
 boto3 = "==1.9.42"
 botocore = "==1.12.42"
 pytest = "~=4.5.0"
-request = "==2019.4.13"
+requests = "==2.22.0"
 
 [packages]
 
