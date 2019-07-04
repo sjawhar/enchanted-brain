@@ -17,27 +17,9 @@ fi
 S3_BUCKET="thecybermonk-cloudformation-artifacts"
 OUTPUT_TEMPLATE="cloudformation-generated.yml"
 
-for PACKAGE_DIR in $(find concert/app/src \
-  -type d -name lib -prune \
-  -o -type f -name Pipfile \
-  -exec dirname {} \;
-)
-do
-  pushd "${PACKAGE_DIR}"
-  PACKAGE_NAME="$(basename "${PACKAGE_DIR}")"
-
-  rm -rf vendor
-  mkdir vendor
-
-  pipenv lock -r > requirements.txt
-  pip install --target vendor -r requirements.txt
-  rm requirements.txt
-
-  mv Pipfile "../Pipfile.${PACKAGE_NAME}.bak"
-  mv Pipfile.lock "../Pipfile.${PACKAGE_NAME}.lock.bak"
-
-  popd
-done
+pushd concert
+./pre-package.sh
+popd
 
 echo "Packaging..."
 aws cloudformation package \
@@ -47,20 +29,9 @@ aws cloudformation package \
   --s3-prefix "${ENVIRONMENT}/enchanted-brain" \
   $REGION_FLAG
 
-for PACKAGE_FILE in $(find concert/app/src \
-  -type d -name vendor -prune \
-  -o -type f -name 'Pipfile.*.lock.bak' \
-  -print
-)
-do
-  pushd "$(dirname "${PACKAGE_FILE}")"
-  PACKAGE_NAME="$(basename "${PACKAGE_FILE}" | awk -F '.' '{ print $2; }')"
-
-  mv "Pipfile.${PACKAGE_NAME}.bak" "./${PACKAGE_NAME}/Pipfile"
-  mv "Pipfile.${PACKAGE_NAME}.lock.bak" "./${PACKAGE_NAME}/Pipfile.lock"
-  rm -r "./${PACKAGE_NAME}/vendor"
-  popd
-done
+pushd concert
+./post-package.sh
+popd
 
 echo "Deploying..."
 aws cloudformation deploy \
