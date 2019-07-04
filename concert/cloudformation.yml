@@ -52,7 +52,6 @@ Globals:
         APP_ENVIRONMENT: !Ref Environment
         EVENT_NAME: !Ref EventName
         DYNAMODB_ENDPOINT: ''
-        PYTHONPATH: /var/task/vendor:/opt/python:/var/runtime
 
 Resources:
 
@@ -141,10 +140,12 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-callback
       CodeUri: app/src/functions/callback
+      Layers:
+        - !Ref LambdaLayer
       Environment:
         Variables:
           API_URL: !Sub
-            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
+            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
         - SQSPollerPolicy:
