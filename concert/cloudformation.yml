@@ -191,7 +191,9 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          CLOUDFORMATION_STACK_NAME_PREFIX: !Sub ${Environment}-enchanted-brain-callback
+          CALLBACK_FUNCTION_ARN: !Ref CallbackFunction.Alias
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
@@ -199,13 +201,7 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action: cloudformation:CreateStack
-              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
-            - Effect: Allow
-              Action:
-                - sqs:CreateQueue
-                - sqs:GetQueueAttributes
-                - sqs:SetQueueAttributes
+              Action: sqs:CreateQueue
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action: sns:Subscribe
@@ -216,9 +212,7 @@ Resources:
                 ForAnyValue:StringLike:
                   sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
-              Action:
-                - lambda:CreateEventSourceMapping
-                - lambda:GetEventSourceMapping
+              Action: lambda:CreateEventSourceMapping
               Resource: '*'
               Condition:
                 ForAnyValue:ArnEquals:
@@ -251,26 +245,13 @@ Resources:
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
-              Action: cloudformation:DeleteStack
-              Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Environment}-enchanted-brain-callback-*
-            - Effect: Allow
-              Action:
-                - sqs:DeleteQueue
-                - sqs:GetQueueAttributes
-                - sqs:SetQueueAttributes
+              Action: sqs:DeleteQueue
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
-              Action:
-                - sns:Unsubscribe
-                - lambda:GetEventSourceMapping
+              Action: sns:Unsubscribe
               Resource: '*'
             - Effect: Allow
-              Action: sns:ListSubscriptionsByTopic
-              Resource: !Ref CallbackSnsTopic
-            - Effect: Allow
-              Action:
-                - lambda:DeleteEventSourceMapping
-                - lambda:UpdateEventSourceMapping
+              Action: lambda:DeleteEventSourceMapping
               Resource: '*'
               Condition:
                 ForAnyValue:ArnEquals:
@@ -387,18 +368,3 @@ Outputs:
 
   WebSocketURI:
     Value: !Sub wss://${Api}.execute-api.${AWS::Region}.amazonaws.com/${ApiStage}
-
-  CallbackKmsKeyAlias:
-    Value: !Ref CallbackKmsKeyAlias
-    Export:
-      Name: !Sub ${Environment}-enchanted-brain-callback-kms-key-alias-v1
-
-  CallbackSnsTopicArn:
-    Value: !Ref CallbackSnsTopic
-    Export:
-      Name: !Sub ${Environment}-enchanted-brain-callback-sns-topic-arn-v1
-
-  CallbackFunctionArn:
-    Value: !Ref CallbackFunction.Alias
-    Export:
-      Name: !Sub ${Environment}-enchanted-brain-callback-function-arn-v1
