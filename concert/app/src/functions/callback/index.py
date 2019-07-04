@@ -108,7 +108,7 @@ def handler(event, context):
                    "Authorization": authorization_header}
 
         r = requests.post(endpoint, data=request_parameters, headers=headers)
-        print(r)
+        print(r.text)
     return {"statusCode": 204}
 
 
