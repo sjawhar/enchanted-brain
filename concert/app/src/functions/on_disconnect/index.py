@@ -1,5 +1,6 @@
 import boto3
 import os
+import time
 from enchanted_brain.attributes import (
     ATTR_CONNECTION_LAMBDA_MAPPING_UUID,
     ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN,
