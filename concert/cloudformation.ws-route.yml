@@ -5,6 +5,10 @@ Parameters:
   ApiId:
     Type: String
 
+  AuthorizerId:
+    Type: String
+    Default: ''
+
   CreateRouteResponse:
     Type: String
     AllowedValues:
@@ -20,6 +24,8 @@ Parameters:
 
 
 Conditions:
+
+  IsAuthorized: !Not [!Equals [!Ref AuthorizerId, '']]
 
   IsCreateRouteResponse: !Equals [!Ref CreateRouteResponse, 'yes']
 
@@ -40,6 +46,7 @@ Resources:
       FunctionName: !Ref FunctionArn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiId}/*
 
   Route:
     Type: AWS::ApiGatewayV2::Route
@@ -50,7 +57,14 @@ Resources:
         - IsCreateRouteResponse
         - $default
         - !Ref AWS::NoValue
-      AuthorizationType: NONE #TODO
+      AuthorizationType: !If
+        - IsAuthorized
+        - CUSTOM
+        - NONE
+      AuthorizerId: !If
+        - IsAuthorized
+        - !Ref AuthorizerId
+        - !Ref AWS::NoValue
       Target: !Sub integrations/${Integration}
 
   RouteResponse:
