@@ -1,4 +1,5 @@
 import boto3
+import json
 import os
 
 API_URL = os.environ.get("API_URL")
@@ -11,5 +12,5 @@ def handler(event, context):
     for record in event["Records"]:
         connection_id = record["eventSourceARN"].split("-")[-1] + "="
         apigateway.post_to_connection(
-            Data=str.encode(record["body"]), ConnectionId=connection_id
+            Data=json.dumps(record["body"]), ConnectionId=connection_id
         )
