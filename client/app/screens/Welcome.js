@@ -8,6 +8,7 @@ class WelcomeScreen extends Component {
   constructor(props) {
     super(props);
     const { navigation } = props;
+    concertApi.connect('idToken');
     concertApi.on("SHOW_COLOR_PICKER", stream => {
       navigation.navigate("Colors"); // temporary
     });
