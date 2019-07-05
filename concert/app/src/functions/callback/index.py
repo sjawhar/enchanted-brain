@@ -11,6 +11,4 @@ def handler(event, context):
 
     for record in event["Records"]:
         connection_id = record["eventSourceARN"].split("-")[-1] + "="
-        apigateway.post_to_connection(
-            Data=json.dumps(record["body"]), ConnectionId=connection_id
-        )
+        apigateway.post_to_connection(Data=record["body"], ConnectionId=connection_id)
