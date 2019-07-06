@@ -8,11 +8,15 @@ import concertApi from "../api/concertApi";
 class ColorsScreen extends Component {
   handleChoice = color => () => {
     console.log(`Color choice made. Emitting color choice ${color}`);
-    concertApi.emit("CHOICE_MADE", {
-      choiceType: "CHOICE_COLOR",
-      choice: color,
-      timestamp: new Date().toString()
-    });
+    concertApi.send(JSON.stringify({
+      event: 'CHOICE_MADE',
+      data: {
+        choiceType: "CHOICE_COLOR",
+        choice: color,
+        timestamp: new Date().toString() // temporary
+      }
+    }));
+    this.props.navigation.goBack()
   };
 
   render() {
