@@ -2,8 +2,6 @@ import boto3
 import json
 import os
 
-# from enchanted_brain.attributes import ATTR_USER_ID
-
 """
 Processes websocket API messages from API Gateway
 """
@@ -14,10 +12,13 @@ sns = boto3.client("sns")
 
 
 def handler(event, context):
-    # print(ATTR_USER_ID)
 
-    message = event["body"]
+    message = json.loads(event["body"])["data"]
+    message["userId"] = "userId"
+
     response = sns.publish(
-        TopicArn=SNS_CHOICE_MADE_ARN, Message=message, MessageStructure="string"
+        TopicArn=SNS_CHOICE_MADE_ARN,
+        Message=json.dumps(message),
+        MessageStructure="string",
     )
     return {"body": "this is a response"}

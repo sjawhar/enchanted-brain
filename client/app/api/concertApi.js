@@ -23,8 +23,11 @@ const connect = idToken => {
     ws.send(
       JSON.stringify({
         event: "CHOICE_MADE",
-        choiceType: "CHOICE_COLOR",
-        color: "COLOR_BLUE"
+        data: {
+          choiceType: "CHOICE_COLOR",
+          choice: "COLOR_BLUE",
+          timestamp: new Date().toISOString(),
+        },
       })
     );
     console.log("MESSAGE SENT.");
