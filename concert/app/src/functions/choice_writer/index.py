@@ -43,6 +43,7 @@ choice_type_to_choice_key = {
 
 
 def handler(event, context):
+    print(event)
     update_args = get_update_args(event)
     table.update_item(**update_args)
     return {"statusCode": 204}
@@ -50,7 +51,7 @@ def handler(event, context):
 
 def get_update_args(event):
     choice_data = json.loads(event["Records"][0]["Sns"]["Message"])
-    record_id = choice_data["userId"]
+    record_id = "userId"
     choice_type = choice_data["choiceType"]
     choice = choice_data["choice"]
     timestamp = choice_data["timestamp"]
