@@ -21,4 +21,4 @@ def handler(event, context):
         Message=json.dumps(message),
         MessageStructure="string",
     )
-    return {"body": "this is a response"}
+    return {"statusCode": 204}
