@@ -34,6 +34,7 @@ const connect = idToken => {
     try {
       const { event, data } = JSON.parse(message.data);
       if (event === 'EVENT_STAGE_CHANGED') {
+        console.log('emitting SHOW_COLOR_PICKER event')
         events.emit('SHOW_COLOR_PICKER');
       }
     } catch (error) {
@@ -62,4 +63,12 @@ const disconnect = () => {
   ws.close();
 }
 
-export default Object.assign(events, { connect, disconnect });
+const send = message => {
+  if (!ws) {
+    return false
+  }
+
+  ws.send(message)
+}
+
+export default Object.assign(events, { connect, disconnect, send });

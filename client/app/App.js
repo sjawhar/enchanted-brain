@@ -128,7 +128,6 @@ const theme = {
 
 class App extends React.Component {
   render() {
-    console.log("Rendering app....");
     return (
       <PaperProvider theme={theme}>
         <View style={styles.container}>
