@@ -53,7 +53,7 @@ def handler(event, context):
 
 
 def get_update_args(event):
-    choice_data = json.loads(event["Records"][0]["Sns"]["Message"])["data"]
+    choice_data = json.loads(event["Records"][0]["Sns"]["Message"])
     record_id = "userId"
     choice_type = choice_data["choiceType"]
     choice = choice_data["choice"]
