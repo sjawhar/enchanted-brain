@@ -6,13 +6,15 @@ from enchanted_brain.attributes import (
     ATTR_CHOICE_TYPE,
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
+    ATTR_CHOICE_VALUE_EMOTION_TYPE,
     ATTR_CHOICE_VALUE_CHILLS,
     ATTR_CHOICE_VALUE_IMAGERY,
     ATTR_RECORD_ID,
     ATTR_RECORD_TYPE,
     CHOICE_CHILLS,
     CHOICE_COLOR,
-    CHOICE_EMOTION,
+    CHOICE_EMOTION_AGITATION,
+    CHOICE_EMOTION_HAPPINESS,
     CHOICE_IMAGERY,
     RECORD_TYPE_CHOICE,
 )
@@ -36,7 +38,8 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 choice_type_to_choice_key = {
     CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
-    CHOICE_EMOTION: ATTR_CHOICE_VALUE_EMOTION,
+    CHOICE_EMOTION_AGITATION: ATTR_CHOICE_VALUE_EMOTION,
+    CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
     CHOICE_IMAGERY: ATTR_CHOICE_VALUE_IMAGERY,
 }
@@ -50,8 +53,8 @@ def handler(event, context):
 
 
 def get_update_args(event):
-    choice_data = json.loads(event["Records"][0]["Sns"]["Message"])
-    record_id = choice_data["userId"]
+    choice_data = json.loads(event["Records"][0]["Sns"]["Message"])["data"]
+    record_id = "userId"
     choice_type = choice_data["choiceType"]
     choice = choice_data["choice"]
     timestamp = choice_data["timestamp"]
@@ -72,5 +75,15 @@ def get_update_args(event):
     if choice_type != CHOICE_IMAGERY:
         update_args["UpdateExpression"] = "SET #choice_key.#timestamp = :choice_value"
         update_args["ExpressionAttributeNames"]["#timestamp"] = timestamp
-
+    if (
+        choice_type == CHOICE_EMOTION_AGITATION
+        or choice_type == CHOICE_EMOTION_HAPPINESS
+    ):
+        emotion_type = choice_type.split("_")[-1]
+        update_args["UpdateExpression"] += ", #emotionType = :emotionType"
+        update_args["ExpressionAttributeNames"][
+            "#emotionType"
+        ] = ATTR_CHOICE_VALUE_EMOTION_TYPE
+        update_args["ExpressionAttributeVales"][":emotionType"] = emotion_type
+    print(update_args)
     return update_args
