@@ -332,6 +332,7 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
