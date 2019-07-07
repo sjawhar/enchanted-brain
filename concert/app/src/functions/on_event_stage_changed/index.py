@@ -17,7 +17,7 @@ def handler(event, context):
         Message=json.dumps(message),
         MessageStructure="string",
         MessageAttributes={
-            "connection_type": {"DataType": "string", "StringValue": "GLOBAL"}
+            "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
         },
     )
     return {"statusCode": 204}
