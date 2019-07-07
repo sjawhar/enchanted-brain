@@ -13,7 +13,7 @@ class ColorsScreen extends Component {
       data: {
         choiceType: "CHOICE_COLOR",
         choice: color,
-        timestamp: new Date().toString() // temporary
+        timestamp: new Date().toISOString() // temporary
       }
     }));
     this.props.navigation.goBack()
