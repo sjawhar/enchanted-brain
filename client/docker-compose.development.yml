@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+
+  client:
+    image: node:10
+    container_name: enchanted-brain
+    environment:
+      REACT_NATIVE_PACKAGER_HOSTNAME:
+    volumes:
+      - ./app:/app
+    ports:
+      - 19000:19000
+      - 19001:19001
+      - 19002:19002
+    working_dir: /app
+    command: [npm, start]

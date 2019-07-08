@@ -25,7 +25,6 @@ docker-compose -f docker-compose.util.yml run --rm pipenv run pytest [OPTIONS]
 ```bash
 docker-compose -f docker-compose.development.yml run --rm invoke-lambda $EVENT_FILE $FUNCTION_NAME
 ```
-**NOTE**: `$EVENT_FILE` should be specified from the repo root (e.g. `lambdas/event.local.json`).
 
 ## Tips
 * Useful bash aliases:

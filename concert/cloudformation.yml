@@ -166,7 +166,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        FunctionName: !Ref OnConnectFunction
         FunctionArn: !Ref OnConnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Connect, Key]
 
@@ -191,7 +190,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        FunctionName: !Ref OnDisconnectFunction
         FunctionArn: !Ref OnDisconnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Disconnect, Key]
 
@@ -221,7 +219,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        FunctionName: !Ref OnChoiceMadeFunction
         FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
 
@@ -244,7 +241,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        FunctionName: !Ref OnEventStageChangedFunction
         FunctionArn: !Ref OnEventStageChangedFunction.Alias
         RouteKey: !FindInMap [RouteKeys, EventStageChanged, Key]
 
