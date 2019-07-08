@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { SafeAreaView, Text } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
+import { Auth } from "aws-amplify";
 
 import concertApi from "../api/concertApi";
 
@@ -8,7 +9,9 @@ class WelcomeScreen extends Component {
   constructor(props) {
     super(props);
     const { navigation } = props;
-    concertApi.connect('idToken');
+    Auth.currentSession().then(session => {
+      concertApi.connect(session.getIdToken().getJwtToken());
+    });
     concertApi.on("SHOW_COLOR_PICKER", stream => {
       navigation.navigate("Colors"); // temporary
     });
