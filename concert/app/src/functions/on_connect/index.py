@@ -1,15 +1,17 @@
 import boto3
 import os
 import json
+from boto3.dynamodb.conditions import Attr
+from botocore.exceptions import ClientError
 from datetime import datetime
 from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_CHILLS,
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
-    ATTR_CONNECTION_CREATED_AT,
     ATTR_CONNECTION_LAMBDA_MAPPING_UUID,
     ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN,
     ATTR_CONNECTION_SQS_QUEUE_URL,
+    ATTR_CREATED_AT,
     ATTR_RECORD_ID,
     ATTR_RECORD_TYPE,
     RECORD_TYPE_CHOICE,
@@ -29,27 +31,10 @@ client_sqs = boto3.client("sqs")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
-CHOICE_VALUE_FIELDS = {
-    "#chills": ATTR_CHOICE_VALUE_CHILLS,
-    "#color": ATTR_CHOICE_VALUE_COLOR,
-    "#emotion": ATTR_CHOICE_VALUE_EMOTION,
-}
-CHOICE_UPDATE_ITEM_ARGS = {
-    "UpdateExpression": "SET "
-    + ", ".join(
-        [
-            "{} = attribute_not_exists({}, :empty_map)".format(field, field)
-            for field in CHOICE_VALUE_FIELDS
-        ]
-    ),
-    "ExpressionAttributeNames": CHOICE_VALUE_FIELDS,
-    "ExpressionAttributeValues": {":empty_map": {}},
-}
-
 
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
-    user_id = event["requestContext"]["principalId"]
+    user_id = event["requestContext"]["authorizer"]["principalId"]
 
     queue_arn = "-".join([CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1]])
     queue_url = client_sqs.create_queue(
@@ -91,13 +76,26 @@ def handler(event, context):
         Item={
             ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
             ATTR_RECORD_ID: connection_id,
-            ATTR_CONNECTION_CREATED_AT: datetime.now().isoformat(),
+            ATTR_CREATED_AT: datetime.now().isoformat(),
             ATTR_CONNECTION_LAMBDA_MAPPING_UUID: mapping_uuid,
             ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN: subscription_arn,
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )
-    table.update_item(
-        Key={ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: user_id},
-        **CHOICE_UPDATE_ITEM_ARGS,
-    )
+    try:
+        table.put_item(
+            Item={
+                ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE,
+                ATTR_RECORD_ID: user_id,
+                ATTR_CREATED_AT: datetime.now().isoformat(),
+                ATTR_CHOICE_VALUE_CHILLS: {},
+                ATTR_CHOICE_VALUE_COLOR: {},
+                ATTR_CHOICE_VALUE_EMOTION: {},
+            },
+            ConditionExpression=Attr(ATTR_RECORD_TYPE).not_exists(),
+        )
+    except ClientError as e:
+        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+            raise
+
+    return {"statusCode": 204}
