@@ -46,7 +46,6 @@ choice_type_to_choice_key = {
 
 
 def handler(event, context):
-    print(event)
     update_args = get_update_args(event)
     table.update_item(**update_args)
     return {"statusCode": 204}
