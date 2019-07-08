@@ -114,7 +114,7 @@ Resources:
         - - !Sub arn:aws:apigateway:${AWS::Region}:lambda:path
           - !Sub /2015-03-31/functions/${AuthorizerFunction.Alias}/invocations
       IdentitySource:
-        - route.request.querystring.token
+        - route.request.header.Authorization
 
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
@@ -335,6 +335,8 @@ Resources:
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
+      - ApiAuthorizer
+      - AuthorizerPermission
       - OnChoiceMadeFunctionAliaslive
       - OnChoiceMadeRoute
       - OnConnectFunctionAliaslive
