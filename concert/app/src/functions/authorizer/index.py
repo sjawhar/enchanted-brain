@@ -6,13 +6,23 @@ API_ARN = os.environ.get("API_ARN")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
 COGNITO_ADMIN_GROUP_NAME = os.environ.get("COGNITO_ADMIN_GROUP_NAME")
 
+# TODO:
+# Verify JWT
+# Check that user is in the concert group
+# Write method-specific policy based on user groups (admin, vis, etc.)
+
 
 def handler(event, context):
     token = event["headers"]["Authorization"]
-    # payload = json.loads(base64.decode(token.split('.')[1]))
+    payload = {"sub": token}
+
+    try:
+        payload = json.loads(base64.decode(token.split(".")[1]))
+    except Exception as e:
+        print(e)
 
     return {
-        "principalId": token,
+        "principalId": payload["sub"],
         "policyDocument": {
             "Version": "2012-10-17",
             "Statement": [
@@ -23,5 +33,4 @@ def handler(event, context):
                 }
             ],
         },
-        "context": {"hello-person": "stringval"},
     }
