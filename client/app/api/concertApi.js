@@ -33,6 +33,9 @@ const connect = idToken => {
     console.log("MESSAGE SENT.");
   };
   ws.onmessage = message => {
+    if (!message || !message.data) {
+      return;
+    }
     console.log("MESSAGE", message.data);
     try {
       const { event, data } = JSON.parse(message.data);
