@@ -36,7 +36,7 @@ if DYNAMODB_REGION:
 dynamodb = boto3.resource("dynamodb", **dynamodb_args)
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
-choice_type_to_choice_key = {
+CHOICE_TYPE_KEYS = {
     CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
     CHOICE_EMOTION_AGITATION: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
@@ -59,10 +59,10 @@ def get_update_args(event):
     timestamp = choice_data["timestamp"]
 
     # If choice type is not recognized, raise exception to indicate failure to SNS
-    if choice_type not in choice_type_to_choice_key:
+    if choice_type not in CHOICE_TYPE_KEYS:
         raise ValueError
 
-    choice_key = choice_type_to_choice_key[choice_type]
+    choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args = {
         "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: record_id},
         "UpdateExpression": "SET #choice_key = :choice_value",
