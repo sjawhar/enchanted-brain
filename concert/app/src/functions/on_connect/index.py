@@ -35,11 +35,10 @@ CHOICE_VALUE_FIELDS = {
     "#emotion": ATTR_CHOICE_VALUE_EMOTION,
 }
 CHOICE_UPDATE_ITEM_ARGS = {
-    "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: user_id},
     "UpdateExpression": "SET "
     + ", ".join(
         [
-            "{}=attribute_not_exists({}, :empty_map)".format(field)
+            "{} = attribute_not_exists({}, :empty_map)".format(field, field)
             for field in CHOICE_VALUE_FIELDS
         ]
     ),
@@ -98,4 +97,7 @@ def handler(event, context):
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )
-    table.update_item(**CHOICE_UPDATE_ITEM_ARGS)
+    table.update_item(
+        Key={ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: user_id},
+        **CHOICE_UPDATE_ITEM_ARGS,
+    )
