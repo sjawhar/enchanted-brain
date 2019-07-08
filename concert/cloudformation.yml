@@ -74,8 +74,6 @@ Resources:
         WriteCapacityUnits: 1
       SSESpecification:
         SSEEnabled: True
-      StreamSpecification:
-        StreamViewType: NEW_IMAGE
 
   Api:
     Type: AWS::ApiGatewayV2::Api
@@ -190,21 +188,6 @@ Resources:
       FunctionName: !Ref CallbackFunction.Alias
       Principal: sqs.amazonaws.com
       SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
-
-  PublisherFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-publisher
-      CodeUri: app/src/functions/publisher
-      Events:
-        StreamEvent:
-          Type: DynamoDB
-          Properties:
-            Stream: !GetAtt Table.StreamArn
-            StartingPosition: TRIM_HORIZON
-      Policies:
-        - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackSnsTopic.TopicName
 
   OnConnectFunction:
     Type: AWS::Serverless::Function
