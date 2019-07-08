@@ -75,15 +75,13 @@ def get_update_args(event):
     if choice_type != CHOICE_IMAGERY:
         update_args["UpdateExpression"] = "SET #choice_key.#timestamp = :choice_value"
         update_args["ExpressionAttributeNames"]["#timestamp"] = timestamp
-    if (
-        choice_type == CHOICE_EMOTION_AGITATION
-        or choice_type == CHOICE_EMOTION_HAPPINESS
-    ):
+
+    if choice_type in [CHOICE_EMOTION_AGITATION, CHOICE_EMOTION_HAPPINESS]:
         emotion_type = choice_type.split("_")[-1]
-        update_args["UpdateExpression"] += ", #emotionType = :emotionType"
+        update_args["UpdateExpression"] += ", #emotion_type = :emotion_type"
         update_args["ExpressionAttributeNames"][
-            "#emotionType"
+            "#emotion_type"
         ] = ATTR_CHOICE_VALUE_EMOTION_TYPE
-        update_args["ExpressionAttributeVales"][":emotionType"] = emotion_type
-    print(update_args)
+        update_args["ExpressionAttributeValues"][":emotion_type"] = emotion_type
+
     return update_args

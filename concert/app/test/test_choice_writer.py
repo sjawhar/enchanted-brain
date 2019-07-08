@@ -7,7 +7,6 @@ dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 20
 
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
 song_id = os.environ["EVENT_NAME"]
-test_user_id = "user id"
 test_timestamp = "2019-05-14T21:20:03.000Z"
 
 # Test that color choice event results in DynamoDB write with expected parameters
@@ -24,7 +23,7 @@ def test_handler_color_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": "user id"},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "colors",
@@ -43,12 +42,12 @@ def test_handler_color_chosen():
 
 
 # Test that emotion choice event results in DynamoDB write with expected parameters
-def test_handler_emotion_chosen():
+def test_handler_emotion_happiness_chosen():
     event = {
         "Records": [
             {
                 "Sns": {
-                    "Message": '{"userId":"user id","choiceType":"CHOICE_EMOTION","choice":"sad","timestamp":"2019-05-14T21:20:03.000Z"}'
+                    "Message": '{"userId":"user id","choiceType":"CHOICE_EMOTION_HAPPINESS","choice":"sad","timestamp":"2019-05-14T21:20:03.000Z"}'
                 }
             }
         ]
@@ -56,13 +55,17 @@ def test_handler_emotion_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
-        "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
+        "Key": {"recordType": "CHOICE", "recordId": "user id"},
+        "UpdateExpression": "SET #choice_key.#timestamp = :choice_value, #emotion_type = :emotion_type",
         "ExpressionAttributeNames": {
             "#choice_key": "emotions",
+            "#emotion_type": "emotionType",
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": "sad"},
+        "ExpressionAttributeValues": {
+            ":choice_value": "sad",
+            ":emotion_type": "HAPPINESS",
+        },
         "ReturnValues": "NONE",
     }
 
@@ -88,7 +91,7 @@ def test_handler_imagery_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": "user id"},
         "UpdateExpression": "SET #choice_key = :choice_value",
         "ExpressionAttributeNames": {"#choice_key": "imagery"},
         "ExpressionAttributeValues": {":choice_value": "a sunset"},
@@ -117,7 +120,7 @@ def test_handler_chills_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": test_user_id},
+        "Key": {"recordType": "CHOICE", "recordId": "user id"},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "chills",
@@ -156,7 +159,7 @@ def test_handler_dynamo_error():
     with pytest.raises(Exception):
 
         event = {
-            "userId": test_user_id,
+            "userId": "user id",
             "choiceType": "CHOICE_COLOR",
             "choice": "chartreuse",
             "timestamp": test_timestamp,
