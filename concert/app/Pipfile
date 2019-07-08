@@ -5,8 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 black = "==19.3b0"
-boto3 = "==1.9.42"
-botocore = "==1.12.42"
+boto3 = "==1.9.182"
 pytest = "~=4.5.0"
 
 [packages]

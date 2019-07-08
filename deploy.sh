@@ -17,6 +17,10 @@ fi
 S3_BUCKET="thecybermonk-cloudformation-artifacts"
 OUTPUT_TEMPLATE="cloudformation-generated.yml"
 
+pushd concert
+./pre-package.sh
+popd
+
 echo "Packaging..."
 aws cloudformation package \
   --template-file cloudformation.yml \
@@ -25,14 +29,18 @@ aws cloudformation package \
   --s3-prefix "${ENVIRONMENT}/enchanted-brain" \
   $REGION_FLAG
 
+pushd concert
+./post-package.sh
+popd
+
 echo "Deploying..."
 aws cloudformation deploy \
   --template-file $OUTPUT_TEMPLATE \
   --stack-name "${ENVIRONMENT}-enchanted-brain" \
   $REGION_FLAG \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-  --tags "threatspan-environment=${ENVIRONMENT}" \
-    "threatspan-system=enchanted-brain" \
+  --tags "environment=${ENVIRONMENT}" \
+    "system=enchanted-brain" \
   --parameter-overrides "Environment=${ENVIRONMENT}" \
   "${@:3}"
 

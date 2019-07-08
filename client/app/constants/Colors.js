@@ -24,10 +24,10 @@ const sixBasicColorTerms = [
   "#743493",
   "#FFFFFF",
   "#A5A5A5",
-  Color("#A5A5A5")
-    .darken(0.5)
-    .rgb()
-    .string(),
+  // Color("#A5A5A5")
+  //   .darken(0.5)
+  //   .rgb()
+  //   .string(),
   "#000000"
 ];
 
@@ -86,10 +86,10 @@ const materialColorsWithGrayscale = [
   // greyscale
   "#FFFFFF",
   "#A5A5A5",
-  Color("#A5A5A5")
-    .darken(0.5)
-    .rgb()
-    .string(),
+  // Color("#A5A5A5")
+  //   .darken(0.5)
+  //   .rgb()
+  //   .string(),
   "#000000"
 ];
 
@@ -174,12 +174,28 @@ const hsluvColors = [
   "#000000"
 ];
 
+const hackathonColors = [
+  [[255, 0, 0], 0.5, 0.33],
+  [[255, 128, 0], 0.5, 0.3],
+  [[255, 255, 0], 0.5, 0.3],
+  [[0, 255, 0], 0.5, 0.4],
+  [[0, 0, 255], 0.5, 0.33],
+  [[255, 0, 255], 0.5, 0.33],
+  [[128, 128, 128], 1],
+].map(([rgb, lighten, darken]) => [
+  Color.rgb(rgb).lighten(lighten),
+  Color.rgb(rgb),
+  Color.rgb(rgb).darken(darken || lighten),
+]).flat()
+.map(color => color.rgb().string());
+
 export {
   materialColors,
   materialColorsWithGrayscale,
   sixBasicColorTerms,
   heringPrimaries,
-  hsluvColors
+  hsluvColors,
+  hackathonColors,
 };
 
 export default {

@@ -1,14 +1,10 @@
 import React, { Component } from "react";
-import { TouchableWithoutFeedback, View } from "react-native";
+import { View } from "react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
+import PropTypes from "prop-types";
 import Layout from "../../constants/Layout";
 
-import {
-  sixBasicColorTerms as basicColors,
-  materialColorsWithGrayscale as materialColors,
-  heringPrimaries,
-  hsluvColors
-} from "../../constants/Colors";
+import { hackathonColors } from "../../constants/Colors";
 
 import Hexagon from "./Hexagon";
 
@@ -35,7 +31,7 @@ const HEXAGON_MARGIN =
 const { triangleHeight } = getHexagonComponents(HEXAGON_WIDTH);
 const Y_OFFSET = triangleHeight * 0.8;
 
-class FourStaggeredHexagons extends Component {
+class ThreeStaggeredHexagons extends Component {
   _handleScreenPress = () => {
     this.setState({
       list: this.state.list === "basic" ? "material" : "basic"
@@ -43,10 +39,9 @@ class FourStaggeredHexagons extends Component {
   };
 
   render() {
-    // const colors = basicColors;
-    const colors = materialColors;
-    // const colors = heringPrimaries;
-    // const colors = hsluvColors;
+    const colors = hackathonColors;
+
+    const { onChoice } = this.props;
     return (
       <View style={styles.container}>
         <View style={[styles.row, styles.rowLeft, styles.firstRow]}>
@@ -56,24 +51,48 @@ class FourStaggeredHexagons extends Component {
               styles.lastHexagonContainerLeft
             ]}
           >
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[0]} />
+            <Hexagon
+              onPress={onChoice(colors[0])}
+              width={HEXAGON_WIDTH}
+              fill={colors[0]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[1]} />
+            <Hexagon
+              onPress={onChoice(colors[1])}
+              width={HEXAGON_WIDTH}
+              fill={colors[1]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[2]} />
+            <Hexagon
+              onPress={onChoice(colors[2])}
+              width={HEXAGON_WIDTH}
+              fill={colors[2]}
+            />
           </View>
         </View>
         <View style={[styles.row, styles.rowRight]}>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[3]} />
+            <Hexagon
+              onPress={onChoice(colors[3])}
+              width={HEXAGON_WIDTH}
+              fill={colors[3]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[4]} />
+            <Hexagon
+              onPress={onChoice(colors[4])}
+              width={HEXAGON_WIDTH}
+              fill={colors[4]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[5]} />
+            <Hexagon
+              onPress={onChoice(colors[5])}
+              width={HEXAGON_WIDTH}
+              fill={colors[5]}
+            />
           </View>
         </View>
         <View style={[styles.row, styles.rowLeft]}>
@@ -83,24 +102,48 @@ class FourStaggeredHexagons extends Component {
               styles.lastHexagonContainerLeft
             ]}
           >
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[6]} />
+            <Hexagon
+              onPress={onChoice(colors[6])}
+              width={HEXAGON_WIDTH}
+              fill={colors[6]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[7]} />
+            <Hexagon
+              onPress={onChoice(colors[7])}
+              width={HEXAGON_WIDTH}
+              fill={colors[7]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[8]} />
+            <Hexagon
+              onPress={onChoice(colors[8])}
+              width={HEXAGON_WIDTH}
+              fill={colors[8]}
+            />
           </View>
         </View>
         <View style={[styles.row, styles.rowRight]}>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[9]} />
+            <Hexagon
+              onPress={onChoice(colors[9])}
+              width={HEXAGON_WIDTH}
+              fill={colors[9]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[10]} />
+            <Hexagon
+              onPress={onChoice(colors[10])}
+              width={HEXAGON_WIDTH}
+              fill={colors[10]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[11]} />
+            <Hexagon
+              onPress={onChoice(colors[11])}
+              width={HEXAGON_WIDTH}
+              fill={colors[11]}
+            />
           </View>
         </View>
         <View style={[styles.row, styles.rowLeft]}>
@@ -110,60 +153,75 @@ class FourStaggeredHexagons extends Component {
               styles.lastHexagonContainerLeft
             ]}
           >
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[12]} />
+            <Hexagon
+              onPress={onChoice(colors[12])}
+              width={HEXAGON_WIDTH}
+              fill={colors[12]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[13]} />
+            <Hexagon
+              onPress={onChoice(colors[13])}
+              width={HEXAGON_WIDTH}
+              fill={colors[13]}
+            />
           </View>
           <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[14]} />
+            <Hexagon
+              onPress={onChoice(colors[14])}
+              width={HEXAGON_WIDTH}
+              fill={colors[14]}
+            />
           </View>
         </View>
 
         {/* Comment out below when showing Hering primaries */}
         <View style={[styles.row, styles.rowRight]}>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[15]} />
+            <Hexagon
+              onPress={onChoice(colors[15])}
+              width={HEXAGON_WIDTH}
+              fill={colors[15]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[16]} />
+            <Hexagon
+              onPress={onChoice(colors[16])}
+              width={HEXAGON_WIDTH}
+              fill={colors[16]}
+            />
           </View>
           <View style={styles.hexagonContainerRight}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[17]} />
+            <Hexagon
+              onPress={onChoice(colors[17])}
+              width={HEXAGON_WIDTH}
+              fill={colors[17]}
+            />
           </View>
         </View>
-
-        {/* Special grayscale row containing 4 hexagons */}
-        <View style={[styles.row, styles.grayscaleRow]}>
-          <Hexagon width={HEXAGON_WIDTH} fill={colors[18]} />
-
-          <Hexagon width={HEXAGON_WIDTH} fill={colors[19]} />
-
-          <Hexagon width={HEXAGON_WIDTH} fill={colors[20]} />
-
-          <Hexagon width={HEXAGON_WIDTH} fill={colors[21]} bordered />
+        <View style={[styles.row, styles.rowLeft]}>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[18])}
+              width={HEXAGON_WIDTH}
+              fill={colors[18]}
+            />
+          </View>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[19])}
+              width={HEXAGON_WIDTH}
+              fill={colors[19]}
+            />
+          </View>
+          <View style={styles.hexagonContainerLeft}>
+            <Hexagon
+              onPress={onChoice(colors[20])}
+              width={HEXAGON_WIDTH}
+              fill={colors[20]}
+            />
+          </View>
         </View>
-
-        {/* Regular final row (that happens to contain grayscale colors) */}
-        {/* <View style={[styles.row, styles.rowLeft]}>
-          <View
-            style={[
-              styles.hexagonContainerLeft,
-              styles.lastHexagonContainerLeft
-            ]}
-          >
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[18]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[19]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[20]} />
-          </View>
-          <View style={styles.hexagonContainerLeft}>
-            <Hexagon width={HEXAGON_WIDTH} fill={colors[21]} bordered />
-          </View>
-        </View> */}
       </View>
     );
   }
@@ -173,8 +231,7 @@ const styles = EStyleSheet.create({
   container: {
     width: WINDOW_WIDTH,
     height: "100%",
-    backgroundColor: "rgba(0,0,0,1)",
-    // backgroundColor: "rgb(95, 95, 95)",
+    backgroundColor: "rgb(95, 95, 95)",
     justifyContent: "center"
   },
 
@@ -208,4 +265,8 @@ const styles = EStyleSheet.create({
   }
 });
 
-export default FourStaggeredHexagons;
+ThreeStaggeredHexagons.propTypes = {
+  onChoice: PropTypes.func.isRequired
+};
+
+export default ThreeStaggeredHexagons;
