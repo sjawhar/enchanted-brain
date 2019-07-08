@@ -1,12 +1,18 @@
 import boto3
 import os
 import json
+from datetime import datetime
 from enchanted_brain.attributes import (
+    ATTR_CHOICE_VALUE_CHILLS,
+    ATTR_CHOICE_VALUE_COLOR,
+    ATTR_CHOICE_VALUE_EMOTION,
+    ATTR_CONNECTION_CREATED_AT,
     ATTR_CONNECTION_LAMBDA_MAPPING_UUID,
     ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN,
     ATTR_CONNECTION_SQS_QUEUE_URL,
     ATTR_RECORD_ID,
     ATTR_RECORD_TYPE,
+    RECORD_TYPE_CHOICE,
     RECORD_TYPE_CONNECTION,
 )
 
@@ -23,9 +29,29 @@ client_sqs = boto3.client("sqs")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
+CHOICE_VALUE_FIELDS = {
+    "#chills": ATTR_CHOICE_VALUE_CHILLS,
+    "#color": ATTR_CHOICE_VALUE_COLOR,
+    "#emotion": ATTR_CHOICE_VALUE_EMOTION,
+}
+CHOICE_UPDATE_ITEM_ARGS = {
+    "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: user_id},
+    "UpdateExpression": "SET "
+    + ", ".join(
+        [
+            "{}=attribute_not_exists({}, :empty_map)".format(field)
+            for field in CHOICE_VALUE_FIELDS
+        ]
+    ),
+    "ExpressionAttributeNames": CHOICE_VALUE_FIELDS,
+    "ExpressionAttributeValues": {":empty_map": {}},
+}
+
 
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
+    user_id = event["requestContext"]["principalId"]
+
     queue_arn = "-".join([CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1]])
     queue_url = client_sqs.create_queue(
         QueueName=queue_arn.split(":")[-1],
@@ -66,10 +92,10 @@ def handler(event, context):
         Item={
             ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
             ATTR_RECORD_ID: connection_id,
+            ATTR_CONNECTION_CREATED_AT: datetime.now().isoformat(),
             ATTR_CONNECTION_LAMBDA_MAPPING_UUID: mapping_uuid,
             ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN: subscription_arn,
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )
-
-    return {"statusCode": 204}
+    table.update_item(**CHOICE_UPDATE_ITEM_ARGS)
