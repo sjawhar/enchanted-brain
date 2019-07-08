@@ -4,12 +4,7 @@ import EStyleSheet from "react-native-extended-stylesheet";
 import PropTypes from "prop-types";
 import Layout from "../../constants/Layout";
 
-import {
-  sixBasicColorTerms as basicColors,
-  materialColorsWithGrayscale as materialColors,
-  heringPrimaries,
-  hsluvColors
-} from "../../constants/Colors";
+import { hackathonColors } from "../../constants/Colors";
 
 import Hexagon from "./Hexagon";
 
@@ -44,10 +39,7 @@ class ThreeStaggeredHexagons extends Component {
   };
 
   render() {
-    // const colors = basicColors;
-    const colors = materialColors;
-    // const colors = heringPrimaries;
-    // const colors = hsluvColors;
+    const colors = hackathonColors;
 
     const { onChoice } = this.props;
     return (
