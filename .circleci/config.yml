@@ -49,7 +49,7 @@ jobs:
 workflows:
   test-and-deploy:
     jobs:
-      # - lambdas-test
+      - lambdas-test
       - lambdas-lint
       - cloudformation-validate
       - deploy:
