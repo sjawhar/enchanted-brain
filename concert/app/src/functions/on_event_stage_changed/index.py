@@ -18,3 +18,5 @@ def handler(event, context):
             "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
         },
     )
+
+    return {"statusCode": 204}
