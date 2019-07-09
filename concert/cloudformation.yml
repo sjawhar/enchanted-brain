@@ -24,6 +24,10 @@ Parameters:
 
 Mappings:
 
+  ApiParams:
+    ServerlessRestApi:
+      StageName: Prod
+
   RouteKeys:
     ChoiceMade:
       Key: CHOICE_MADE
@@ -33,10 +37,6 @@ Mappings:
       Key: $disconnect
     EventStageChanged:
       Key: EVENT_STAGE_CHANGED
-
-  ApiParams:
-    ServerlessRestApi:
-      StageName: Prod
 
 
 Globals:
@@ -49,6 +49,7 @@ Globals:
     AutoPublishAlias: live
     Environment:
       Variables:
+        APP_ENVIRONMENT: !Ref Environment
         EVENT_NAME: !Ref EventName
         DYNAMODB_ENDPOINT: ''
 
@@ -59,18 +60,20 @@ Resources:
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
-        - AttributeName: userId
+        - AttributeName: recordType
+          AttributeType: S
+        - AttributeName: recordId
           AttributeType: S
       KeySchema:
-        - AttributeName: userId
+        - AttributeName: recordType
           KeyType: HASH
+        - AttributeName: recordId
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
       SSESpecification:
         SSEEnabled: True
-      StreamSpecification:
-        StreamViewType: NEW_IMAGE
 
   Api:
     Type: AWS::ApiGatewayV2::Api
@@ -82,11 +85,36 @@ Resources:
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-authorizer
       CodeUri: app/src/functions/authorizer
       Environment:
         Variables:
+          API_ARN: !Sub
+            - arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/${StageName}
+            - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
           COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
           COGNITO_ADMIN_GROUP_NAME: !Ref AdminUserPoolGroupName
+
+  AuthorizerPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AuthorizerFunction.Alias
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*
+
+  ApiAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      Name: !Sub ${Environment}-enchanted-brain
+      ApiId: !Ref Api
+      AuthorizerType: REQUEST
+      AuthorizerUri: !Join
+        - ''
+        - - !Sub arn:aws:apigateway:${AWS::Region}:lambda:path
+          - !Sub /2015-03-31/functions/${AuthorizerFunction.Alias}/invocations
+      IdentitySource:
+        - route.request.header.Authorization
 
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
@@ -99,24 +127,59 @@ Resources:
   CallbackSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-global
+      TopicName: !Sub ${Environment}-enchanted-brain-callback
       KmsMasterKeyId: alias/aws/sns
+
+  CallbackKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub ${Environment}-enchanted-brain-callback
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: kms:*
+            Resource: '*'
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+          - Effect: Allow
+            Action:
+              - kms:GenerateDataKey*
+              - kms:Decrypt
+            Resource: '*'
+            Principal:
+              Service: sns.amazonaws.com
+
+  CallbackKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${Environment}/enchanted-brain/callback
+      TargetKeyId: !Ref CallbackKmsKey
 
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-callback
       CodeUri: app/src/functions/callback
+      Layers:
+        - !Ref LambdaLayer
       Environment:
         Variables:
           API_URL: !Sub
-            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/@connections
+            - https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${StageName}
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
+        - SQSPollerPolicy:
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action: execute-api:ManageConnections
               Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource: !GetAtt CallbackKmsKey.Arn
 
   CallbackFunctionPermission:
     Type: AWS::Lambda::Permission
@@ -126,39 +189,42 @@ Resources:
       Principal: sqs.amazonaws.com
       SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
 
-  PublisherFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: app/src/functions/publisher
-      Events:
-        StreamEvent:
-          Type: DynamoDB
-          Properties:
-            Stream: !GetAtt Table.StreamArn
-            StartingPosition: TRIM_HORIZON
-      Policies:
-        - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackSnsTopic.TopicName
-
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-connect
       CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 10
       Environment:
         Variables:
-          APP_ENVIRONMENT: !Ref Environment
-          CALLBACK_FUNCTION_ARN: !GetAtt CallbackFunction.Arn
+          CALLBACK_FUNCTION_ARN: !Ref CallbackFunction.Alias
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
-          TABLE_NAME: !Ref Table
+          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
-        # TODO
-        # Deploy stack
-        # Create SQS queue
-        # Create subscription to SNS topics for SQS queues
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref Table
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: sqs:CreateQueue
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: sns:Subscribe
+              Resource: !Ref CallbackSnsTopic
+              Condition:
+                ForAnyValue:StringEquals:
+                  sns:Protocol: sqs
+                ForAnyValue:StringLike:
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: lambda:CreateEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !Ref CallbackFunction.Alias
 
   OnConnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -166,23 +232,39 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
+        AuthorizerId: !Ref ApiAuthorizer
+        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnConnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Connect, Key]
 
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-disconnect
       CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
+      Timeout: 120
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
-      Policies: !Ref AWS::NoValue
-        # TODO Policies
-        # Delete stack
-        # Delete SQS queue
-        # Delete subscription to SNS topics for SQS queues
+          DYNAMODB_TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: sqs:DeleteQueue
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+            - Effect: Allow
+              Action: sns:Unsubscribe
+              Resource: '*'
+            - Effect: Allow
+              Action: lambda:DeleteEventSourceMapping
+              Resource: '*'
+              Condition:
+                ForAnyValue:ArnEquals:
+                  lambda:FunctionArn: !Ref CallbackFunction.Alias
 
   OnDisconnectRoute:
     Type: AWS::CloudFormation::Stack
@@ -202,6 +284,7 @@ Resources:
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-choice-made
       CodeUri: app/src/functions/on_choice_made
       Layers:
         - !Ref LambdaLayer
@@ -219,21 +302,26 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
+        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
 
   OnEventStageChangedFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-on-event-stage-changed
       CodeUri: app/src/functions/on_event_stage_changed
       Layers:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt CallbackSnsTopic.TopicName
 
   OnEventStageChangedRoute:
     Type: AWS::CloudFormation::Stack
@@ -247,9 +335,15 @@ Resources:
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
+      - ApiAuthorizer
+      - AuthorizerPermission
+      - OnChoiceMadeFunctionAliaslive
       - OnChoiceMadeRoute
+      - OnConnectFunctionAliaslive
       - OnConnectRoute
+      - OnDisconnectFunctionAliaslive
       - OnDisconnectRoute
+      - OnEventStageChangedFunctionAliaslive
       - OnEventStageChangedRoute
     Properties:
       ApiId: !Ref Api
@@ -264,6 +358,7 @@ Resources:
   ChoiceWriterFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
       CodeUri: app/src/functions/choice_writer
       Layers:
         - !Ref LambdaLayer
@@ -274,7 +369,7 @@ Resources:
             Topic: !Ref ChoiceMadeSnsTopic
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table

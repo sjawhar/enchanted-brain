@@ -4,6 +4,8 @@ import {
   createBottomTabNavigator
 } from "react-navigation";
 
+import ConcertNavigator from "./ConcertNavigator";
+
 import TabBarIcon from "../components/TabBarIcon";
 import EmotionPickerScreen from "../screens/EmotionPicker";
 import ColorPickerScreen from "../screens/ColorPicker";
@@ -52,13 +54,13 @@ ChillsStack.navigationOptions = {
   tabBarLabel: "Chills"
 };
 
-export default createBottomTabNavigator(
-  {
-    EmotionStack,
-    ColorStack,
-    ChillsStack
-  },
-  {
-    initialRouteName: "ColorStack"
-  }
-);
+ConcertNavigator.navigationOptions = {
+  tabBarLabel: "Concert",
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="colours" />
+};
+
+export default createBottomTabNavigator({
+  ConcertNavigator,
+  EmotionStack,
+  ChillsStack
+});

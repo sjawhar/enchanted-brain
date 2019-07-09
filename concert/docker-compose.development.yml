@@ -2,36 +2,6 @@ version: '3.5'
 
 services:
 
-  api:
-    image: sjawhar/aws-cli:1.16.160
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./:/${PWD}
-    environment:
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
-      AWS_SESSION_TOKEN:
-    ports:
-      - 3000:3000
-    user: root
-    working_dir: ${PWD}
-    entrypoint: [sam]
-    command:
-      - local
-      - start-api
-      - --host
-      - 0.0.0.0
-      - --template
-      - cloudformation.yml
-      - --env-vars
-      - env.local.json
-      - --docker-volume-basedir
-      - ${PWD}
-      - --docker-network
-      - enchanted-brain-concert
-      - --region
-      - us-west-2
-
   invoke-lambda:
     image: sjawhar/aws-cli:1.16.160
     volumes:
@@ -84,6 +54,7 @@ services:
   dbsetup:
     image: lambci/lambda:nodejs10.x
     environment:
+      NODE_PATH: /var/runtime/node_modules
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     volumes:

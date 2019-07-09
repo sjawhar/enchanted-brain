@@ -26,6 +26,9 @@ Resources:
       Parameters:
         Environment: !Ref Environment
         EventName: !Ref EventName
+      Tags:
+        - Key: component
+          Value: user-pool
 
   LausanneConcert:
     Type: AWS::Serverless::Application
@@ -36,6 +39,8 @@ Resources:
         CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
         Environment: !Ref Environment
         EventName: !Ref EventName
+      Tags:
+        component: concert
 
 
 Outputs:
