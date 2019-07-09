@@ -140,7 +140,8 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### User choices
 ```js
 {
-  userId: `${userId}`,
+  recordType: 'CHOICE',
+  recordId: userId,
   colors: {
     [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
     ...
@@ -160,7 +161,8 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Aggregated choices
 ```js
 {
-  userId: 'AGGREGATE',
+  recordType: 'CHOICE',
+  recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
       COLOR_BLUE: Number,           // Number of audience members whose latest color choice as of this time was COLOR_BLUE
@@ -184,10 +186,24 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 }
 ```
 
-### Event Stage
+
+### Connection information
 ```js
 {
-  userId: 'EVENT_STAGE',
+    recordType: 'CONNECTION',
+    recordId: connectionId,
+    lambdaMappingUuid: String,
+    snsSubscriptionArn: String,
+    sqsQueueUrl: String,
+    createdAt: String,
+}
+```
+
+### Event stage
+```js
+{
+  recordType: 'EVENT_INFO',
+  recordId: 'EVENT_STAGE',
   stageId: String,
   ...                       // Other attributes of the stage
 }
@@ -196,7 +212,8 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Song information
 ```js
 {
-  userId: 'SONG_LIST',
+  recordType: 'EVENT_INFO',
+  recordId: 'SONG_LIST'
   songs: [
     {
       displayName: String,  // Helpful for in-app displays

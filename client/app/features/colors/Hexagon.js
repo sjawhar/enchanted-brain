@@ -2,10 +2,13 @@ import React from "react";
 import { Svg } from "expo";
 import PropTypes from "prop-types";
 
+import Touchable from "../../components/Touchable";
+
 const Hexagon = props => {
   const {
     fill,
     width,
+    onPress,
     bordered,
     borderColor,
     borderStrokeWidth,
@@ -74,24 +77,27 @@ const Hexagon = props => {
   const borderPoints = getBorderPoints(width);
 
   return (
-    <Svg height={longDiagonal} width={width} {...svgProps}>
-      <Svg.Polygon points={hexagonPoints} fill={fill} {...hexagonProps} />
-      {bordered && (
-        <Svg.Polyline
-          points={borderPoints}
-          fill="none"
-          stroke={borderColor}
-          strokeWidth={borderStrokeWidth}
-          {...polylineProps}
-        />
-      )}
-    </Svg>
+    <Touchable onPress={onPress}>
+      <Svg height={longDiagonal} width={width} {...svgProps}>
+        <Svg.Polygon points={hexagonPoints} fill={fill} {...hexagonProps} />
+        {bordered && (
+          <Svg.Polyline
+            points={borderPoints}
+            fill="none"
+            stroke={borderColor}
+            strokeWidth={borderStrokeWidth}
+            {...polylineProps}
+          />
+        )}
+      </Svg>
+    </Touchable>
   );
 };
 
 Hexagon.defaultProps = {
   fill: "white",
   width: 100,
+  onPress: () => {},
   bordered: false,
   borderColor: "white",
   borderStrokeWidth: "2",
@@ -105,6 +111,7 @@ Hexagon.propTypes = {
   width: PropTypes.number,
   bordered: PropTypes.bool,
   borderColor: PropTypes.string,
+  onPress: PropTypes.func,
   borderStrokeWidth: PropTypes.string,
   svgProps: PropTypes.object,
   hexagonProps: PropTypes.object,

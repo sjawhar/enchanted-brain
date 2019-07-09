@@ -3,7 +3,7 @@ We use Docker containers running SAM and DynamoDB for local development. Unit te
 
 ## Setting Up
 1. Copy `env.dist.json` to `env.local.json` and fill in all relevant environment variables for the lambda function(s) you want to test.
-2. If needed, create an `event.local.json` for invoking your lambda function. You can use `event.dist.json` as a guide.
+2. If needed, create an `event.local.json` for invoking your lambda function. You can use the `event.*.dist.json` files as guides for the events used by different services.
 
 ## Useful Commands
 ### Setting up local DB
