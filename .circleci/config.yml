@@ -55,8 +55,11 @@ workflows:
       - deploy:
           requires:
             - lambdas-lint
-            # - lambdas-test
+            - lambdas-test
             - cloudformation-validate
+          filters:
+            branches:
+              only: master
       - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'

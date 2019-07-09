@@ -45,3 +45,5 @@ def handler(event, context):
             time.sleep(2 ** i)
 
     table.delete_item(Key=connection_key)
+
+    return {"statusCode": 204}
