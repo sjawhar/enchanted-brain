@@ -41,6 +41,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
   --tags "environment=${ENVIRONMENT}" \
     "system=enchanted-brain" \
+  --no-fail-on-empty-changeset \
   --parameter-overrides "Environment=${ENVIRONMENT}" \
   "${@:3}"
 
