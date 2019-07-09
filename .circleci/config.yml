@@ -59,9 +59,7 @@ workflows:
             - cloudformation-validate
           filters:
             branches:
-              only:
-                - master
-                - hackathon
+              only: master
       - github-wiki/build-and-deploy:
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
