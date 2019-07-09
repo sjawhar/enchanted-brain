@@ -127,7 +127,7 @@ Resources:
   CallbackSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-global
+      TopicName: !Sub ${Environment}-enchanted-brain-callback
       KmsMasterKeyId: alias/aws/sns
 
   CallbackKmsKey:

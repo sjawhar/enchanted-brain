@@ -9,7 +9,7 @@ const main = async () => {
   try {
     await dynamoDb
       .createTable({
-        TableName: 'local-choice',
+        TableName: 'local-enchanted-brain',
         KeySchema: [
           { AttributeName: 'songId', KeyType: 'HASH' },
           { AttributeName: 'listenId', KeyType: 'RANGE' },
@@ -32,7 +32,7 @@ const main = async () => {
   await docuClient
     .batchWrite({
       RequestItems: {
-        'local-choice': [
+        'local-enchanted-brain': [
           {
             PutRequest: {
               Item: {
@@ -73,7 +73,7 @@ const main = async () => {
     })
     .promise();
 
-  const records = await docuClient.scan({ TableName: 'local-choice' }).promise();
+  const records = await docuClient.scan({ TableName: 'local-enchanted-brain' }).promise();
   console.log(JSON.stringify(records.Items, null, 2));
 };
 
