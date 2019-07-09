@@ -192,9 +192,10 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 {
     recordType: 'CONNECTION',
     recordId: connectionId,
-    labdaMappingUuid: String,
+    lambdaMappingUuid: String,
     snsSubscriptionArn: String,
     sqsQueueUrl: String,
+    createdAt: String,
 }
 ```
 

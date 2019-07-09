@@ -95,7 +95,7 @@ def handler(event, context):
             ConditionExpression=Attr(ATTR_RECORD_TYPE).not_exists(),
         )
     except ClientError as e:
-        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+        if e.response["Error"]["Code"] != "ConditionalCheckFailedException":
             raise
 
     return {"statusCode": 204}
