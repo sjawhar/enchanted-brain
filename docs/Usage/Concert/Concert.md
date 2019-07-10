@@ -27,8 +27,11 @@ The websocket API will also be used to guide the mobile app through the concert 
 On connection, the server will respond with the current event stage. This can be used to ensure the app is in the correct state when reconnecting after being disconnected.
 ```js
 {
-  stageId: String,    // The ID of the current stage
-  ...                 // Other attributes of the stage
+  event: 'CONNECTED',
+  data: {
+    stageId: String,    // The ID of the current stage
+    ...                 // Other attributes of the stage
+  },
 }
 ```
 
@@ -140,8 +143,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### User choices
 ```js
 {
-  recordType: 'CHOICE',
-  recordId: userId,
+  recordId: ['CHOICE', userId].join('$'),
   colors: {
     [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
     ...
@@ -161,7 +163,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Aggregated choices
 ```js
 {
-  recordType: 'CHOICE',
   recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
@@ -190,8 +191,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Connection information
 ```js
 {
-    recordType: 'CONNECTION',
-    recordId: connectionId,
+    recordId: ['CONN', connectionId].join('$'),
     lambdaMappingUuid: String,
     snsSubscriptionArn: String,
     sqsQueueUrl: String,
@@ -202,7 +202,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Event stage
 ```js
 {
-  recordType: 'EVENT_INFO',
   recordId: 'EVENT_STAGE',
   stageId: String,
   ...                       // Other attributes of the stage
@@ -212,7 +211,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Song information
 ```js
 {
-  recordType: 'EVENT_INFO',
   recordId: 'SONG_LIST'
   songs: [
     {
