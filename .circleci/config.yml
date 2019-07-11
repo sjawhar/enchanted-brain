@@ -5,6 +5,33 @@ orbs:
 
 
 jobs:
+  client-install:
+    docker:
+      - image: circleci/node:10.16
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - dependencies-{{ .Environment.CACHE_VERSION }}-{{ checksum "client/app/package-lock.json" }}
+      - run: cd client/app && npm ci
+      - save_cache:
+          paths:
+            - /home/circleci/.npm
+          key: dependencies-{{ .Environment.CACHE_VERSION }}-{{ checksum "client/app/package-lock.json" }}
+      - persist_to_workspace:
+          root: client/app
+          paths:
+            - node_modules
+
+  client-lint:
+    docker:
+      - image: circleci/node:10.16.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: client/app
+      - run: cd client/app && npm run lint
+
   lambdas-test:
     docker:
       - image: circleci/python:3.7
@@ -49,11 +76,16 @@ jobs:
 workflows:
   test-and-deploy:
     jobs:
+      - client-install
+      - client-lint:
+          requires:
+            - client-install
       - lambdas-test
       - lambdas-lint
       - cloudformation-validate
       - deploy:
           requires:
+            - client-lint
             - lambdas-lint
             - lambdas-test
             - cloudformation-validate
