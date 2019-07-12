@@ -130,7 +130,6 @@ const styles = EStyleSheet.create({
   },
   hexGrid: {
     width: '100%',
-    height: '100%',
     minHeight: MIN_GRID_HEIGHT,
     height: MIN_GRID_HEIGHT * 1.25,
     maxHeight: '80%',
