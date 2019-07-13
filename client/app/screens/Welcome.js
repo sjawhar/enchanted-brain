@@ -8,12 +8,8 @@ import concertApi from "../api/concertApi";
 class WelcomeScreen extends Component {
   constructor(props) {
     super(props);
-    const { navigation } = props;
     Auth.currentSession().then(session => {
       concertApi.connect(session.getIdToken().getJwtToken());
-    });
-    concertApi.on("SHOW_COLOR_PICKER", stream => {
-      navigation.navigate("Colors"); // temporary
     });
   }
 
