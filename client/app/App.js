@@ -1,11 +1,12 @@
 import React from "react";
 import { Platform, StatusBar, StyleSheet, View } from "react-native";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 import Amplify from "aws-amplify";
 import { withAuthenticator } from "aws-amplify-react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
-import { store } from "./state";
+import { persistor, store } from "./state";
 import AppNavigator from "./navigation/AppNavigator";
 import NavigationManager from "./navigation/NavigationManager";
 import layout from "./constants/Layout";
@@ -134,14 +135,16 @@ class App extends React.Component {
     return (
       <PaperProvider theme={theme}>
         <Provider store={store}>
-          <View style={styles.container}>
-            {Platform.OS === "ios" && <StatusBar barStyle="default" />}
-            <AppNavigator
-              ref={navigatorRef => {
-                NavigationManager.setTopLevelNavigator(navigatorRef);
-              }}
-            />
-          </View>
+          <PersistGate loading={null} persistor={persistor}>
+            <View style={styles.container}>
+              {Platform.OS === "ios" && <StatusBar barStyle="default" />}
+              <AppNavigator
+                ref={navigatorRef => {
+                  NavigationManager.setTopLevelNavigator(navigatorRef);
+                }}
+              />
+            </View>
+          </PersistGate>
         </Provider>
       </PaperProvider>
     );
@@ -155,5 +158,4 @@ const styles = StyleSheet.create({
   }
 });
 
-// export default App;
 export default withAuthenticator(App, { signUpConfig });

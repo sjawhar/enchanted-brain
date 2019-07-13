@@ -1,5 +1,5 @@
 import actions from "./actions";
 import reducer from "./reducer";
-import store from "./store";
+import { persistor, store } from "./configureStore";
 
-export { actions, reducer, store };
+export { actions, reducer, persistor, store };
