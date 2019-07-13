@@ -1,4 +1,5 @@
 import EventEmitter from "events";
+import { store, actions } from "../state";
 
 let ws = null;
 let isConnect = false;
@@ -14,8 +15,8 @@ const connect = idToken => {
     "wss://gem4rt4c0j.execute-api.us-east-1.amazonaws.com/Prod",
     null,
     {
-      headers: { Authorization: idToken },
-    },
+      headers: { Authorization: idToken }
+    }
   );
 
   ws.onopen = () => {
@@ -26,8 +27,8 @@ const connect = idToken => {
         data: {
           choiceType: "CHOICE_COLOR",
           choice: "COLOR_BLUE",
-          timestamp: new Date().toISOString(),
-        },
+          timestamp: new Date().toISOString()
+        }
       })
     );
     console.log("MESSAGE SENT.");
@@ -39,9 +40,11 @@ const connect = idToken => {
     console.log("MESSAGE", message.data);
     try {
       const { event, data } = JSON.parse(message.data);
-      if (event === 'EVENT_STAGE_CHANGED') {
-        console.log('emitting SHOW_COLOR_PICKER event')
-        events.emit('SHOW_COLOR_PICKER');
+      if (event === "CONNECTED") {
+        events.emit("WEBSOCKET_CONNECTED", data);
+      }
+      if (event === "EVENT_STAGE_CHANGED") {
+        events.emit("STAGE_CHANGED", data);
       }
     } catch (error) {
       console.error(error);
@@ -67,14 +70,14 @@ const disconnect = () => {
     return;
   }
   ws.close();
-}
+};
 
 const send = message => {
   if (!ws) {
-    return false
+    return false;
   }
 
-  ws.send(message)
-}
+  ws.send(message);
+};
 
 export default Object.assign(events, { connect, disconnect, send });
