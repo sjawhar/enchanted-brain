@@ -1,5 +1,4 @@
 import EventEmitter from "events";
-import { store, actions } from "../state";
 
 let ws = null;
 let isConnect = false;
