@@ -1,18 +1,14 @@
 import React from "react";
 import { Platform, StatusBar, StyleSheet, View } from "react-native";
-import { applyMiddleware, createStore } from "redux";
 import { Provider } from "react-redux";
-import thunk from "redux-thunk";
 import Amplify from "aws-amplify";
 import { withAuthenticator } from "aws-amplify-react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
-import { reducer } from "./state";
+import { store } from "./state";
 import AppNavigator from "./navigation/AppNavigator";
+import NavigationManager from "./navigation/NavigationManager";
 import layout from "./constants/Layout";
-
-// Redux
-const store = createStore(reducer, applyMiddleware(thunk));
 
 Amplify.configure({
   Auth: {
@@ -140,7 +136,11 @@ class App extends React.Component {
         <Provider store={store}>
           <View style={styles.container}>
             {Platform.OS === "ios" && <StatusBar barStyle="default" />}
-            <AppNavigator />
+            <AppNavigator
+              ref={navigatorRef => {
+                NavigationManager.setTopLevelNavigator(navigatorRef);
+              }}
+            />
           </View>
         </Provider>
       </PaperProvider>
@@ -155,4 +155,5 @@ const styles = StyleSheet.create({
   }
 });
 
+// export default App;
 export default withAuthenticator(App, { signUpConfig });
