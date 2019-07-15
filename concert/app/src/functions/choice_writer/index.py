@@ -24,13 +24,10 @@ For event and database record shapes, see https://github.com/sjawhar/enchanted-b
 
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 DYNAMODB_ENDPOINT = os.environ.get("DYNAMODB_ENDPOINT")
-DYNAMODB_REGION = os.environ.get("DYNAMODB_REGION")
 
 dynamodb_args = {}
 if DYNAMODB_ENDPOINT:
     dynamodb_args["endpoint_url"] = DYNAMODB_ENDPOINT
-if DYNAMODB_REGION:
-    dynamodb_args["region_name"] = DYNAMODB_REGION
 dynamodb = boto3.resource("dynamodb", **dynamodb_args)
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
@@ -72,11 +69,11 @@ def get_update_args(event):
     }
 
     if choice_type in [CHOICE_EMOTION_AGITATION, CHOICE_EMOTION_HAPPINESS]:
-        emotion_type = choice_type.split("_")[-1]
         update_args["UpdateExpression"] += ", #emotion_type = :emotion_type"
         update_args["ExpressionAttributeNames"][
             "#emotion_type"
         ] = ATTR_CHOICE_VALUE_EMOTION_TYPE
-        update_args["ExpressionAttributeValues"][":emotion_type"] = emotion_type
+        # Trim off starting CHOICE_
+        update_args["ExpressionAttributeValues"][":emotion_type"] = choice_type[7:]
 
     return update_args

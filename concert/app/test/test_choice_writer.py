@@ -1,140 +1,88 @@
+import json
 import os
 import pytest
-from src.functions.choice_writer.index import handler, dynamodb
+from botocore.exceptions import ClientError
 from botocore.stub import Stubber
+from src.functions.choice_writer.index import handler, dynamodb
 
 dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
 table_name = os.environ["DYNAMODB_TABLE_NAME"]
-song_id = os.environ["EVENT_NAME"]
 test_timestamp = "2019-05-14T21:20:03.000Z"
 
-# Test that color choice event results in DynamoDB write with expected parameters
-def test_handler_color_chosen():
-    event = {
+
+def get_event(choice="COLOR_BLUE", choice_type="CHOICE_COLOR", user_id="userId"):
+    return {
         "Records": [
             {
                 "Sns": {
-                    "Message": '{"userId":"user id","choiceType":"CHOICE_COLOR","choice":"COLOR_RED","timestamp":"2019-05-14T21:20:03.000Z"}'
+                    "Message": json.dumps(
+                        {
+                            "userId": user_id,
+                            "choiceType": choice_type,
+                            "choice": choice,
+                            "timestamp": test_timestamp,
+                        }
+                    )
                 }
             }
         ]
     }
 
+
+@pytest.mark.parametrize(
+    "choice_type, choice, choice_key, emotion_type, user_id",
+    [
+        ("CHOICE_COLOR", "COLOR_RED", "colors", None, "colorUser"),
+        ("CHOICE_EMOTION_HAPPINESS", 1, "emotions", "EMOTION_HAPPINESS", "happyUser"),
+        (
+            "CHOICE_EMOTION_AGITATION",
+            1,
+            "emotions",
+            "EMOTION_AGITATION",
+            "agitatedUser",
+        ),
+        ("CHOICE_CHILLS", 1, "chills", None, "chillyUser"),
+    ],
+)
+def test_choices(choice_type, choice, choice_key, emotion_type, user_id):
+    event = get_event(user_id=user_id, choice_type=choice_type, choice=choice)
+
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordId": "CHOICE$user id"},
+        "Key": {"recordId": "$".join(["CHOICE", user_id])},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
-            "#choice_key": "colors",
+            "#choice_key": choice_key,
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": "COLOR_RED"},
+        "ExpressionAttributeValues": {":choice_value": choice},
         "ReturnValues": "NONE",
     }
+    if emotion_type is not None:
+        expected_params["UpdateExpression"] += ", #emotion_type = :emotion_type"
+        expected_params["ExpressionAttributeNames"]["#emotion_type"] = "emotionType"
+        expected_params["ExpressionAttributeValues"][":emotion_type"] = emotion_type
 
+    resp = None
     with Stubber(dynamodb.meta.client) as stub:
         stub.add_response(
             "update_item", dynamo_update_item_success_response, expected_params
         )
         resp = handler(event, None)
-        assert resp == {"statusCode": 204}
+
+    assert resp == {"statusCode": 204}
 
 
-# Test that emotion choice event results in DynamoDB write with expected parameters
-def test_handler_emotion_happiness_chosen():
-    event = {
-        "Records": [
-            {
-                "Sns": {
-                    "Message": '{"userId":"user id","choiceType":"CHOICE_EMOTION_HAPPINESS","choice":"sad","timestamp":"2019-05-14T21:20:03.000Z"}'
-                }
-            }
-        ]
-    }
-
-    expected_params = {
-        "TableName": table_name,
-        "Key": {"recordId": "CHOICE$user id"},
-        "UpdateExpression": "SET #choice_key.#timestamp = :choice_value, #emotion_type = :emotion_type",
-        "ExpressionAttributeNames": {
-            "#choice_key": "emotions",
-            "#emotion_type": "emotionType",
-            "#timestamp": test_timestamp,
-        },
-        "ExpressionAttributeValues": {
-            ":choice_value": "sad",
-            ":emotion_type": "HAPPINESS",
-        },
-        "ReturnValues": "NONE",
-    }
-
-    with Stubber(dynamodb.meta.client) as stub:
-        stub.add_response(
-            "update_item", dynamo_update_item_success_response, expected_params
-        )
-        resp = handler(event, None)
-        assert resp == {"statusCode": 204}
-
-
-# Test that chills choice event results in DynamoDB write with expected parameters
-def test_handler_chills_chosen():
-    event = {
-        "Records": [
-            {
-                "Sns": {
-                    "Message": '{"userId":"user id","choiceType":"CHOICE_CHILLS","choice":"True","timestamp":"2019-05-14T21:20:03.000Z"}'
-                }
-            }
-        ]
-    }
-
-    expected_params = {
-        "TableName": table_name,
-        "Key": {"recordId": "CHOICE$user id"},
-        "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
-        "ExpressionAttributeNames": {
-            "#choice_key": "chills",
-            "#timestamp": test_timestamp,
-        },
-        "ExpressionAttributeValues": {":choice_value": "True"},
-        "ReturnValues": "NONE",
-    }
-
-    with Stubber(dynamodb.meta.client) as stub:
-        stub.add_response(
-            "update_item", dynamo_update_item_success_response, expected_params
-        )
-        resp = handler(event, None)
-        assert resp == {"statusCode": 204}
-
-
-# Test that invalid data results in ValueError being raised
-def test_handler_invalid_input():
+def test_invalid_choice_type_raises_value_error():
     with pytest.raises(ValueError):
-        event = {
-            "Records": [
-                {
-                    "Sns": {
-                        "Message": '{"userId":"user id","choiceType":"INVALID CHOICE","choice":"(ツ)","timestamp":"2019-05-14T21:20:03.000Z"}'
-                    }
-                }
-            ]
-        }
+        event = get_event(choice_type="CHOICE_INVALID")
 
         handler(event, None)
 
 
-# Test that Dynamo client error results in exception being thrown
-def test_handler_dynamo_error():
-    with pytest.raises(Exception):
-
-        event = {
-            "userId": "user id",
-            "choiceType": "CHOICE_COLOR",
-            "choice": "chartreuse",
-            "timestamp": test_timestamp,
-        }
+def test_dynamodb_update_error_raises_client_error():
+    with pytest.raises(ClientError):
 
         with Stubber(dynamodb.meta.client) as stub:
             stub.add_client_error(
@@ -142,4 +90,4 @@ def test_handler_dynamo_error():
                 service_message="Jeff Bezos dislikes you personally and has sabotaged your Dynamo endpoint",
                 service_error_code=500,
             )
-            handler(event, None)
+            handler(get_event(), None)
