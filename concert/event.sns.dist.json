@@ -2,7 +2,7 @@
   "Records": [
     {
       "Sns": {
-        "Message": "{\"choiceType\":\"CHOICE_COLOR\",\"choice\":\"COLOR_RED\",\"timestamp\":\"2019-05-14T21:20:03.000Z\"}"
+        "Message": "{\"userId\":\"1\",\"choiceType\":\"CHOICE_COLOR\",\"choice\":\"COLOR_RED\",\"timestamp\":\"2019-05-14T21:22:03.000Z\"}"
       }
     }
   ]
