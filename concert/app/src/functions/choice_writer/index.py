@@ -8,14 +8,12 @@ from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_EMOTION,
     ATTR_CHOICE_VALUE_EMOTION_TYPE,
     ATTR_CHOICE_VALUE_CHILLS,
-    ATTR_CHOICE_VALUE_IMAGERY,
     ATTR_RECORD_ID,
     ATTR_RECORD_TYPE,
     CHOICE_CHILLS,
     CHOICE_COLOR,
     CHOICE_EMOTION_AGITATION,
     CHOICE_EMOTION_HAPPINESS,
-    CHOICE_IMAGERY,
     RECORD_TYPE_CHOICE,
 )
 
@@ -40,8 +38,7 @@ CHOICE_TYPE_KEYS = {
     CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
     CHOICE_EMOTION_AGITATION: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
-    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
-    CHOICE_IMAGERY: ATTR_CHOICE_VALUE_IMAGERY,
+    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS
 }
 
 
@@ -65,15 +62,11 @@ def get_update_args(event):
     choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args = {
         "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: record_id},
-        "UpdateExpression": "SET #choice_key = :choice_value",
-        "ExpressionAttributeNames": {"#choice_key": choice_key},
+        "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
+        "ExpressionAttributeNames": {"#choice_key": choice_key, "#timestamp": timestamp},
         "ExpressionAttributeValues": {":choice_value": choice},
         "ReturnValues": "NONE",
     }
-
-    if choice_type != CHOICE_IMAGERY:
-        update_args["UpdateExpression"] = "SET #choice_key.#timestamp = :choice_value"
-        update_args["ExpressionAttributeNames"]["#timestamp"] = timestamp
 
     if choice_type in [CHOICE_EMOTION_AGITATION, CHOICE_EMOTION_HAPPINESS]:
         emotion_type = choice_type.split("_")[-1]
