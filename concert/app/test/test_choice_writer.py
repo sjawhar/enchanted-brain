@@ -77,35 +77,6 @@ def test_handler_emotion_happiness_chosen():
         assert resp == {"statusCode": 204}
 
 
-# Test that imagery choice event results in DynamoDB write with expected parameters
-def test_handler_imagery_chosen():
-    event = {
-        "Records": [
-            {
-                "Sns": {
-                    "Message": '{"userId":"user id","choiceType":"CHOICE_IMAGERY","choice":"a sunset","timestamp":"2019-05-14T21:20:03.000Z"}'
-                }
-            }
-        ]
-    }
-
-    expected_params = {
-        "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": "user id"},
-        "UpdateExpression": "SET #choice_key = :choice_value",
-        "ExpressionAttributeNames": {"#choice_key": "imagery"},
-        "ExpressionAttributeValues": {":choice_value": "a sunset"},
-        "ReturnValues": "NONE",
-    }
-
-    with Stubber(dynamodb.meta.client) as stub:
-        stub.add_response(
-            "update_item", dynamo_update_item_success_response, expected_params
-        )
-        resp = handler(event, None)
-        assert resp == {"statusCode": 204}
-
-
 # Test that chills choice event results in DynamoDB write with expected parameters
 def test_handler_chills_chosen():
     event = {
