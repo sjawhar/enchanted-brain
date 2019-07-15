@@ -11,12 +11,10 @@ const main = async () => {
       .createTable({
         TableName: 'local-enchanted-brain',
         KeySchema: [
-          { AttributeName: 'songId', KeyType: 'HASH' },
-          { AttributeName: 'listenId', KeyType: 'RANGE' },
+          { AttributeName: 'recordId', KeyType: 'HASH' },
         ],
         AttributeDefinitions: [
-          { AttributeName: 'songId', AttributeType: 'S' },
-          { AttributeName: 'listenId', AttributeType: 'S' },
+          { AttributeName: 'recordId', AttributeType: 'S' },
         ],
         ProvisionedThroughput: {
           ReadCapacityUnits: 5,
@@ -36,29 +34,27 @@ const main = async () => {
           {
             PutRequest: {
               Item: {
-                songId: '1',
-                listenId: 'user-1342',
+                recordId: 'CHOICE$1',
                 colors: {
                   '2019-05-14T21:20:03.000Z': 'COLOR_RED',
                   '2019-05-14T21:20:23.000Z': 'COLOR_BLUE',
                 },
+                emotionType: 'EMOTION_HAPPINESS',
                 emotions: {
-                  '2019-05-14T21:20:43.000Z': 'Sad',
-                  '2019-05-14T21:21:03.000Z': 'Angry',
+                  '2019-05-14T21:20:43.000Z': 0.5,
+                  '2019-05-14T21:21:03.000Z': 0,
                 },
                 chills: {
-                  '2019-05-14T21:21:23.000Z': 'True',
-                  '2019-05-14T21:21:43.000Z': 'False',
+                  '2019-05-14T21:21:23.000Z': 1,
+                  '2019-05-14T21:21:43.000Z': 0,
                 },
-                imagery: 'a slice of chocolate cake',
               },
             },
           },
           {
             PutRequest: {
               Item: {
-                songId: 'CONCERT_LAUSANNE_2019',
-                listenId: 'user id',
+                recordId: 'CHOICE$user id',
                 colors: {
                 },
                 emotions: {
