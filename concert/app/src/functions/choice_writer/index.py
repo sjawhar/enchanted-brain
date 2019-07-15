@@ -38,7 +38,7 @@ CHOICE_TYPE_KEYS = {
     CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
     CHOICE_EMOTION_AGITATION: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
-    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS
+    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
 }
 
 
@@ -63,7 +63,10 @@ def get_update_args(event):
     update_args = {
         "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: record_id},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
-        "ExpressionAttributeNames": {"#choice_key": choice_key, "#timestamp": timestamp},
+        "ExpressionAttributeNames": {
+            "#choice_key": choice_key,
+            "#timestamp": timestamp,
+        },
         "ExpressionAttributeValues": {":choice_value": choice},
         "ReturnValues": "NONE",
     }
