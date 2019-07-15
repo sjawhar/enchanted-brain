@@ -27,8 +27,13 @@ The websocket API will also be used to guide the mobile app through the concert 
 On connection, the server will respond with the current event stage. This can be used to ensure the app is in the correct state when reconnecting after being disconnected.
 ```js
 {
-  stageId: String,    // The ID of the current stage
-  ...                 // Other attributes of the stage
+  event: 'CONNECTED',
+  data: {
+    choiceType: String,      // For use in STAGE_CHOICE_COLOR_EMOTION
+    choiceInverted: Boolean, // For use in STAGE_CHOICE_COLOR_EMOTION
+    stageId: String,         // The ID of the current stage
+    ...                      // Other attributes of the stage
+  },
 }
 ```
 
@@ -38,7 +43,7 @@ To report a user's choice, send the CHOICE_MADE event:
 {
   event: 'CHOICE_MADE',
   data: {
-    choiceType: String,         // CHOICE_COLOR || CHOICE_EMOTION_HAPPINESS || CHOICE_EMOTION_AGITATION || CHOICE_CHILLS
+    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_AGITATION | CHOICE_CHILLS
     choice: String || Number,   // String for color, Number for the rest
     timestamp: String,
   },
@@ -70,19 +75,15 @@ The user should be displayed the survey form found at `formUrl`, where they will
   endTime: String,
   frequency: Number,
   timeout: Number,
-  choiceTypes: {
-    CHOICE_COLOR: Number,
-    CHOICE_EMOTION_AGITATION: Number,
-    CHOICE_EMOTION_HAPPINESS: Number,
-  },
+  choiceTypes: [String, ...],
 }
 ```
 
 This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `frequency` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
- 
-When first receiving this event, each user should be randomly assigned to make **one** of the choice types indicated in `choiceTypes`. In `choiceType`, the key indicates the choice type and the value is the percentages of the audience that should take that type.
 
 When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `frequency` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
+
+`choiceTypes` will contain a list of choice types that the user can be presented with. The user should be shown the type corresponding to the `choiceType` value received on connect. If that is not in the list, the user should be shown the type corresponding to the first entry in the list. If the user has one of the emotion choice types, the `choiceInverted` value received on connect determines whether the scale should be displayed upside down (e.g. `choiceInverted = False` means happy on top, `choiceInverted = True` means sad on top). **NOTE**: The display should be inverted, but the value sent to the websocket should not.
 
 #### 4 - Prompt for chills
 ```js
@@ -140,8 +141,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### User choices
 ```js
 {
-  recordType: 'CHOICE',
-  recordId: userId,
+  recordId: ['CHOICE', userId].join('$'),
   colors: {
     [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
     ...
@@ -161,7 +161,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Aggregated choices
 ```js
 {
-  recordType: 'CHOICE',
   recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
@@ -190,8 +189,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Connection information
 ```js
 {
-    recordType: 'CONNECTION',
-    recordId: connectionId,
+    recordId: ['CONN', connectionId].join('$'),
     lambdaMappingUuid: String,
     snsSubscriptionArn: String,
     sqsQueueUrl: String,
@@ -202,7 +200,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Event stage
 ```js
 {
-  recordType: 'EVENT_INFO',
   recordId: 'EVENT_STAGE',
   stageId: String,
   ...                       // Other attributes of the stage
@@ -212,7 +209,6 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 ### Song information
 ```js
 {
-  recordType: 'EVENT_INFO',
   recordId: 'SONG_LIST'
   songs: [
     {
