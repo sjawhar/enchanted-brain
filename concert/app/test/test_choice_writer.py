@@ -23,7 +23,7 @@ def test_handler_color_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": "user id"},
+        "Key": {"recordId": "CHOICE$user id"},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "colors",
@@ -55,7 +55,7 @@ def test_handler_emotion_happiness_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": "user id"},
+        "Key": {"recordId": "CHOICE$user id"},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value, #emotion_type = :emotion_type",
         "ExpressionAttributeNames": {
             "#choice_key": "emotions",
@@ -91,7 +91,7 @@ def test_handler_chills_chosen():
 
     expected_params = {
         "TableName": table_name,
-        "Key": {"recordType": "CHOICE", "recordId": "user id"},
+        "Key": {"recordId": "CHOICE$user id"},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": "chills",

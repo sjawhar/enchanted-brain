@@ -61,7 +61,7 @@ def get_update_args(event):
 
     choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args = {
-        "Key": {ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE, ATTR_RECORD_ID: record_id},
+        "Key": {ATTR_RECORD_ID: RECORD_TYPE_CHOICE + "$" + record_id},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
