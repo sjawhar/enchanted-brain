@@ -1,9 +1,4 @@
 import actionTypes from "./actionTypes";
-// import NavigationManager from "../navigation/NavigationManager";
-
-const eventNameToScreenMap = {
-  SHOW_COLOR_PICKER: "Colors"
-};
 
 const setChoiceType = choiceType => dispatch => {
   dispatch({
@@ -24,11 +19,6 @@ const setChoiceInverted = choiceInverted => dispatch => {
 };
 
 const setLastKnownScreen = screen => dispatch => {
-  console.log("in setLastKNownScreen");
-  console.log("screen is:", screen);
-  // const screen = eventNameToScreenMap[eventName];
-
-  // NavigationManager.navigate(screen);
   dispatch({
     type: actionTypes.SET_LAST_KNOWN_STAGE,
     payload: {
