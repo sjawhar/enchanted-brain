@@ -9,7 +9,7 @@ import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
 import { persistor, store, actions } from "./state";
 import concertApi from "./api/concertApi";
 import AppNavigator from "./navigation/AppNavigator";
-import NavigationManager from "./navigation/NavigationManager";
+import NavigationService from "./navigation/NavigationService";
 import layout from "./constants/Layout";
 
 // ** Event listeners ** //
@@ -38,7 +38,7 @@ const handleStageNavigation = stageId => {
     // navigate to "something went wrong screen"?
   }
   store.dispatch(actions.setLastKnownScreen(screen));
-  NavigationManager.navigate(screen);
+  NavigationService.navigate(screen);
 };
 
 concertApi.on("WEBSOCKET_CONNECTED", data => {
@@ -51,7 +51,7 @@ concertApi.on("WEBSOCKET_CONNECTED", data => {
     handleStageNavigation(stageId);
   } catch (error) {
     console.error(
-      "Something went wrong in NavigationManager in WEBSOCKET_CONNECTED listener. Error:",
+      "Something went wrong in NavigationService in WEBSOCKET_CONNECTED listener. Error:",
       error
     );
   }
@@ -63,7 +63,7 @@ concertApi.on("STAGE_CHANGED", data => {
     handleStageNavigation(stageId);
   } catch (error) {
     console.error(
-      "Something went wrong in NavigationManager in STAGE_CHANGED listener. Error:",
+      "Something went wrong in NavigationService in STAGE_CHANGED listener. Error:",
       error
     );
   }
@@ -201,7 +201,7 @@ class App extends React.Component {
               {Platform.OS === "ios" && <StatusBar barStyle="default" />}
               <AppNavigator
                 ref={navigatorRef => {
-                  NavigationManager.setTopLevelNavigator(navigatorRef);
+                  NavigationService.setTopLevelNavigator(navigatorRef);
                 }}
               />
             </View>
