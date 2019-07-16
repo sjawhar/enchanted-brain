@@ -6,11 +6,70 @@ import Amplify from "aws-amplify";
 import { withAuthenticator } from "aws-amplify-react-native";
 import EStyleSheet from "react-native-extended-stylesheet";
 import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
-import { persistor, store } from "./state";
+import { persistor, store, actions } from "./state";
+import concertApi from "./api/concertApi";
 import AppNavigator from "./navigation/AppNavigator";
 import NavigationManager from "./navigation/NavigationManager";
 import layout from "./constants/Layout";
 
+// ** Event listeners ** //
+const handleStageNavigation = stageId => {
+  console.log("in handleStageNavigation");
+  const currentState = store.getState();
+  const { choiceType } = currentState;
+
+  let screen = "Welcome";
+  if (stageId === "STAGE_CHOICE_IMAGERY") {
+    screen = "MentalImagery";
+  } else if (stageId === "STAGE_CHOICE_COLOR_EMOTION") {
+    if (choiceType === "CHOICE_COLOR") {
+      screen = "Colors";
+    } else {
+      screen = "Emotions";
+    }
+  } else if (stageId === "STAGE_CHOICE_CHILLS") {
+    screen = "Chills";
+  } else if (stageId === "STAGE_END") {
+    screen = "Results";
+  } else {
+    screen = "Welcome"; // temporary
+    console.log("stub: something went wrong in handleStageNavigation");
+    // something went wrong
+    // navigate to "something went wrong screen"?
+  }
+  store.dispatch(actions.setLastKnownScreen(screen));
+  NavigationManager.navigate(screen);
+};
+
+concertApi.on("WEBSOCKET_CONNECTED", data => {
+  console.log("stream in ws connected is:", data);
+  try {
+    const { stageId, choiceType, choiceInverted } = data;
+    console.log("choiceType in WS connected is:", choiceType);
+    store.dispatch(actions.setChoiceType(choiceType));
+    store.dispatch(actions.setChoiceInverted(choiceInverted));
+    handleStageNavigation(stageId);
+  } catch (error) {
+    console.error(
+      "Something went wrong in NavigationManager in WEBSOCKET_CONNECTED listener. Error:",
+      error
+    );
+  }
+});
+
+concertApi.on("STAGE_CHANGED", data => {
+  try {
+    const { stageId } = data;
+    handleStageNavigation(stageId);
+  } catch (error) {
+    console.error(
+      "Something went wrong in NavigationManager in STAGE_CHANGED listener. Error:",
+      error
+    );
+  }
+});
+
+// ** AWS Amplify config ** //
 Amplify.configure({
   Auth: {
     region: "us-east-1",
@@ -80,6 +139,7 @@ const signUpConfig = {
   ]
 };
 
+// ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
 
 // Abitrary min, max for rem and width
@@ -117,6 +177,7 @@ const calculateRem = (width, minWidth, maxWidth, minRem, maxRem) => {
   return calculatedRem;
 };
 
+// ** Extended Stylesheet Setup ** //
 EStyleSheet.build({
   $rem: calculateRem(SCREEN_WIDTH, MIN_WIDTH, MAX_WIDTH, MIN_REM, MAX_REM)
 });
