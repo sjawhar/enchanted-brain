@@ -3,8 +3,9 @@ import { ActivityIndicator, SafeAreaView, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-// replace preview survey root with published survey when it's available.
+// TODO: replace preview survey root with published survey when it's available.
 const PREVIEW_SURVEY_ROOT = 'https://ucsf.co1.qualtrics.com/jfe/preview/SV_eEBoIQ1RAp6UxdH';
+// TODO: replace with uid from redux state
 const FAKE_UID = 'Im from the app!';
 
 const MentalImageryScreen = props => {
