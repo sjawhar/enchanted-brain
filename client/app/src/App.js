@@ -1,70 +1,70 @@
-import React from "react";
-import { Platform, StatusBar, StyleSheet, View } from "react-native";
-import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import Amplify from "aws-amplify";
-import { withAuthenticator } from "aws-amplify-react-native";
-import EStyleSheet from "react-native-extended-stylesheet";
-import { DefaultTheme, Provider as PaperProvider } from "react-native-paper";
-import { persistor, store, actions } from "./state";
-import concertApi from "./api/concertApi";
-import NavigationService from "./navigation/NavigationService";
+import React from 'react';
+import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import Amplify from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react-native';
+import EStyleSheet from 'react-native-extended-stylesheet';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { persistor, store, actions } from './state';
+import concertApi from './api/concertApi';
+import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
 import config from './config';
 
 // ** Event listeners ** //
 const handleStageNavigation = stageId => {
-  console.log("in handleStageNavigation");
+  console.log('in handleStageNavigation');
   const currentState = store.getState();
   const { choiceType } = currentState;
 
-  let screen = "Welcome";
-  if (stageId === "STAGE_CHOICE_IMAGERY") {
-    screen = "MentalImagery";
-  } else if (stageId === "STAGE_CHOICE_COLOR_EMOTION") {
-    if (choiceType === "CHOICE_COLOR") {
-      screen = "Colors";
+  let screen = 'Welcome';
+  if (stageId === 'STAGE_CHOICE_IMAGERY') {
+    screen = 'MentalImagery';
+  } else if (stageId === 'STAGE_CHOICE_COLOR_EMOTION') {
+    if (choiceType === 'CHOICE_COLOR') {
+      screen = 'Colors';
     } else {
-      screen = "Emotions";
+      screen = 'Emotions';
     }
-  } else if (stageId === "STAGE_CHOICE_CHILLS") {
-    screen = "Chills";
-  } else if (stageId === "STAGE_END") {
-    screen = "Results";
+  } else if (stageId === 'STAGE_CHOICE_CHILLS') {
+    screen = 'Chills';
+  } else if (stageId === 'STAGE_END') {
+    screen = 'Results';
   } else {
-    screen = "Welcome"; // temporary
-    console.log("stub: something went wrong in handleStageNavigation");
+    screen = 'Welcome'; // temporary
+    console.log('stub: something went wrong in handleStageNavigation');
     // something went wrong
-    // navigate to "something went wrong screen"?
+    // navigate to 'something went wrong screen'?
   }
   store.dispatch(actions.setLastKnownScreen(screen));
   NavigationService.navigate(screen);
 };
 
-concertApi.on("WEBSOCKET_CONNECTED", data => {
-  console.log("stream in ws connected is:", data);
+concertApi.on('WEBSOCKET_CONNECTED', data => {
+  console.log('stream in ws connected is:', data);
   try {
     const { stageId, choiceType, choiceInverted } = data;
-    console.log("choiceType in WS connected is:", choiceType);
+    console.log('choiceType in WS connected is:', choiceType);
     store.dispatch(actions.setChoiceType(choiceType));
     store.dispatch(actions.setChoiceInverted(choiceInverted));
     handleStageNavigation(stageId);
   } catch (error) {
     console.error(
-      "Something went wrong in NavigationService in WEBSOCKET_CONNECTED listener. Error:",
+      'Something went wrong in NavigationService in WEBSOCKET_CONNECTED listener. Error:',
       error
     );
   }
 });
 
-concertApi.on("STAGE_CHANGED", data => {
+concertApi.on('STAGE_CHANGED', data => {
   try {
     const { stageId } = data;
     handleStageNavigation(stageId);
   } catch (error) {
     console.error(
-      "Something went wrong in NavigationService in STAGE_CHANGED listener. Error:",
+      'Something went wrong in NavigationService in STAGE_CHANGED listener. Error:',
       error
     );
   }
@@ -199,7 +199,7 @@ class App extends React.Component {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
-              {Platform.OS === "ios" && <StatusBar barStyle="default" />}
+              {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
               <AppNavigator
                 ref={navigatorRef => {
                   NavigationService.setTopLevelNavigator(navigatorRef);
