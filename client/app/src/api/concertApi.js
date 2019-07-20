@@ -36,12 +36,7 @@ const connect = idToken => {
     console.log('MESSAGE', message.data);
     try {
       const { event, data } = JSON.parse(message.data);
-      if (event === "CONNECTED") {
-        events.emit("WEBSOCKET_CONNECTED", data);
-      }
-      if (event === "EVENT_STAGE_CHANGED") {
-        events.emit("STAGE_CHANGED", data);
-      }
+      events.emit(event, data);
     } catch (error) {
       console.error(error);
     }
