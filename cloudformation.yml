@@ -32,11 +32,11 @@ Resources:
 
   LausanneConcert:
     Type: AWS::Serverless::Application
+    DependsOn:
+      - UserPool
     Properties:
       Location: concert/cloudformation.yml
       Parameters:
-        AdminUserPoolGroupName: !GetAtt UserPool.Outputs.AdminUserPoolGroupName
-        CognitoUserPoolId: !GetAtt UserPool.Outputs.CognitoUserPoolId
         Environment: !Ref Environment
         EventName: !Ref EventName
       Tags:
