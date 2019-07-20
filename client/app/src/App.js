@@ -42,7 +42,7 @@ const handleStageNavigation = stageId => {
   NavigationService.navigate(screen);
 };
 
-concertApi.on('WEBSOCKET_CONNECTED', data => {
+concertApi.on('CONNECTED', data => {
   console.log('stream in ws connected is:', data);
   try {
     const { stageId, choiceType, choiceInverted } = data;
@@ -58,7 +58,7 @@ concertApi.on('WEBSOCKET_CONNECTED', data => {
   }
 });
 
-concertApi.on('STAGE_CHANGED', data => {
+concertApi.on('EVENT_STAGE_CHANGED', data => {
   try {
     const { stageId } = data;
     handleStageNavigation(stageId);
