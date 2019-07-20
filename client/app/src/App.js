@@ -38,7 +38,6 @@ const handleStageNavigation = stageId => {
     // something went wrong
     // navigate to 'something went wrong screen'?
   }
-  store.dispatch(actions.setLastKnownScreen(screen));
   NavigationService.navigate(screen);
 };
 
