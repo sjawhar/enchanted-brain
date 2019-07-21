@@ -22,7 +22,9 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 def handler(event, context):
     connection_key = {
-        ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CONNECTION, event["requestContext"]["connectionId"]),
+        ATTR_RECORD_ID: "{}${}".format(
+            RECORD_ID_PREFIX_CONNECTION, event["requestContext"]["connectionId"]
+        )
     }
 
     resources = table.get_item(Key=connection_key)["Item"]
