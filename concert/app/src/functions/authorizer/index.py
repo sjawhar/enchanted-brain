@@ -10,6 +10,7 @@ from urllib.request import urlopen
 API_ARN = os.environ.get("API_ARN")
 API_METHOD_CHOICE_MADE = os.environ.get("API_METHOD_CHOICE_MADE")
 API_METHOD_EVENT_STAGE_CHANGED = os.environ.get("API_METHOD_EVENT_STAGE_CHANGED")
+COGNITO_APP_CLIENT_ID = os.environ.get("COGNITO_APP_CLIENT_ID")
 COGNITO_GROUP_ADMIN = os.environ.get("COGNITO_GROUP_ADMIN")
 COGNITO_GROUP_VISUALIZATION = os.environ.get("COGNITO_GROUP_VISUALIZATION")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
@@ -43,7 +44,7 @@ def get_verified_token(token):
     if key_index == -1:
         return None
 
-    return jwt.decode(token, JWKS_KEYS[key_index])
+    return jwt.decode(token, JWKS_KEYS[key_index], audience=COGNITO_APP_CLIENT_ID)
 
 
 def get_user_context(user_id):
