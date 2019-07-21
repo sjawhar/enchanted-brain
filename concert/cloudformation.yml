@@ -60,13 +60,9 @@ Resources:
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
-        - AttributeName: recordType
-          AttributeType: S
         - AttributeName: recordId
           AttributeType: S
       KeySchema:
-        - AttributeName: recordType
-          KeyType: HASH
         - AttributeName: recordId
           KeyType: RANGE
       ProvisionedThroughput:

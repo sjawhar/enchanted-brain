@@ -13,10 +13,12 @@ from enchanted_brain.attributes import (
     ATTR_CONNECTION_SQS_QUEUE_URL,
     ATTR_CREATED_AT,
     ATTR_RECORD_ID,
-    ATTR_RECORD_TYPE,
-    RECORD_TYPE_CHOICE,
-    RECORD_TYPE_CONNECTION,
+    RECORD_ID_PREFIX_CHOICE,
+    RECORD_ID_PREFIX_CONNECTION,
+    RECORD_ID_EVENT_STAGE,
 )
+from enchanted_brain.parser import DynamoDbEncoder
+from enchanted_brain.stages import STAGE_WAITING
 
 
 CALLBACK_FUNCTION_ARN = os.environ.get("CALLBACK_FUNCTION_ARN")
@@ -28,13 +30,11 @@ client_lambda = boto3.client("lambda")
 client_sns = boto3.client("sns")
 client_sqs = boto3.client("sqs")
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
 
 
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
-    user_id = event["requestContext"]["authorizer"]["principalId"]
 
     queue_arn = "-".join([CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1]])
     queue_url = client_sqs.create_queue(
@@ -74,28 +74,49 @@ def handler(event, context):
 
     table.put_item(
         Item={
-            ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
-            ATTR_RECORD_ID: connection_id,
+            ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CONNECTION, connection_id),
             ATTR_CREATED_AT: datetime.now().isoformat(),
             ATTR_CONNECTION_LAMBDA_MAPPING_UUID: mapping_uuid,
             ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN: subscription_arn,
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )
+
+    authorizer_context = event["requestContext"]["authorizer"]
+    user_id = authorizer_context["principalId"]
     try:
         table.put_item(
             Item={
-                ATTR_RECORD_TYPE: RECORD_TYPE_CHOICE,
-                ATTR_RECORD_ID: user_id,
+                ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CHOICE, user_id),
                 ATTR_CREATED_AT: datetime.now().isoformat(),
                 ATTR_CHOICE_VALUE_CHILLS: {},
                 ATTR_CHOICE_VALUE_COLOR: {},
                 ATTR_CHOICE_VALUE_EMOTION: {},
             },
-            ConditionExpression=Attr(ATTR_RECORD_TYPE).not_exists(),
+            ConditionExpression=Attr(ATTR_RECORD_ID).not_exists(),
         )
     except ClientError as e:
         if e.response["Error"]["Code"] != "ConditionalCheckFailedException":
             raise
 
-    return {"statusCode": 204}
+    response_data = {
+        "choiceType": authorizer_context["choiceType"],
+        "choiceInverted": authorizer_context["choiceInverted"],
+        "stageId": STAGE_WAITING,
+    }
+
+    stage_record = table.get_item(Key={ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE}).get(
+        "Item"
+    )
+    if stage_record:
+        for key, value in stage_record.items():
+            if key == ATTR_RECORD_ID:
+                continue
+            response_data[key] = value
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {"event": "CONNECTED", "data": response_data}, cls=DynamoDbEncoder
+        ),
+    }
