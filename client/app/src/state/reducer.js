@@ -3,6 +3,7 @@ import * as actionTypes from './actionTypes';
 const INITIAL_STATE = {
   choiceType: '',
   choiceInverted: null,
+  uid: null,
 };
 
 const reducer = (state = INITIAL_STATE, action) => {
@@ -13,6 +14,9 @@ const reducer = (state = INITIAL_STATE, action) => {
     }
     case actionTypes.SET_CHOICE_INVERTED: {
       return { ...state, choiceInverted: action.payload.choiceInverted };
+    }
+    case actionTypes.SET_UID: {
+      return { ...state, uid: action.payload.uid };
     }
     default: {
       return { ...state };

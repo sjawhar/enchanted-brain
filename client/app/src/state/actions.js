@@ -14,4 +14,11 @@ const setChoiceInverted = choiceInverted => ({
   },
 });
 
-export { setChoiceType, setChoiceInverted };
+const setUID = uid => ({
+  type: actionTypes.SET_UID,
+  payload: {
+    uid,
+  },
+});
+
+export { setChoiceType, setChoiceInverted, setUID };
