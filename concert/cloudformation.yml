@@ -64,7 +64,7 @@ Resources:
           AttributeType: S
       KeySchema:
         - AttributeName: recordId
-          KeyType: RANGE
+          KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
