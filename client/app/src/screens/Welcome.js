@@ -1,15 +1,20 @@
 import React, { Component } from 'react';
 import { SafeAreaView, Text } from 'react-native';
+import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
 
+import { actions } from '../state';
 import concertApi from '../api/concertApi';
 
 class WelcomeScreen extends Component {
   constructor(props) {
     super(props);
+    const { setUID } = this.props;
     Auth.currentSession().then(session => {
-      concertApi.connect(session.getIdToken().getJwtToken());
+      const jwt = session.getIdToken().getJwtToken();
+      concertApi.connect(jwt);
+      setUID(jwt);
     });
   }
 
@@ -45,4 +50,7 @@ const styles = EStyleSheet.create({
   },
 });
 
-export default WelcomeScreen;
+export default connect(
+  null,
+  { setUID: actions.setUID }
+)(WelcomeScreen);
