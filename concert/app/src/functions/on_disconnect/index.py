@@ -6,8 +6,7 @@ from enchanted_brain.attributes import (
     ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS,
     ATTR_CONNECTION_SQS_QUEUE_URL,
     ATTR_RECORD_ID,
-    ATTR_RECORD_TYPE,
-    RECORD_TYPE_CONNECTION,
+    RECORD_ID_PREFIX_CONNECTION,
 )
 
 
@@ -23,8 +22,7 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 def handler(event, context):
     connection_key = {
-        ATTR_RECORD_TYPE: RECORD_TYPE_CONNECTION,
-        ATTR_RECORD_ID: event["requestContext"]["connectionId"],
+        ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CONNECTION, event["requestContext"]["connectionId"]),
     }
 
     resources = table.get_item(Key=connection_key)["Item"]

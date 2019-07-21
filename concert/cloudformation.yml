@@ -307,7 +307,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
 
