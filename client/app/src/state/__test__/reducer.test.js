@@ -22,4 +22,11 @@ describe('root reducer', () => {
       expect(state.choiceInverted).toBeTruthy();
     });
   });
+
+  describe(actionTypes.SET_UID, () => {
+    it('should set the user id', () => {
+      const state = reducer(undefined, actions.setUID('watermelon'));
+      expect(state.uid).toEqual('watermelon');
+    });
+  });
 });
