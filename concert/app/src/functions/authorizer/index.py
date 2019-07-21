@@ -47,13 +47,16 @@ def get_verified_token(token):
     return jwt.decode(token, JWKS_KEYS[key_index], audience=COGNITO_APP_CLIENT_ID)
 
 
-def get_user_context(user_id):
+def get_user_context(user_id, groups):
     user_id_hash = int(hashlib.md5(user_id.encode("utf-8")).hexdigest(), 16)
     choice_mod = user_id_hash % (NUM_BUCKETS * 2)
-    return {
+    context = {
         "choiceType": CHOICE_BUCKETS[int(choice_mod / 2)],
         "choiceInverted": bool(choice_mod % 2),
     }
+    for group in groups:
+        context["is{}".format(group)] = True
+    return context
 
 
 def handler(event, context):
@@ -89,5 +92,5 @@ def handler(event, context):
     elif COGNITO_GROUP_VISUALIZATION not in groups:
         # User is an audience member
         statement["Resource"].append("{}/{}".format(API_ARN, API_METHOD_CHOICE_MADE))
-        policy["context"] = get_user_context(policy["principalId"])
+        policy["context"] = get_user_context(policy["principalId"], groups)
     return policy

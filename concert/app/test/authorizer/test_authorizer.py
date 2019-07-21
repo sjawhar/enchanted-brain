@@ -108,8 +108,9 @@ def test_methods_allowed(user_id, groups, method, make_event):
 
 
 def test_audience_user_has_context(make_event):
-    event = make_event()
+    event = make_event(groups=["Jaguar"])
     policy = handler(event, {})
     assert "context" in policy
     assert type(policy["context"]["choiceType"]) is str
     assert type(policy["context"]["choiceInverted"]) is bool
+    assert policy["context"].get("isJaguar") == True
