@@ -9,7 +9,7 @@ from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
     ATTR_CONNECTION_LAMBDA_MAPPING_UUID,
-    ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN,
+    ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS,
     ATTR_CONNECTION_SQS_QUEUE_URL,
     ATTR_CREATED_AT,
     ATTR_RECORD_ID,
@@ -22,7 +22,10 @@ from enchanted_brain.stages import STAGE_WAITING
 
 
 CALLBACK_FUNCTION_ARN = os.environ.get("CALLBACK_FUNCTION_ARN")
-CALLBACK_SNS_TOPIC_ARN = os.environ.get("CALLBACK_SNS_TOPIC_ARN")
+CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ.get("CALLBACK_GLOBAL_SNS_TOPIC_ARN")
+CALLBACK_VISUALIZATION_SNS_TOPIC_ARN = os.environ.get(
+    "CALLBACK_VISUALIZATION_SNS_TOPIC_ARN"
+)
 CALLBACK_SQS_QUEUE_ARN_PREFIX = os.environ.get("CALLBACK_SQS_QUEUE_ARN_PREFIX")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
@@ -31,6 +34,16 @@ client_sns = boto3.client("sns")
 client_sqs = boto3.client("sqs")
 
 table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
+
+
+def sns_subscribe(topic_arn, queue_arn):
+    return client_sns.subscribe(
+        TopicArn=topic_arn,
+        Protocol="sqs",
+        Endpoint=queue_arn,
+        Attributes={"RawMessageDelivery": "true"},
+        ReturnSubscriptionArn=True,
+    )["SubscriptionArn"]
 
 
 def handler(event, context):
@@ -50,7 +63,9 @@ def handler(event, context):
                             "Resource": queue_arn,
                             "Principal": "*",
                             "Condition": {
-                                "ArnEquals": {"aws:SourceArn": CALLBACK_SNS_TOPIC_ARN}
+                                "ArnEquals": {
+                                    "aws:SourceArn": CALLBACK_GLOBAL_SNS_TOPIC_ARN
+                                }
                             },
                         }
                     ],
@@ -64,25 +79,24 @@ def handler(event, context):
         Enabled=True,
         BatchSize=1,
     )["UUID"]
-    subscription_arn = client_sns.subscribe(
-        TopicArn=CALLBACK_SNS_TOPIC_ARN,
-        Protocol="sqs",
-        Endpoint=queue_arn,
-        Attributes={"RawMessageDelivery": "true"},
-        ReturnSubscriptionArn=True,
-    )["SubscriptionArn"]
+    subscription_arns = set([sns_subscribe(CALLBACK_GLOBAL_SNS_TOPIC_ARN, queue_arn)])
+
+    authorizer_context = event["requestContext"]["authorizer"]
+    if authorizer_context.get("isVisualization"):
+        subscription_arns.add(
+            sns_subscribe(CALLBACK_VISUALIZATION_SNS_TOPIC_ARN, queue_arn)
+        )
 
     table.put_item(
         Item={
             ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CONNECTION, connection_id),
             ATTR_CREATED_AT: datetime.now().isoformat(),
             ATTR_CONNECTION_LAMBDA_MAPPING_UUID: mapping_uuid,
-            ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN: subscription_arn,
+            ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS: subscription_arns,
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )
 
-    authorizer_context = event["requestContext"]["authorizer"]
     user_id = authorizer_context["principalId"]
     try:
         table.put_item(

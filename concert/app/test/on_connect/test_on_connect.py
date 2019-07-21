@@ -13,7 +13,10 @@ from src.functions.on_connect.index import (
 )
 
 CALLBACK_FUNCTION_ARN = os.environ.get("CALLBACK_FUNCTION_ARN")
-CALLBACK_SNS_TOPIC_ARN = os.environ.get("CALLBACK_SNS_TOPIC_ARN")
+CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ.get("CALLBACK_GLOBAL_SNS_TOPIC_ARN")
+CALLBACK_VISUALIZATION_SNS_TOPIC_ARN = os.environ.get(
+    "CALLBACK_VISUALIZATION_SNS_TOPIC_ARN"
+)
 CALLBACK_SQS_QUEUE_ARN_PREFIX = os.environ.get("CALLBACK_SQS_QUEUE_ARN_PREFIX")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
@@ -24,9 +27,10 @@ def get_event():
         choice_inverted=False,
         choice_type="CHOICE_COLOR",
         connection_id="test-connection=",
+        group=None,
         principal_id="test-user",
     ):
-        return {
+        event = {
             "requestContext": {
                 "connectionId": connection_id,
                 "authorizer": {
@@ -36,6 +40,9 @@ def get_event():
                 },
             }
         }
+        if group is not None:
+            event["requestContext"]["authorizer"][group] = True
+        return event
 
     return _get_event
 
@@ -50,6 +57,8 @@ def run_handler(
     lambda_response=None,
     sns_params=None,
     sns_response=None,
+    sns_viz_params=None,
+    sns_viz_response=None,
     sqs_params=None,
     sqs_response=None,
     stage_params=None,
@@ -73,6 +82,10 @@ def run_handler(
             "SubscriptionArn": "arn:aws:sns:region:account-id:testing-enchanted-brain-callback:uuid"
         }
     stubber_sns.add_response("subscribe", sns_response, sns_params)
+    if sns_viz_params is not None or sns_viz_response is not None:
+        if sns_viz_response is None:
+            sns_viz_response = sns_response
+        stubber_sns.add_response("subscribe", sns_viz_response, sns_viz_params)
 
     stubber_dynamodb = Stubber(table.meta.client)
     if dynamodb_response is None:
@@ -128,7 +141,7 @@ def test_sqs_queue_is_created_with_connection_id(get_event):
                                 "Principal": "*",
                                 "Condition": {
                                     "ArnEquals": {
-                                        "aws:SourceArn": CALLBACK_SNS_TOPIC_ARN
+                                        "aws:SourceArn": CALLBACK_GLOBAL_SNS_TOPIC_ARN
                                     }
                                 },
                             }
@@ -155,15 +168,29 @@ def test_lambda_event_source_mapping_is_created_with_sqs_queue_arn(get_event):
     )
 
 
-def test_sns_subscription_is_created_with_sqs_queue_arn(get_event):
+def test_sns_global_subscription_is_created_with_sqs_queue_arn(get_event):
     event = get_event(connection_id="sns-connection=")
     run_handler(
         event,
         sns_params={
-            "TopicArn": CALLBACK_SNS_TOPIC_ARN,
-            "Protocol": "sqs",
+            "TopicArn": CALLBACK_GLOBAL_SNS_TOPIC_ARN,
             "Endpoint": "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, "sns-connection"),
             "Attributes": {"RawMessageDelivery": "true"},
+            "Protocol": "sqs",
+            "ReturnSubscriptionArn": True,
+        },
+    )
+
+
+def test_sns_visualization_subscription_is_created_if_is_visualization(get_event):
+    event = get_event(connection_id="vis-connection=", group="isVisualization")
+    run_handler(
+        event,
+        sns_viz_params={
+            "TopicArn": CALLBACK_VISUALIZATION_SNS_TOPIC_ARN,
+            "Endpoint": "{}-{}".format(CALLBACK_SQS_QUEUE_ARN_PREFIX, "vis-connection"),
+            "Attributes": {"RawMessageDelivery": "true"},
+            "Protocol": "sqs",
             "ReturnSubscriptionArn": True,
         },
     )
@@ -184,8 +211,29 @@ def test_connection_record_is_written_with_resource_ids(get_event):
                 "recordId": "CONN$connection-id=",
                 "createdAt": ANY,
                 "lambdaMappingUuid": event_source_mapping_uuid,
+                "snsSubscriptionArns": set([subscription_arn]),
                 "sqsQueueUrl": queue_url,
-                "snsSubscriptionArn": subscription_arn,
+            },
+            "TableName": DYNAMODB_TABLE_NAME,
+        },
+    )
+
+
+def test_visualization_connection_record_has_two_subscriptions(get_event):
+    event = get_event(connection_id="visualization-id=", group="isVisualization")
+    subscription_arn = "global-arn"
+    visualization_arn = "visualization-arn"
+    run_handler(
+        event,
+        sns_response={"SubscriptionArn": subscription_arn},
+        sns_viz_response={"SubscriptionArn": visualization_arn},
+        connection_params={
+            "Item": {
+                "recordId": "CONN$visualization-id=",
+                "createdAt": ANY,
+                "lambdaMappingUuid": ANY,
+                "snsSubscriptionArns": set([subscription_arn, visualization_arn]),
+                "sqsQueueUrl": ANY,
             },
             "TableName": DYNAMODB_TABLE_NAME,
         },

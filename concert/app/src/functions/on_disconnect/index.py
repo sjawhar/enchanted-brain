@@ -3,7 +3,7 @@ import os
 import time
 from enchanted_brain.attributes import (
     ATTR_CONNECTION_LAMBDA_MAPPING_UUID,
-    ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN,
+    ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS,
     ATTR_CONNECTION_SQS_QUEUE_URL,
     ATTR_RECORD_ID,
     ATTR_RECORD_TYPE,
@@ -29,9 +29,8 @@ def handler(event, context):
 
     resources = table.get_item(Key=connection_key)["Item"]
 
-    client_sns.unsubscribe(
-        SubscriptionArn=resources[ATTR_CONNECTION_SNS_SUBSCRIPTION_ARN]
-    )
+    for subscription_arn in resources[ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS]:
+        client_sns.unsubscribe(SubscriptionArn=subscription_arn)
     client_sqs.delete_queue(QueueUrl=resources[ATTR_CONNECTION_SQS_QUEUE_URL])
 
     for i in range(5):
