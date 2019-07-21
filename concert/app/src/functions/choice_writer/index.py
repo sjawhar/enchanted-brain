@@ -14,7 +14,7 @@ from enchanted_brain.attributes import (
     CHOICE_COLOR,
     CHOICE_EMOTION_AGITATION,
     CHOICE_EMOTION_HAPPINESS,
-    RECORD_TYPE_CHOICE,
+    RECORD_ID_PREFIX_CHOICE,
 )
 
 """
@@ -58,7 +58,7 @@ def get_update_args(event):
 
     choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args = {
-        "Key": {ATTR_RECORD_ID: RECORD_TYPE_CHOICE + "$" + record_id},
+        "Key": {ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CHOICE, record_id)},
         "UpdateExpression": "SET #choice_key.#timestamp = :choice_value",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,

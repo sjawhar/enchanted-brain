@@ -7,7 +7,7 @@ from src.functions.choice_writer.index import handler, dynamodb
 
 dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 200}}
 
-table_name = os.environ["DYNAMODB_TABLE_NAME"]
+table_name = os.environ.get("DYNAMODB_TABLE_NAME")
 test_timestamp = "2019-05-14T21:20:03.000Z"
 
 
@@ -70,6 +70,7 @@ def test_choices(choice_type, choice, choice_key, emotion_type, user_id):
             "update_item", dynamo_update_item_success_response, expected_params
         )
         resp = handler(event, None)
+        stub.assert_no_pending_responses()
 
     assert resp == {"statusCode": 204}
 
