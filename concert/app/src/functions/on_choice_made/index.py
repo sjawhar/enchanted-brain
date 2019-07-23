@@ -6,7 +6,7 @@ import os
 Processes websocket API messages from API Gateway
 """
 
-SNS_CHOICE_MADE_ARN = os.environ["CHOICE_MADE_SNS_TOPIC_ARN"]
+CHOICE_MADE_SNS_TOPIC_ARN = os.environ["CHOICE_MADE_SNS_TOPIC_ARN"]
 
 sns = boto3.client("sns")
 
@@ -17,7 +17,7 @@ def handler(event, context):
     message["userId"] = event["requestContext"]["authorizer"]["principalId"]
 
     response = sns.publish(
-        TopicArn=SNS_CHOICE_MADE_ARN,
+        TopicArn=CHOICE_MADE_SNS_TOPIC_ARN,
         Message=json.dumps(message),
         MessageStructure="string",
     )
