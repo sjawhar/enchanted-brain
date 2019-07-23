@@ -60,10 +60,10 @@ Resources:
       UserPoolId: !Ref CognitoUserPool
       Precedence: 20
 
-  EventUserPoolGroup:
+  VisualizationUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      GroupName: !Ref EventName
+      GroupName: Visualization
       UserPoolId: !Ref CognitoUserPool
       Precedence: 50
 
@@ -106,10 +106,10 @@ Outputs:
     Export:
       Name: !Sub ${Environment}-enchanted-brain-admin-user-pool-group-name-v1
 
-  EventUserPoolGroupName:
-    Value: !Ref EventUserPoolGroup
+  VisualizationUserPoolGroupName:
+    Value: !Ref VisualizationUserPoolGroup
     Export:
-      Name: !Sub ${Environment}-enchanted-brain-event-user-pool-group-name-v1
+      Name: !Sub ${Environment}-enchanted-brain-visualization-user-pool-group-name-v1
 
   MobileUserPoolClientId:
     Value: !Ref MobileUserPoolClient

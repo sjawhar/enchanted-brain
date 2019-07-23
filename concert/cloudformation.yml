@@ -4,12 +4,6 @@ Transform: AWS::Serverless-2016-10-31
 
 Parameters:
 
-  AdminUserPoolGroupName:
-    Type: String
-
-  CognitoUserPoolId:
-    Type: String
-
   Environment:
     Type: String
     AllowedValues:
@@ -60,15 +54,11 @@ Resources:
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
-        - AttributeName: recordType
-          AttributeType: S
         - AttributeName: recordId
           AttributeType: S
       KeySchema:
-        - AttributeName: recordType
-          KeyType: HASH
         - AttributeName: recordId
-          KeyType: RANGE
+          KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
@@ -89,11 +79,20 @@ Resources:
       CodeUri: app/src/functions/authorizer
       Environment:
         Variables:
+          PYTHONPATH: /var/task/vendor
           API_ARN: !Sub
             - arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/${StageName}
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
-          COGNITO_USER_POOL_ID: !Ref CognitoUserPoolId
-          COGNITO_ADMIN_GROUP_NAME: !Ref AdminUserPoolGroupName
+          API_METHOD_CHOICE_MADE: !FindInMap [RouteKeys, ChoiceMade, Key]
+          API_METHOD_EVENT_STAGE_CHANGED: !FindInMap [RouteKeys, EventStageChanged, Key]
+          COGNITO_APP_CLIENT_ID:
+            Fn::ImportValue: !Sub ${Environment}-enchanted-brain-mobile-user-pool-client-id-v1
+          COGNITO_USER_POOL_ID:
+            Fn::ImportValue: !Sub ${Environment}-enchanted-brain-cognito-user-pool-id-v1
+          COGNITO_GROUP_ADMIN:
+            Fn::ImportValue: !Sub ${Environment}-enchanted-brain-admin-user-pool-group-name-v1
+          COGNITO_GROUP_VISUALIZATION:
+            Fn::ImportValue: !Sub ${Environment}-enchanted-brain-visualization-user-pool-group-name-v1
 
   AuthorizerPermission:
     Type: AWS::Lambda::Permission
@@ -124,10 +123,16 @@ Resources:
       CompatibleRuntimes:
         - python3.7
 
-  CallbackSnsTopic:
+  CallbackGlobalSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback
+      TopicName: !Sub ${Environment}-enchanted-brain-callback-global
+      KmsMasterKeyId: alias/aws/sns
+
+  CallbackVisualizationSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-enchanted-brain-callback-visualization
       KmsMasterKeyId: alias/aws/sns
 
   CallbackKmsKey:
@@ -200,12 +205,15 @@ Resources:
       Environment:
         Variables:
           CALLBACK_FUNCTION_ARN: !Ref CallbackFunction.Alias
-          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CALLBACK_GLOBAL_SNS_TOPIC_ARN: !Ref CallbackGlobalSnsTopic
+          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
+        - SQSSendMessagePolicy:
+            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -213,7 +221,9 @@ Resources:
               Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
             - Effect: Allow
               Action: sns:Subscribe
-              Resource: !Ref CallbackSnsTopic
+              Resource:
+                - !Ref CallbackGlobalSnsTopic
+                - !Ref CallbackVisualizationSnsTopic
               Condition:
                 ForAnyValue:StringEquals:
                   sns:Protocol: sqs
@@ -290,7 +300,7 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
       Policies:
         - SNSPublishMessagePolicy:
@@ -302,7 +312,6 @@ Resources:
       TemplateURL: cloudformation.ws-route.yml
       Parameters:
         ApiId: !Ref Api
-        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnChoiceMadeFunction.Alias
         RouteKey: !FindInMap [RouteKeys, ChoiceMade, Key]
 
@@ -315,13 +324,13 @@ Resources:
         - !Ref LambdaLayer
       Environment:
         Variables:
-          CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
+          CALLBACK_GLOBAL_SNS_TOPIC_ARN: !Ref CallbackGlobalSnsTopic
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - SNSPublishMessagePolicy:
-            TopicName: !GetAtt CallbackSnsTopic.TopicName
+            TopicName: !GetAtt CallbackGlobalSnsTopic.TopicName
 
   OnEventStageChangedRoute:
     Type: AWS::CloudFormation::Stack
