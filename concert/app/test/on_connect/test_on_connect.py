@@ -59,6 +59,7 @@ def run_handler(
     sns_response=None,
     sns_viz_params=None,
     sns_viz_response=None,
+    sqs_message_params=None,
     sqs_params=None,
     sqs_response=None,
     stage_params=None,
@@ -109,6 +110,8 @@ def run_handler(
             }
         }
     stubber_dynamodb.add_response("get_item", dict(stage_response), stage_params)
+
+    stubber_sqs.add_response("send_message", {}, sqs_message_params)
 
     with stubber_dynamodb, stubber_lambda, stubber_sns, stubber_sqs:
         response = handler(event, {})
@@ -265,7 +268,7 @@ def test_if_choice_record_exists_no_error_is_raised(get_event):
         choice_params={"ConditionExpression": ANY, "Item": ANY, "TableName": ANY},
         choice_error_code="ConditionalCheckFailedException",
     )
-    assert response["statusCode"] == 200
+    assert response["statusCode"] == 204
 
 
 def test_event_stage_record_is_retrieved(get_event):
@@ -281,8 +284,24 @@ def test_event_stage_record_is_retrieved(get_event):
 
 def test_response_includes_connected_event_and_choice_data(get_event):
     event = get_event(choice_type="CHOICE_AWESOME", choice_inverted=True)
+    queue_url = "https://queue.com/event"
     response = run_handler(
         event,
+        sqs_response={"QueueUrl": queue_url},
+        sqs_message_params={
+            "QueueUrl": queue_url,
+            "MessageBody": json.dumps(
+                {
+                    "event": "CONNECTED",
+                    "data": {
+                        "choiceType": "CHOICE_AWESOME",
+                        "choiceInverted": True,
+                        "stageId": "STAGE_AMAZING",
+                        "powerLevel": 9001,
+                    },
+                }
+            ),
+        },
         stage_response={
             "Item": {
                 "recordId": {"S": "EVENT_STAGE"},
@@ -291,27 +310,26 @@ def test_response_includes_connected_event_and_choice_data(get_event):
             }
         },
     )
-    assert response["statusCode"] == 200
-    assert json.loads(response["body"]) == {
-        "event": "CONNECTED",
-        "data": {
-            "choiceType": "CHOICE_AWESOME",
-            "choiceInverted": True,
-            "stageId": "STAGE_AMAZING",
-            "powerLevel": 9001,
-        },
-    }
 
 
 def test_if_not_event_stage_record_stage_id_is_waiting(get_event):
+    queue_url = "https://queue.com/missing-stage"
     event = get_event(choice_type="CHOICE_MISSING", choice_inverted=False)
-    response = run_handler(event, stage_response={})
-    assert response["statusCode"] == 200
-    assert json.loads(response["body"]) == {
-        "event": "CONNECTED",
-        "data": {
-            "choiceType": "CHOICE_MISSING",
-            "choiceInverted": False,
-            "stageId": "STAGE_WAITING",
+    response = run_handler(
+        event,
+        sqs_message_params={
+            "QueueUrl": queue_url,
+            "MessageBody": json.dumps(
+                {
+                    "event": "CONNECTED",
+                    "data": {
+                        "choiceType": "CHOICE_MISSING",
+                        "choiceInverted": False,
+                        "stageId": "STAGE_WAITING",
+                    },
+                }
+            ),
         },
-    }
+        sqs_response={"QueueUrl": queue_url},
+        stage_response={},
+    )
