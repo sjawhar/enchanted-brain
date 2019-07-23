@@ -128,9 +128,11 @@ def handler(event, context):
                 continue
             response_data[key] = value
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(
+    client_sqs.send_message(
+        QueueUrl=queue_url,
+        MessageBody=json.dumps(
             {"event": "CONNECTED", "data": response_data}, cls=DynamoDbEncoder
         ),
-    }
+    )
+
+    return {"statusCode": 204}
