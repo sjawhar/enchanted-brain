@@ -292,9 +292,12 @@ Resources:
         Variables:
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
           CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
+          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: AggregateChoiceDataStream
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
+        - FirehoseWritePolicy:
+            DeliveryStreamName: AggregateChoiceDataStream
 
   OnChoiceMadeRoute:
     Type: AWS::CloudFormation::Stack
@@ -374,6 +377,84 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
 
+  AggregateChoiceDataStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: AggregateChoiceDataStream
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt AggregateChoiceDataS3Bucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 1
+        CompressionFormat: UNCOMPRESSED
+        RoleARN: !GetAtt AggregateChoiceDataStreamRole.Arn
+
+  AggregateChoiceDataStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+
+  AggregateChoiceDataApplication:
+    Type: AWS::KinesisAnalytics::Application
+    Properties:
+      ApplicationCode: 'CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM"
+                          (CHOICE_TIME VARCHAR(64), CHOICE_TYPE VARCHAR(32), CHOICE_SUM DOUBLE, CHOICE_COUNT int);
+
+                        -- Create pump to insert into output.
+                        CREATE OR REPLACE PUMP "STREAM_PUMP" AS
+                           INSERT INTO "DESTINATION_SQL_STREAM"
+                              SELECT STREAM CHOICE_TIME, CHOICE_TYPE, SUM(CHOICE), COUNT(CHOICE)
+                              FROM "ChoiceDataStream_001"
+                              GROUP BY CHOICE_TIME, CHOICE_TYPE;'
+      Inputs:
+      - NamePrefix: ChoiceDataStream
+        InputSchema:
+          RecordColumns:
+            - Mapping: timestamp
+              Name: CHOICE_TIME
+              SqlType: VARCHAR(64)
+            - Mapping: choiceType
+              Name: CHOICE_TYPE
+              SqlType: VARCHAR(32)
+            - Mapping: choice
+              Name: CHOICE
+              SqlType: VARCHAR(32)
+          RecordFormat:
+            RecordFormatType: JSON
+        KinesisFirehoseInput:
+          ResourceARN: !GetAtt AggregateChoiceDataStream.Arn
+          RoleARN: !GetAtt AggregateChoiceDataApplicationRole.Arn
+
+  AggregateChoiceDataApplicationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kinesisanalytics.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ReadFirehoseDeliveryStream
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:DescribeDeliveryStream
+                  - firehose:Get*
+                Resource: !GetAtt AggregateChoiceDataStream.Arn
+
+
+  AggregateChoiceDataS3Bucket:
+    Type: AWS::S3::Bucket
 
 Outputs:
 
