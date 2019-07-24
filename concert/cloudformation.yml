@@ -291,6 +291,14 @@ Resources:
       TopicName: !Sub ${Environment}-enchanted-brain-choice-made
       KmsMasterKeyId: alias/aws/sns
 
+  ChoiceAggregator:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: cloudformation.choice-aggregator.yml
+      Parameters:
+        Environment: !Ref Environment
+        TableName: !Ref Table
+
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -302,12 +310,12 @@ Resources:
         Variables:
           CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
-          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: !Sub ${Environment}-AggregateChoiceDataStream
+          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: !GetAtt ChoiceAggregator.Outputs.KinesisFirehoseStreamName
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
         - FirehoseWritePolicy:
-            DeliveryStreamName: !Sub ${Environment}-AggregateChoiceDataStream
+            DeliveryStreamName: !GetAtt ChoiceAggregator.Outputs.KinesisFirehoseStreamName
 
   OnChoiceMadeRoute:
     Type: AWS::CloudFormation::Stack
@@ -385,118 +393,6 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
-
-  AggregateChoiceDataStream:
-    Type: AWS::KinesisFirehose::DeliveryStream
-    Properties:
-      DeliveryStreamName: !Sub ${Environment}-AggregateChoiceDataStream
-      S3DestinationConfiguration:
-        BucketARN: !GetAtt AggregateChoiceDataS3Bucket.Arn
-        BufferingHints:
-          IntervalInSeconds: 60
-          SizeInMBs: 50
-        CompressionFormat: UNCOMPRESSED
-        RoleARN: !GetAtt AggregateChoiceDataStreamRole.Arn
-        CloudWatchLoggingOptions:
-          Enabled: true
-          LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
-          LogStreamName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
-
-  AggregateChoiceDataStreamLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
-      RetentionInDays: 30
-  AggregateChoiceDataStreamLogStream:
-    Type: AWS::Logs::LogStream
-    Properties:
-      LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
-      LogStreamName: s3Backup
-
-  AggregateChoiceDataStreamRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: firehose.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: firehose_delivery_policy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: s3:*
-                Resource: '*'
-              - Effect: Allow
-                Action: logs:PutLogEvents
-                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs:*
-
-  AggregateChoiceDataApplication:
-    Type: AWS::KinesisAnalytics::Application
-    Properties:
-      ApplicationCode: 'CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM" (CHOICE_TIME TIMESTAMP, CHOICE_TYPE VARCHAR(32), CHOICE_SUM DOUBLE, CHOICE_COUNT int);
-                        CREATE OR REPLACE PUMP "NUMERIC_PUMP" AS
-                          INSERT INTO "DESTINATION_SQL_STREAM"
-                            SELECT STREAM CHOICE_TIME,
-                                   CHOICE_TYPE,
-                                   SUM(CAST(CHOICE AS DOUBLE)) OVER (
-                                     PARTITION BY CHOICE_TYPE
-                                     RANGE INTERVAL ''1'' MINUTE PRECEDING
-                                   ) AS choiceSum,
-                                   COUNT(*) OVER W1 AS choiceCount
-                            FROM   "ChoiceDataStream_001"
-                            WHERE CHOICE_TYPE NOT LIKE ''CHOICE_COLOR''
-                            WINDOW W1 AS (
-                              PARTITION BY CHOICE_TIME
-                              RANGE INTERVAL ''1'' MINUTE PRECEDING
-                            );'
-      Inputs:
-      - NamePrefix: ChoiceDataStream
-        InputSchema:
-          RecordColumns:
-            - Mapping: timestamp
-              Name: CHOICE_TIME
-              SqlType: TIMESTAMP
-            - Mapping: choiceType
-              Name: CHOICE_TYPE
-              SqlType: VARCHAR(32)
-            - Mapping: choice
-              Name: CHOICE
-              SqlType: VARCHAR(32)
-          RecordFormat:
-            RecordFormatType: JSON
-        KinesisFirehoseInput:
-          ResourceARN: !GetAtt AggregateChoiceDataStream.Arn
-          RoleARN: !GetAtt AggregateChoiceDataApplicationRole.Arn
-
-  AggregateChoiceDataApplicationRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: kinesisanalytics.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: read_firehose_delivery_stream_policy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - firehose:DescribeDeliveryStream
-                  - firehose:Get*
-                Resource: !GetAtt AggregateChoiceDataStream.Arn
-
-
-  AggregateChoiceDataS3Bucket:
-    Type: AWS::S3::Bucket
 
 Outputs:
 
