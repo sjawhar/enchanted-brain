@@ -403,22 +403,29 @@ Resources:
   AggregateChoiceDataApplication:
     Type: AWS::KinesisAnalytics::Application
     Properties:
-      ApplicationCode: 'CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM"
-                          (CHOICE_TIME VARCHAR(64), CHOICE_TYPE VARCHAR(32), CHOICE_SUM DOUBLE, CHOICE_COUNT int);
-
-                        -- Create pump to insert into output.
-                        CREATE OR REPLACE PUMP "STREAM_PUMP" AS
-                           INSERT INTO "DESTINATION_SQL_STREAM"
-                              SELECT STREAM CHOICE_TIME, CHOICE_TYPE, SUM(CHOICE), COUNT(CHOICE)
-                              FROM "ChoiceDataStream_001"
-                              GROUP BY CHOICE_TIME, CHOICE_TYPE;'
+      ApplicationCode: 'CREATE OR REPLACE STREAM "DESTINATION_SQL_STREAM" (CHOICE_TIME TIMESTAMP, CHOICE_TYPE VARCHAR(32), CHOICE_SUM DOUBLE, CHOICE_COUNT int);
+                        CREATE OR REPLACE PUMP "NUMERIC_PUMP" AS
+                          INSERT INTO "DESTINATION_SQL_STREAM"
+                            SELECT STREAM CHOICE_TIME,
+                                   CHOICE_TYPE,
+                                   SUM(CAST(CHOICE AS DOUBLE)) OVER (
+                                     PARTITION BY CHOICE_TYPE
+                                     RANGE INTERVAL ''1'' MINUTE PRECEDING
+                                   ) AS choiceSum,
+                                   COUNT(*) OVER W1 AS choiceCount
+                            FROM   "ChoiceDataStream_001"
+                            WHERE CHOICE_TYPE NOT LIKE ''CHOICE_COLOR''
+                            WINDOW W1 AS (
+                              PARTITION BY CHOICE_TIME
+                              RANGE INTERVAL ''1'' MINUTE PRECEDING
+                            );'
       Inputs:
       - NamePrefix: ChoiceDataStream
         InputSchema:
           RecordColumns:
             - Mapping: timestamp
               Name: CHOICE_TIME
-              SqlType: VARCHAR(64)
+              SqlType: TIMESTAMP
             - Mapping: choiceType
               Name: CHOICE_TYPE
               SqlType: VARCHAR(32)
