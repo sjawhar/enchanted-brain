@@ -6,7 +6,9 @@ import os
 Processes websocket API messages from API Gateway
 """
 
-AGGREGATE_CHOICE_DELIVERY_STREAM_NAME = os.environ["AGGREGATE_CHOICE_DELIVERY_STREAM_NAME"]
+AGGREGATE_CHOICE_DELIVERY_STREAM_NAME = os.environ[
+    "AGGREGATE_CHOICE_DELIVERY_STREAM_NAME"
+]
 CHOICE_MADE_SNS_TOPIC_ARN = os.environ["CHOICE_MADE_SNS_TOPIC_ARN"]
 
 sns = boto3.client("sns")
@@ -25,7 +27,7 @@ def handler(event, context):
     )
     firehose_response = firehose.put_record(
         DeliveryStreamName=AGGREGATE_CHOICE_DELIVERY_STREAM_NAME,
-        Record={"Data": json.dumps(message)}
+        Record={"Data": json.dumps(message)},
     )
 
     return {"statusCode": 204}
