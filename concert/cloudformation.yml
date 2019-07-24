@@ -292,12 +292,12 @@ Resources:
         Variables:
           CALLBACK_SNS_TOPIC_ARN: !Ref CallbackSnsTopic
           CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
-          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: AggregateChoiceDataStream
+          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: !Sub ${Environment}-AggregateChoiceDataStream
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
         - FirehoseWritePolicy:
-            DeliveryStreamName: AggregateChoiceDataStream
+            DeliveryStreamName: !Sub ${Environment}-AggregateChoiceDataStream
 
   OnChoiceMadeRoute:
     Type: AWS::CloudFormation::Stack
@@ -380,14 +380,29 @@ Resources:
   AggregateChoiceDataStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
-      DeliveryStreamName: AggregateChoiceDataStream
+      DeliveryStreamName: !Sub ${Environment}-AggregateChoiceDataStream
       S3DestinationConfiguration:
         BucketARN: !GetAtt AggregateChoiceDataS3Bucket.Arn
         BufferingHints:
           IntervalInSeconds: 60
-          SizeInMBs: 1
+          SizeInMBs: 50
         CompressionFormat: UNCOMPRESSED
         RoleARN: !GetAtt AggregateChoiceDataStreamRole.Arn
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
+          LogStreamName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
+
+  AggregateChoiceDataStreamLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
+      RetentionInDays: 30
+  AggregateChoiceDataStreamLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
+      LogStreamName: s3Backup
 
   AggregateChoiceDataStreamRole:
     Type: AWS::IAM::Role
@@ -399,6 +414,17 @@ Resources:
             Principal:
               Service: firehose.amazonaws.com
             Action: sts:AssumeRole
+      Policies:
+        - PolicyName: firehose_delivery_policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource: '*'
+              - Effect: Allow
+                Action: logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs:*
 
   AggregateChoiceDataApplication:
     Type: AWS::KinesisAnalytics::Application
@@ -449,7 +475,7 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: ReadFirehoseDeliveryStream
+        - PolicyName: read_firehose_delivery_stream_policy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
