@@ -28,6 +28,7 @@ def test_callback():
             "post_to_connection", post_to_connection_success_response, expected_params
         )
         handler(event, None)
+        stub.assert_no_pending_responses()
 
 
 def test_invalid_message_raises_exception():
