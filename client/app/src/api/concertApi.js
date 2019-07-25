@@ -36,10 +36,7 @@ const connect = idToken => {
     console.log('MESSAGE', message.data);
     try {
       const { event, data } = JSON.parse(message.data);
-      if (event === 'EVENT_STAGE_CHANGED') {
-        console.log('emitting SHOW_COLOR_PICKER event');
-        events.emit('SHOW_COLOR_PICKER');
-      }
+      events.emit(event, data);
     } catch (error) {
       console.error(error);
     }
