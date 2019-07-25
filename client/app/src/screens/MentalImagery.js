@@ -2,14 +2,9 @@ import React, { useRef } from 'react';
 import { ActivityIndicator, SafeAreaView, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import { store } from '../state';
 
-// TODO: replace preview survey root with published survey when it's available.
-const PREVIEW_SURVEY_ROOT = 'https://ucsf.co1.qualtrics.com/jfe/preview/SV_eEBoIQ1RAp6UxdH';
-// TODO: replace with uid from redux state
-const FAKE_UID = 'Im from the app!';
-
-const MentalImageryScreen = props => {
-  const { navigation } = props;
+const MentalImageryScreen = ({ navigation }) => {
   const webViewRef = useRef(null);
 
   const loadingIndicator = (
@@ -19,14 +14,19 @@ const MentalImageryScreen = props => {
   );
 
   const handleNavigationStateChange = navState => {
-    const { url } = navState;
-    if (url === 'https://www.google.com/') {
-      navigation.navigate('SurveyThankYou');
+    try {
+      const { url } = navState;
+      if (url.includes('neurotech')) {
+        navigation.navigate('Welcome');
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const endpoint = `${PREVIEW_SURVEY_ROOT}/?uid=${FAKE_UID}`;
-
+  const { state: { params: { formUrl } } } = navigation;
+  const { uid } = store.getState();
+  const endpoint = `${formUrl}?uid=${uid}`;
   return (
     <SafeAreaView style={styles.container}>
       <WebView

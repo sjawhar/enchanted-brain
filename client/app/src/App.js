@@ -14,60 +14,43 @@ import layout from './constants/Layout';
 import config from './config';
 
 // ** Event listeners ** //
-const handleStageNavigation = stageId => {
-  console.log('in handleStageNavigation');
-  const currentState = store.getState();
-  const { choiceType } = currentState;
-
-  let screen = 'Welcome';
-  if (stageId === 'STAGE_CHOICE_IMAGERY') {
-    screen = 'MentalImagery';
-  } else if (stageId === 'STAGE_CHOICE_COLOR_EMOTION') {
-    if (choiceType === 'CHOICE_COLOR') {
-      screen = 'Colors';
-    } else {
-      screen = 'Emotions';
-    }
-  } else if (stageId === 'STAGE_CHOICE_CHILLS') {
-    screen = 'Chills';
-  } else if (stageId === 'STAGE_END') {
-    screen = 'Results';
-  } else {
-    screen = 'Welcome'; // temporary
-    console.log('stub: something went wrong in handleStageNavigation');
-    // something went wrong
-    // navigate to 'something went wrong screen'?
+const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageData }) => {
+  if (choiceType) {
+    store.dispatch(actions.setChoiceType(choiceType));
   }
-  NavigationService.navigate(screen);
+  if (choiceInverted !== undefined) {
+    store.dispatch(actions.setChoiceInverted(choiceInverted));
+  }
+
+  const screen = (() => {
+    switch (stageId) {
+      case 'STAGE_WAITING':
+        return 'Welcome';
+      case 'STAGE_CHOICE_IMAGERY':
+        return 'MentalImagery';
+      case 'STAGE_CHOICE_COLOR_EMOTION':
+        if (store.getState().choiceType === 'CHOICE_COLOR') {
+          return 'Colors';
+        }
+        return 'Emotions';
+      case 'STAGE_CHOICE_CHILLS':
+        return 'Chills';
+      case 'STAGE_END':
+        return 'Results';
+      default:
+        // something went wrong
+        // navigate to 'something went wrong screen'?
+        console.log('stub: something went wrong in handleStageNavigation');
+        return 'Welcome';
+    }
+  })();
+
+  console.debug("Screen chosen", screen);
+  NavigationService.navigate(screen, stageData);
 };
 
-concertApi.on('CONNECTED', data => {
-  console.log('stream in ws connected is:', data);
-  try {
-    const { stageId, choiceType, choiceInverted } = data;
-    console.log('choiceType in WS connected is:', choiceType);
-    store.dispatch(actions.setChoiceType(choiceType));
-    store.dispatch(actions.setChoiceInverted(choiceInverted));
-    handleStageNavigation(stageId);
-  } catch (error) {
-    console.error(
-      'Something went wrong in NavigationService in WEBSOCKET_CONNECTED listener. Error:',
-      error
-    );
-  }
-});
-
-concertApi.on('EVENT_STAGE_CHANGED', data => {
-  try {
-    const { stageId } = data;
-    handleStageNavigation(stageId);
-  } catch (error) {
-    console.error(
-      'Something went wrong in NavigationService in STAGE_CHANGED listener. Error:',
-      error
-    );
-  }
-});
+concertApi.on('CONNECTED', handleStageNavigation);
+concertApi.on('EVENT_STAGE_CHANGED', handleStageNavigation);
 
 // ** AWS Amplify config ** //
 Amplify.configure({

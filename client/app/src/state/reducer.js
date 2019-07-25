@@ -1,8 +1,8 @@
 import * as actionTypes from './actionTypes';
 
 const INITIAL_STATE = {
-  choiceType: '',
-  choiceInverted: null,
+  choiceType: 'CHOICE_COLOR',
+  choiceInverted: false,
   uid: null,
 };
 
