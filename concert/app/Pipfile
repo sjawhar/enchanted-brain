@@ -7,6 +7,8 @@ verify_ssl = true
 black = "==19.3b0"
 boto3 = "==1.9.182"
 pytest = "~=4.5.0"
+pytest-watch = "~=4.2.0"
+python-jose = "~=3.0.1"
 
 [packages]
 
@@ -15,5 +17,6 @@ python_version = "3.7"
 
 [scripts]
 test = "pytest -v"
+test-dev = "pytest-watch -- -v"
 format = "black --verbose --target-version py37 ."
 lint = "pipenv run format --check"
