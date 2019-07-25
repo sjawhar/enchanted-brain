@@ -16,8 +16,7 @@ client_lambda = boto3.client("lambda")
 client_sns = boto3.client("sns")
 client_sqs = boto3.client("sqs")
 
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+table = boto3.resource("dynamodb").Table(DYNAMODB_TABLE_NAME)
 
 
 def handler(event, context):
@@ -29,7 +28,7 @@ def handler(event, context):
 
     resources = table.get_item(Key=connection_key)["Item"]
 
-    for subscription_arn in resources[ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS]:
+    for subscription_arn in sorted(resources[ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS]):
         client_sns.unsubscribe(SubscriptionArn=subscription_arn)
     client_sqs.delete_queue(QueueUrl=resources[ATTR_CONNECTION_SQS_QUEUE_URL])
 

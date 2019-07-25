@@ -2,7 +2,6 @@ import json
 import os
 import pytest
 from boto3.dynamodb.conditions import Attr
-from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
 from src.functions.on_connect.index import (
     handler,
