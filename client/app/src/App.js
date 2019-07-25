@@ -1,14 +1,75 @@
-import Amplify from 'aws-amplify';
 import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import Amplify from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import { withAuthenticator } from 'aws-amplify-react-native';
-
+import { persistor, store, actions } from './state';
+import concertApi from './api/concertApi';
+import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
 import config from './config';
 
+// ** Event listeners ** //
+const handleStageNavigation = stageId => {
+  console.log('in handleStageNavigation');
+  const currentState = store.getState();
+  const { choiceType } = currentState;
+
+  let screen = 'Welcome';
+  if (stageId === 'STAGE_CHOICE_IMAGERY') {
+    screen = 'MentalImagery';
+  } else if (stageId === 'STAGE_CHOICE_COLOR_EMOTION') {
+    if (choiceType === 'CHOICE_COLOR') {
+      screen = 'Colors';
+    } else {
+      screen = 'Emotions';
+    }
+  } else if (stageId === 'STAGE_CHOICE_CHILLS') {
+    screen = 'Chills';
+  } else if (stageId === 'STAGE_END') {
+    screen = 'Results';
+  } else {
+    screen = 'Welcome'; // temporary
+    console.log('stub: something went wrong in handleStageNavigation');
+    // something went wrong
+    // navigate to 'something went wrong screen'?
+  }
+  NavigationService.navigate(screen);
+};
+
+concertApi.on('CONNECTED', data => {
+  console.log('stream in ws connected is:', data);
+  try {
+    const { stageId, choiceType, choiceInverted } = data;
+    console.log('choiceType in WS connected is:', choiceType);
+    store.dispatch(actions.setChoiceType(choiceType));
+    store.dispatch(actions.setChoiceInverted(choiceInverted));
+    handleStageNavigation(stageId);
+  } catch (error) {
+    console.error(
+      'Something went wrong in NavigationService in WEBSOCKET_CONNECTED listener. Error:',
+      error
+    );
+  }
+});
+
+concertApi.on('EVENT_STAGE_CHANGED', data => {
+  try {
+    const { stageId } = data;
+    handleStageNavigation(stageId);
+  } catch (error) {
+    console.error(
+      'Something went wrong in NavigationService in STAGE_CHANGED listener. Error:',
+      error
+    );
+  }
+});
+
+// ** AWS Amplify config ** //
 Amplify.configure({
   Auth: {
     region: config.AMPLIFY_REGION,
@@ -78,6 +139,7 @@ const signUpConfig = {
   ],
 };
 
+// ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
 
 // Abitrary min, max for rem and width
@@ -115,6 +177,7 @@ const calculateRem = (width, minWidth, maxWidth, minRem, maxRem) => {
   return calculatedRem;
 };
 
+// ** Extended Stylesheet Setup ** //
 EStyleSheet.build({
   $rem: calculateRem(SCREEN_WIDTH, MIN_WIDTH, MAX_WIDTH, MIN_REM, MAX_REM),
 });
@@ -132,10 +195,18 @@ class App extends React.Component {
   render() {
     return (
       <PaperProvider theme={theme}>
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
-        </View>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <View style={styles.container}>
+              {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
+              <AppNavigator
+                ref={navigatorRef => {
+                  NavigationService.setTopLevelNavigator(navigatorRef);
+                }}
+              />
+            </View>
+          </PersistGate>
+        </Provider>
       </PaperProvider>
     );
   }
