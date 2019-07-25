@@ -5,8 +5,8 @@ import reducer from '../reducer';
 describe('root reducer', () => {
   it('should cleanly initialize state', () => {
     const state = reducer(undefined, { type: '' });
-    expect(state.choiceType).toEqual('');
-    expect(state.choiceInverted).toEqual(null);
+    expect(state.choiceType).toEqual('CHOICE_COLOR');
+    expect(state.choiceInverted).toEqual(false);
   });
 
   describe(actionTypes.SET_CHOICE_TYPE, () => {
