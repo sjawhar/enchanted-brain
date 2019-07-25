@@ -16,26 +16,15 @@ const connect = idToken => {
   });
 
   ws.onopen = () => {
-    console.log('CONNECTED');
-    ws.send(
-      JSON.stringify({
-        event: 'CHOICE_MADE',
-        data: {
-          choiceType: 'CHOICE_COLOR',
-          choice: 'COLOR_BLUE',
-          timestamp: new Date().toISOString(),
-        },
-      })
-    );
-    console.log('MESSAGE SENT.');
+    console.debug('CONNECTED');
   };
   ws.onmessage = message => {
     if (!message || !message.data) {
       return;
     }
-    console.log('MESSAGE', message.data);
     try {
       const { event, data } = JSON.parse(message.data);
+      console.debug("MESSAGE", event, data);
       events.emit(event, data);
     } catch (error) {
       console.error(error);
@@ -48,7 +37,7 @@ const connect = idToken => {
 
   ws.onclose = e => {
     ws = null;
-    console.log('CLOSED', e.code, e.reason);
+    console.debug('CLOSED', e.code, e.reason);
     if (isConnect) {
       connect(idToken);
     }

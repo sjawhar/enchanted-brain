@@ -12,9 +12,9 @@ class WelcomeScreen extends Component {
     super(props);
     const { setUID } = this.props;
     Auth.currentSession().then(session => {
-      const jwt = session.getIdToken().getJwtToken();
-      concertApi.connect(jwt);
-      setUID(jwt);
+      const idToken = session.getIdToken();
+      concertApi.connect(idToken.getJwtToken());
+      setUID(idToken.payload['cognito:username']);
     });
   }
 
