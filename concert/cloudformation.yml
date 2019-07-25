@@ -497,6 +497,14 @@ Resources:
 
   AggregateChoiceDataS3Bucket:
     Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-enchanted-brain-choices
+      AccessControl: private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
 
 Outputs:
 
