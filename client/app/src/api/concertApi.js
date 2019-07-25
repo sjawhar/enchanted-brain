@@ -24,7 +24,7 @@ const connect = idToken => {
     }
     try {
       const { event, data } = JSON.parse(message.data);
-      console.debug("MESSAGE", event, data);
+      console.debug('MESSAGE', event, data);
       events.emit(event, data);
     } catch (error) {
       console.error(error);
