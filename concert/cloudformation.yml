@@ -302,9 +302,12 @@ Resources:
         Variables:
           CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           CHOICE_MADE_SNS_TOPIC_ARN: !Ref ChoiceMadeSnsTopic
+          AGGREGATE_CHOICE_DELIVERY_STREAM_NAME: !Ref AggregateChoiceDataStream
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
+        - FirehoseWritePolicy:
+            DeliveryStreamName: !Ref AggregateChoiceDataStream
 
   OnChoiceMadeRoute:
     Type: AWS::CloudFormation::Stack
@@ -383,6 +386,65 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
 
+  AggregateChoiceDataStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub ${Environment}-enchanted-brain-aggregate
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt AggregateChoiceDataS3Bucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 50
+        CompressionFormat: UNCOMPRESSED
+        RoleARN: !GetAtt AggregateChoiceDataStreamRole.Arn
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref AggregateChoiceDataStreamLogGroup
+          LogStreamName: !Ref AggregateChoiceDataStreamLogStream
+
+  AggregateChoiceDataStreamLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub ${Environment}-enchanted-brain-aggregateChoiceDataStreamLogs
+      RetentionInDays: 30
+  AggregateChoiceDataStreamLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref AggregateChoiceDataStreamLogGroup
+      LogStreamName: s3Backup
+
+  AggregateChoiceDataStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: firehose_delivery_policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: s3:*
+                Resource: !GetAtt AggregateChoiceDataS3Bucket.Arn
+              - Effect: Allow
+                Action: logs:PutLogEvents
+                Resource: !GetAtt AggregateChoiceDataStreamLogGroup.Arn
+
+  AggregateChoiceDataS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-enchanted-brain-choices
+      AccessControl: private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
 
 Outputs:
 
