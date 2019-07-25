@@ -24,7 +24,11 @@ const MentalImageryScreen = ({ navigation }) => {
     }
   };
 
-  const { state: { params: { formUrl } } } = navigation;
+  const {
+    state: {
+      params: { formUrl },
+    },
+  } = navigation;
   const { uid } = store.getState();
   const endpoint = `${formUrl}?uid=${uid}`;
   return (

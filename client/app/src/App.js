@@ -45,7 +45,7 @@ const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageDa
     }
   })();
 
-  console.debug("Screen chosen", screen);
+  console.debug('Screen chosen', screen);
   NavigationService.navigate(screen, stageData);
 };
 
@@ -181,7 +181,7 @@ class App extends React.Component {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
-              {Platform.OS === 'ios' && <StatusBar barStyle='default' />}
+              {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
               <AppNavigator
                 ref={navigatorRef => {
                   NavigationService.setTopLevelNavigator(navigatorRef);
