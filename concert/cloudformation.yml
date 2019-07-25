@@ -389,7 +389,7 @@ Resources:
   AggregateChoiceDataStream:
     Type: AWS::KinesisFirehose::DeliveryStream
     Properties:
-      DeliveryStreamName: !Sub ${Environment}-AggregateChoiceDataStream
+      DeliveryStreamName: !Sub ${Environment}-enchanted-brain-aggregate
       S3DestinationConfiguration:
         BucketARN: !GetAtt AggregateChoiceDataS3Bucket.Arn
         BufferingHints:
