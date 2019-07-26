@@ -59,6 +59,9 @@ Amplify.configure({
     userPoolId: config.AMPLIFY_USER_POOL_ID,
     userPoolWebClientId: config.AMPLIFY_USER_POOL_WEB_CLIENT_ID,
   },
+  Analytics: {
+    disabled: true,
+  },
 });
 
 const signUpConfig = {
