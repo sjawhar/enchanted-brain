@@ -13,17 +13,6 @@ const MentalImageryScreen = ({ navigation }) => {
     </View>
   );
 
-  const handleNavigationStateChange = navState => {
-    try {
-      const { url } = navState;
-      if (url.includes('neurotech')) {
-        navigation.navigate('Welcome');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const {
     state: {
       params: { formUrl },
@@ -31,6 +20,14 @@ const MentalImageryScreen = ({ navigation }) => {
   } = navigation;
   const { uid } = store.getState();
   const endpoint = `${formUrl}?uid=${uid}`;
+
+  const handleNavigationStateChange = navState => {
+    const { url } = navState;
+    if (url !== endpoint) {
+      navigation.navigate('Welcome');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <WebView
