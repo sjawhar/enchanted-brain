@@ -1,13 +1,15 @@
 import React from 'react';
 import { Platform, TouchableNativeFeedback, TouchableOpacity } from 'react-native';
 
-const Touchable = props => {
-  const { children, ...rest } = props;
+const Touchable = ({
+  children,
+  ...props,
+}) => {
   if (Platform.OS === 'ios') {
-    return <TouchableOpacity {...rest}>{children}</TouchableOpacity>;
+    return <TouchableOpacity {...props}>{children}</TouchableOpacity>;
   }
 
-  return <TouchableNativeFeedback {...rest}>{children}</TouchableNativeFeedback>;
+  return <TouchableNativeFeedback {...props}>{children}</TouchableNativeFeedback>;
 };
 
 export default Touchable;
