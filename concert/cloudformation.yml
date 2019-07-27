@@ -306,6 +306,8 @@ Resources:
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt CallbackVisualizationSnsTopic.TopicName
         - FirehoseWritePolicy:
             DeliveryStreamName: !Ref AggregateChoiceDataStream
 
