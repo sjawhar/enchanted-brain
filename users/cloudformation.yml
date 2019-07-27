@@ -14,6 +14,11 @@ Parameters:
     Type: String
 
 
+Conditions:
+
+  IsProduction: !Equals [!Ref Environment, production]
+
+
 Resources:
 
   CognitoUserPool:
@@ -88,6 +93,7 @@ Resources:
         - custom:color-perception
       RefreshTokenValidity: 30
       GenerateSecret: false
+      ExplicitAuthFlows: !If [IsProduction, !Ref AWS::NoValue, [USER_PASSWORD_AUTH]]
 
 Outputs:
 
