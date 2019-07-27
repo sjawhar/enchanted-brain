@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Animated, PanResponder, Text, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 import Layout from '../../constants/Layout';
 
 const WINDOW_HEIGHT = Layout.window.height;
