@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 import BackgroundColorInterpolation from '../features/chills/BackgroundColorInterpolation';
 
 class ChillsScreen extends Component {
