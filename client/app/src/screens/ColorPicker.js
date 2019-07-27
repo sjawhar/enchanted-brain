@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ScrollView } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { Constants } from 'expo';
+import Constants from 'expo-constants';
 import ThreeHexagonsWithMargin from '../features/colors/ThreeHexagonsWithMargin';
 import concertApi from '../api/concertApi';
 
