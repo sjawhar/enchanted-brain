@@ -113,12 +113,7 @@ def handler(event, context):
         if e.response["Error"]["Code"] != "ConditionalCheckFailedException":
             raise
 
-    response_data = {
-        "choiceType": authorizer_context["choiceType"],
-        "choiceInverted": authorizer_context["choiceInverted"],
-        "stageId": STAGE_WAITING,
-    }
-
+    response_data = {"stageId": STAGE_WAITING}
     stage_record = table.get_item(Key={ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE}).get(
         "Item"
     )
@@ -127,6 +122,11 @@ def handler(event, context):
             if key == ATTR_RECORD_ID:
                 continue
             response_data[key] = value
+
+    for key, value in authorizer_context.items():
+        if key == "principalId" or key == "integrationLatency":
+            continue
+        response_data[key] = value
 
     client_sqs.send_message(
         QueueUrl=queue_url,
