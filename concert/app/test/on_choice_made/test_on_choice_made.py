@@ -79,8 +79,12 @@ def test_choices(choice_type, choice, timestamp, user_id):
 
     resp = None
     with Stubber(sns) as sns_stub, Stubber(firehose) as firehose_stub:
-        sns_stub.add_response("publish", SNS_SUCCESS_RESPONSE, choice_made_sns_expected_params)
-        sns_stub.add_response("publish", SNS_SUCCESS_RESPONSE, visualization_sns_expected_params)
+        sns_stub.add_response(
+            "publish", SNS_SUCCESS_RESPONSE, choice_made_sns_expected_params
+        )
+        sns_stub.add_response(
+            "publish", SNS_SUCCESS_RESPONSE, visualization_sns_expected_params
+        )
         firehose_stub.add_response(
             "put_record", PUT_RECORD_SUCCESS_RESPONSE, firehose_expected_params
         )
