@@ -54,7 +54,7 @@
     "babel-preset-expo": "^5.1.1",
     "eslint": "^6.0.1",
     "eslint-config-universe": "^1.0.7",
-    "expo-cli": "^2.21.2",
+    "expo-cli": "^3.0.4",
     "jest-expo": "^33.0.0",
     "prettier": "^1.18.2",
     "prettier-eslint-cli": "^5.0.0",
