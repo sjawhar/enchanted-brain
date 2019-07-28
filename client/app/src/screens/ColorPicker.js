@@ -70,6 +70,8 @@ export default class ColorsScreen extends Component {
       isShowPrompt: false,
       waitingHeader: color ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
     });
+    Vibration.cancel();
+
     if (color) {
       concertApi.send({
         event: 'CHOICE_MADE',
@@ -80,6 +82,7 @@ export default class ColorsScreen extends Component {
         },
       });
     }
+
     this.scheduleNextPrompt();
   };
 
