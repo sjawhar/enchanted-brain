@@ -12,4 +12,5 @@ os.environ[
 os.environ[
     "CALLBACK_SQS_QUEUE_ARN_PREFIX"
 ] = "arn:aws:sqs:region:account-id:testing-enchanted-brain-callback"
+os.environ["CALLBACK_TIMEOUT_SECONDS"] = "30"
 os.environ["DYNAMODB_TABLE_NAME"] = "testing-enchanted-brain"
