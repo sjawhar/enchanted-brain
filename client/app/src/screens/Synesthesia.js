@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { Vibration } from 'react-native';
 
+import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
 import { VIBRATION_PATTERN } from '../config';
 import concertApi from '../api/concertApi';
+import { CHOICE_COLOR } from '../constants/Choices';
+import { CHOICE_MADE } from '../constants/Events';
 
 const MESSAGE_MISSED_HEADER = '';
 
@@ -14,12 +17,21 @@ const MESSAGE_WAITING_BODY = 'Please continue listening to the music';
 const MESSAGE_COMPLETE_HEADER = 'Get Enchanted!';
 const MESSAGE_COMPLETE_BODY = 'Please enjoy the next stage of the concert!';
 
-export default class ColorsScreen extends Component {
+export default class SynesthsiaScreen extends Component {
   constructor(props) {
     super(props);
-    const { startTime, endTime, frequency, timeout } = props.navigation.state.params;
+    const {
+      startTime,
+      endTime,
+      frequency,
+      timeout,
+      choiceType,
+      choiceInverted,
+    } = props.navigation.state.params;
 
     this.state = {
+      choiceType,
+      choiceInverted,
       endTime,
       frequency: frequency * 1000,
       isShowPrompt: false,
@@ -61,23 +73,23 @@ export default class ColorsScreen extends Component {
     setTimeout(this.handleChoice, this.state.timeout);
   };
 
-  handleChoice = color => {
-    if (!color && !this.state.isShowPrompt) {
+  handleChoice = choice => {
+    if (choice === undefined && !this.state.isShowPrompt) {
       return;
     }
 
     this.setState({
       isShowPrompt: false,
-      waitingHeader: color ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
+      waitingHeader: choice ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
     });
     Vibration.cancel();
 
-    if (color) {
+    if (choice !== undefined) {
       concertApi.send({
-        event: 'CHOICE_MADE',
+        event: CHOICE_MADE,
         data: {
-          choiceType: 'CHOICE_COLOR',
-          choice: color,
+          choiceType: this.state.choiceType,
+          choice,
           timestamp: new Date(this.state.timestamp).toISOString(),
         },
       });
@@ -87,13 +99,17 @@ export default class ColorsScreen extends Component {
   };
 
   render() {
-    if (this.state.isShowPrompt) {
+    const { choiceInverted, choiceType, isShowPrompt, waitingHeader, waitingMessage } = this.state;
+    if (!isShowPrompt) {
+      return <WaitingScreen headerText={waitingHeader} messageText={waitingMessage} />;
+    } else if (choiceType === CHOICE_COLOR) {
       return <HexagonGrid onChoice={this.handleChoice} />;
     }
     return (
-      <WaitingScreen
-        headerText={this.state.waitingHeader}
-        messageText={this.state.waitingMessage}
+      <EmotionPicker
+        onChoice={this.handleChoice}
+        choiceType={choiceType}
+        choiceInverted={choiceInverted}
       />
     );
   }
