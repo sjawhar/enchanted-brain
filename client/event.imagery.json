@@ -1,1 +1,7 @@
-{"event":"EVENT_STAGE_CHANGED","data":{"stageId":"STAGE_CHOICE_IMAGERY","formUrl":"https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH"}}
+{
+  "event": "EVENT_STAGE_CHANGED",
+  "data": {
+    "stageId": "STAGE_CHOICE_IMAGERY",
+    "formUrl": "https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH"
+  }
+}
