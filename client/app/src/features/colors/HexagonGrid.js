@@ -39,7 +39,6 @@ class HexagonGrid extends Component {
 
   render() {
     const { onChoice } = this.props;
-    console.log(onChoice);
     return (
       <View style={styles.container}>
         {swatchColors.map((row, i) => (
@@ -57,7 +56,7 @@ class HexagonGrid extends Component {
                   !j && i % 2 ? styles.lastHexagonContainerLeft : '',
                 ]}
                 key={color}>
-                <Hexagon onPress={onChoice(color)} width={HEXAGON_WIDTH} fill={color} />
+                <Hexagon onPress={() => onChoice(color)} width={HEXAGON_WIDTH} fill={color} />
               </View>
             ))}
           </View>
@@ -74,7 +73,6 @@ const styles = EStyleSheet.create({
     backgroundColor: 'rgb(95, 95, 95)',
     justifyContent: 'center',
   },
-
   row: {
     width: ROW_WIDTH,
     flexDirection: 'row',
