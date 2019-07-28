@@ -2,7 +2,7 @@ import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
@@ -185,6 +185,12 @@ const theme = {
 };
 
 class App extends React.Component {
+  async componentDidMount() {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    concertApi.connect(idToken.getJwtToken());
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+  }
+
   render() {
     return (
       <PaperProvider theme={theme}>
