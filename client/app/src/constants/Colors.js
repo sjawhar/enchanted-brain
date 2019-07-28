@@ -1,5 +1,4 @@
 import Color from 'color';
-import hsluv from 'hsluv';
 const tintColor = '#2f95dc';
 
 export const swatchColors = [

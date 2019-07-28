@@ -70,7 +70,6 @@ const Hexagon = ({
   hexagonProps,
   polylineProps,
 }) => {
-
   const { longDiagonal } = getHexagonComponents(width);
   const hexagonPoints = getHexagonPoints(width);
   const borderPoints = getBorderPoints(width);

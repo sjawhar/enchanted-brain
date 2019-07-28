@@ -49,16 +49,14 @@ class HexagonGrid extends Component {
               i % 2 ? styles.rowLeft : styles.rowRight,
               !i ? styles.firstRow : '',
             ]}
-            key={i}
-          >
+            key={i}>
             {row.map((color, j) => (
               <View
                 style={[
                   i % 2 ? styles.hexagonContainerLeft : styles.hexagonContainerRight,
                   !j && i % 2 ? styles.lastHexagonContainerLeft : '',
                 ]}
-                key={color}
-              >
+                key={color}>
                 <Hexagon onPress={onChoice(color)} width={HEXAGON_WIDTH} fill={color} />
               </View>
             ))}
