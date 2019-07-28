@@ -27,6 +27,7 @@ CALLBACK_VISUALIZATION_SNS_TOPIC_ARN = os.environ.get(
     "CALLBACK_VISUALIZATION_SNS_TOPIC_ARN"
 )
 CALLBACK_SQS_QUEUE_ARN_PREFIX = os.environ.get("CALLBACK_SQS_QUEUE_ARN_PREFIX")
+CALLBACK_TIMEOUT_SECONDS = os.environ.get("CALLBACK_TIMEOUT_SECONDS")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
 client_lambda = boto3.client("lambda")
@@ -58,6 +59,7 @@ def handler(event, context):
     queue_url = client_sqs.create_queue(
         QueueName=queue_arn.split(":")[-1],
         Attributes={
+            "VisibilityTimeout": CALLBACK_TIMEOUT_SECONDS,
             "Policy": json.dumps(
                 {
                     "Version": "2012-10-17",

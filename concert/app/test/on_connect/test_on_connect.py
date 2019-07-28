@@ -130,6 +130,7 @@ def test_sqs_queue_is_created_with_connection_id(get_event):
         sqs_params={
             "QueueName": "testing-enchanted-brain-callback-sqs-connection",
             "Attributes": {
+                "VisibilityTimeout": "30",
                 "Policy": json.dumps(
                     {
                         "Version": "2012-10-17",
@@ -163,6 +164,7 @@ def test_visualization_sqs_queue_permission_includes_visualization_topic(get_eve
         sqs_params={
             "QueueName": "testing-enchanted-brain-callback-sqs-viz-connection",
             "Attributes": {
+                "VisibilityTimeout": "30",
                 "Policy": json.dumps(
                     {
                         "Version": "2012-10-17",
