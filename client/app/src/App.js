@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import Amplify, { Auth } from 'aws-amplify';
@@ -11,7 +11,7 @@ import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
-import config from './config';
+import config, { IS_IOS } from './config';
 
 // ** Event listeners ** //
 const handleStageNavigation = ({
@@ -197,7 +197,7 @@ class App extends React.Component {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
-              {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+              {IS_IOS && <StatusBar barStyle="default" />}
               <AppNavigator
                 ref={navigatorRef => {
                   NavigationService.setTopLevelNavigator(navigatorRef);
