@@ -72,7 +72,7 @@ class ColorsScreen extends Component {
           <HexagonGrid onChoice={this.handleChoice} />
         ) : (
           <View>
-            <Text style={styles.headerText}>Response recorded</Text>
+            <Text style={styles.headerText}>Get Enchanted</Text>
             <Text style={styles.messageText}>
               Please listen to the music and wait for the next prompt.
             </Text>
