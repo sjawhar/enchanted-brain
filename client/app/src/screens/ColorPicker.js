@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
+import { Vibration } from 'react-native';
 
 import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
+import { VIBRATION_PATTERN } from '../config';
 import concertApi from '../api/concertApi';
 
 const MESSAGE_MISSED_HEADER = '';
@@ -55,18 +57,20 @@ export default class ColorsScreen extends Component {
 
   showPrompt = () => {
     this.setState({ isShowPrompt: true });
+    Vibration.vibrate(VIBRATION_PATTERN);
     setTimeout(this.handleChoice, this.state.timeout);
   };
 
   handleChoice = color => {
+    if (!color && !this.state.isShowPrompt) {
+      return;
+    }
+
     this.setState({
       isShowPrompt: false,
-      waitingHeader: MESSAGE_MISSED_HEADER,
+      waitingHeader: color ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
     });
     if (color) {
-      this.setState({
-        waitingHeader: MESSAGE_WAITING_HEADER,
-      });
       concertApi.send({
         event: 'CHOICE_MADE',
         data: {

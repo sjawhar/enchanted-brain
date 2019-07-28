@@ -1,8 +1,10 @@
 import React from 'react';
-import { Platform, TouchableNativeFeedback, TouchableOpacity } from 'react-native';
+import { TouchableNativeFeedback, TouchableOpacity } from 'react-native';
+
+import { IS_IOS } from '../config';
 
 const Touchable = ({ children, ...props }) => {
-  if (Platform.OS === 'ios') {
+  if (IS_IOS) {
     return <TouchableOpacity {...props}>{children}</TouchableOpacity>;
   }
 
