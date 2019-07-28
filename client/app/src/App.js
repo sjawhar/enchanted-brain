@@ -14,13 +14,21 @@ import layout from './constants/Layout';
 import config from './config';
 
 // ** Event listeners ** //
-const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageData }) => {
+const handleStageNavigation = ({
+  choiceInverted,
+  choiceType,
+  choiceTypes,
+  stageId,
+  ...stageData
+}) => {
   if (choiceType) {
     store.dispatch(actions.setChoiceType(choiceType));
   }
   if (choiceInverted !== undefined) {
     store.dispatch(actions.setChoiceInverted(choiceInverted));
   }
+
+  ({ choiceType, choiceInverted } = store.getState());
 
   const screen = (() => {
     switch (stageId) {
@@ -29,10 +37,10 @@ const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageDa
       case 'STAGE_CHOICE_IMAGERY':
         return 'MentalImagery';
       case 'STAGE_CHOICE_COLOR_EMOTION':
-        if (store.getState().choiceType === 'CHOICE_COLOR') {
-          return 'Colors';
+        if (choiceType !== 'CHOICE_COLOR' && choiceTypes && choiceTypes.includes(choiceType)) {
+          return 'Emotions';
         }
-        return 'Emotions';
+        return 'Colors';
       case 'STAGE_CHOICE_CHILLS':
         return 'Chills';
       case 'STAGE_END':
@@ -44,9 +52,8 @@ const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageDa
         return 'Welcome';
     }
   })();
-
   console.debug('Screen chosen', screen);
-  NavigationService.navigate(screen, stageData);
+  NavigationService.navigate(screen, Object.assign(stageData, { choiceInverted }));
 };
 
 concertApi.on('CONNECTED', handleStageNavigation);
