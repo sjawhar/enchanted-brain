@@ -1,10 +1,18 @@
 import React, { Component } from 'react';
 
-import WelcomeScreen from './Welcome';
+import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
 import concertApi from '../api/concertApi';
 
-class ColorsScreen extends Component {
+const MESSAGE_MISSED_HEADER = '';
+
+const MESSAGE_WAITING_HEADER = 'Response recorded';
+const MESSAGE_WAITING_BODY = 'Please continue listening to the music';
+
+const MESSAGE_COMPLETE_HEADER = 'Get Enchanted!';
+const MESSAGE_COMPLETE_BODY = 'Please enjoy the next stage of the concert!';
+
+export default class ColorsScreen extends Component {
   constructor(props) {
     super(props);
     const { startTime, endTime, frequency, timeout } = props.navigation.state.params;
@@ -12,9 +20,11 @@ class ColorsScreen extends Component {
     this.state = {
       endTime,
       frequency: frequency * 1000,
-      prompt: false,
+      isShowPrompt: false,
       startTime,
       timeout: timeout * 1000,
+      waitingHeader: MESSAGE_COMPLETE_HEADER,
+      waitingMessage: MESSAGE_WAITING_BODY,
     };
   }
 
@@ -32,6 +42,10 @@ class ColorsScreen extends Component {
     }
 
     if (timestamp > Date.parse(endTime)) {
+      this.setState({
+        waitingHeader: MESSAGE_COMPLETE_HEADER,
+        waitingMessage: MESSAGE_COMPLETE_BODY,
+      });
       return;
     }
 
@@ -40,13 +54,19 @@ class ColorsScreen extends Component {
   };
 
   showPrompt = () => {
-    this.setState({ prompt: true });
+    this.setState({ isShowPrompt: true });
     setTimeout(this.handleChoice, this.state.timeout);
   };
 
   handleChoice = color => {
-    this.setState({ prompt: false });
+    this.setState({
+      isShowPrompt: false,
+      waitingHeader: MESSAGE_MISSED_HEADER,
+    });
     if (color) {
+      this.setState({
+        waitingHeader: MESSAGE_WAITING_HEADER,
+      });
       concertApi.send({
         event: 'CHOICE_MADE',
         data: {
@@ -60,11 +80,14 @@ class ColorsScreen extends Component {
   };
 
   render() {
-    if (this.state.prompt) {
+    if (this.state.isShowPrompt) {
       return <HexagonGrid onChoice={this.handleChoice} />;
     }
-    return <WelcomeScreen />;
+    return (
+      <WaitingScreen
+        headerText={this.state.waitingHeader}
+        messageText={this.state.waitingMessage}
+      />
+    );
   }
 }
-
-export default ColorsScreen;
