@@ -53,7 +53,7 @@ const handleStageNavigation = ({
     }
   })();
   console.debug('Screen chosen', screen);
-  NavigationService.navigate(screen, Object.assign(stageData, { choiceInverted }));
+  NavigationService.navigate(screen, { ...stageData, choiceInverted });
 };
 
 concertApi.on('CONNECTED', handleStageNavigation);
