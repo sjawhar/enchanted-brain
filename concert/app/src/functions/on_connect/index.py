@@ -48,6 +48,11 @@ def sns_subscribe(topic_arn, queue_arn):
 
 def handler(event, context):
     connection_id = event["requestContext"]["connectionId"]
+    authorizer_context = event["requestContext"]["authorizer"]
+
+    sns_topics = [CALLBACK_GLOBAL_SNS_TOPIC_ARN]
+    if authorizer_context.get("isVisualization"):
+        sns_topics.append(CALLBACK_VISUALIZATION_SNS_TOPIC_ARN)
 
     queue_arn = "-".join([CALLBACK_SQS_QUEUE_ARN_PREFIX, connection_id[:-1]])
     queue_url = client_sqs.create_queue(
@@ -62,15 +67,11 @@ def handler(event, context):
                             "Action": "sqs:SendMessage",
                             "Resource": queue_arn,
                             "Principal": "*",
-                            "Condition": {
-                                "ArnEquals": {
-                                    "aws:SourceArn": CALLBACK_GLOBAL_SNS_TOPIC_ARN
-                                }
-                            },
+                            "Condition": {"ArnEquals": {"aws:SourceArn": sns_topics}},
                         }
                     ],
                 }
-            )
+            ),
         },
     )["QueueUrl"]
     mapping_uuid = client_lambda.create_event_source_mapping(
@@ -79,20 +80,14 @@ def handler(event, context):
         Enabled=True,
         BatchSize=1,
     )["UUID"]
-    subscription_arns = set([sns_subscribe(CALLBACK_GLOBAL_SNS_TOPIC_ARN, queue_arn)])
-
-    authorizer_context = event["requestContext"]["authorizer"]
-    if authorizer_context.get("isVisualization"):
-        subscription_arns.add(
-            sns_subscribe(CALLBACK_VISUALIZATION_SNS_TOPIC_ARN, queue_arn)
-        )
+    subscription_arns = [sns_subscribe(topic, queue_arn) for topic in sns_topics]
 
     table.put_item(
         Item={
             ATTR_RECORD_ID: "{}${}".format(RECORD_ID_PREFIX_CONNECTION, connection_id),
             ATTR_CREATED_AT: datetime.now().isoformat(),
             ATTR_CONNECTION_LAMBDA_MAPPING_UUID: mapping_uuid,
-            ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS: subscription_arns,
+            ATTR_CONNECTION_SNS_SUBSCRIPTION_ARNS: set(subscription_arns),
             ATTR_CONNECTION_SQS_QUEUE_URL: queue_url,
         }
     )

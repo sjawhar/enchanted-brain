@@ -143,13 +143,49 @@ def test_sqs_queue_is_created_with_connection_id(get_event):
                                 "Principal": "*",
                                 "Condition": {
                                     "ArnEquals": {
-                                        "aws:SourceArn": CALLBACK_GLOBAL_SNS_TOPIC_ARN
+                                        "aws:SourceArn": [CALLBACK_GLOBAL_SNS_TOPIC_ARN]
                                     }
                                 },
                             }
                         ],
                     }
-                )
+                ),
+            },
+        },
+    )
+
+
+def test_visualization_sqs_queue_permission_includes_visualization_topic(get_event):
+    event = get_event(connection_id="sqs-viz-connection=", group="isVisualization")
+    run_handler(
+        event,
+        sns_viz_response={"SubscriptionArn": "viz-subscription-arn"},
+        sqs_params={
+            "QueueName": "testing-enchanted-brain-callback-sqs-viz-connection",
+            "Attributes": {
+                "Policy": json.dumps(
+                    {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": "sqs:SendMessage",
+                                "Resource": "{}-{}".format(
+                                    CALLBACK_SQS_QUEUE_ARN_PREFIX, "sqs-viz-connection"
+                                ),
+                                "Principal": "*",
+                                "Condition": {
+                                    "ArnEquals": {
+                                        "aws:SourceArn": [
+                                            CALLBACK_GLOBAL_SNS_TOPIC_ARN,
+                                            CALLBACK_VISUALIZATION_SNS_TOPIC_ARN,
+                                        ]
+                                    }
+                                },
+                            }
+                        ],
+                    }
+                ),
             },
         },
     )
