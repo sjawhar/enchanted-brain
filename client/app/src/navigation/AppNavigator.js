@@ -1,11 +1,24 @@
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
-import MainTabNavigator from './MainTabNavigator';
+import ChillsScreen from '../screens/Chills';
+import ColorPickerScreen from '../screens/ColorPicker';
+import MentalImageryScreen from '../screens/MentalImagery';
+import ResultsScreen from '../screens/Results';
+import WelcomeScreen from '../screens/Welcome';
 
 export default createAppContainer(
-  createSwitchNavigator({
+  createSwitchNavigator(
     // You could add another route here for authentication.
     // Read more at https://reactnavigation.org/docs/en/auth-flow.html
-    Main: MainTabNavigator,
-  })
+    {
+      Welcome: WelcomeScreen,
+      MentalImagery: MentalImageryScreen,
+      Colors: ColorPickerScreen,
+      Chills: ChillsScreen,
+      Results: ResultsScreen,
+    },
+    {
+      headerMode: 'none',
+    }
+  )
 );

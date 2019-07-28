@@ -1,14 +1,8 @@
 import React, { Component } from 'react';
-import { View, SafeAreaView, Text } from 'react-native';
-import Constants from 'expo-constants';
-import EStyleSheet from 'react-native-extended-stylesheet';
 
+import WelcomeScreen from './Welcome';
 import HexagonGrid from '../features/colors/HexagonGrid';
 import concertApi from '../api/concertApi';
-import Layout from '../constants/Layout';
-
-const { window } = Layout;
-const WINDOW_HEIGHT = window.height;
 
 class ColorsScreen extends Component {
   constructor(props) {
@@ -66,41 +60,11 @@ class ColorsScreen extends Component {
   };
 
   render() {
-    return (
-      <View style={styles.container}>
-        {this.state.prompt ? (
-          <HexagonGrid onChoice={this.handleChoice} />
-        ) : (
-          <View>
-            <Text style={styles.headerText}>Get Enchanted</Text>
-            <Text style={styles.messageText}>
-              Please listen to the music and wait for the next prompt.
-            </Text>
-          </View>
-        )}
-      </View>
-    );
+    if (this.state.prompt) {
+      return <HexagonGrid onChoice={this.handleChoice} />;
+    }
+    return <WelcomeScreen />;
   }
 }
-
-const styles = EStyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: 'white',
-  },
-  headerText: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: '1rem',
-  },
-  messageText: {
-    fontSize: '1rem',
-    textAlign: 'center',
-  },
-});
 
 export default ColorsScreen;

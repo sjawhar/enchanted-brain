@@ -1,23 +1,8 @@
 import React, { Component } from 'react';
 import { SafeAreaView, Text } from 'react-native';
-import { connect } from 'react-redux';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { Auth } from 'aws-amplify';
-
-import { actions } from '../state';
-import concertApi from '../api/concertApi';
 
 class WelcomeScreen extends Component {
-  constructor(props) {
-    super(props);
-    const { setUID } = this.props;
-    Auth.currentSession().then(session => {
-      const idToken = session.getIdToken();
-      concertApi.connect(idToken.getJwtToken());
-      setUID(idToken.payload['cognito:username']);
-    });
-  }
-
   render() {
     return (
       <SafeAreaView style={styles.container}>
@@ -50,7 +35,4 @@ const styles = EStyleSheet.create({
   },
 });
 
-export default connect(
-  null,
-  { setUID: actions.setUID }
-)(WelcomeScreen);
+export default WelcomeScreen;
