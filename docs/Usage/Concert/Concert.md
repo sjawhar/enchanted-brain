@@ -29,8 +29,8 @@ On connection, the server will respond with the current event stage. This can be
 {
   event: 'CONNECTED',
   data: {
-    choiceType: String,      // For use in STAGE_CHOICE_COLOR_EMOTION
-    choiceInverted: Boolean, // For use in STAGE_CHOICE_COLOR_EMOTION
+    choiceType: String,      // For use in STAGE_CHOICE_SYNESTHESIA
+    choiceInverted: Boolean, // For use in STAGE_CHOICE_SYNESTHESIA
     stageId: String,         // The ID of the current stage
     ...                      // Other attributes of the stage
   },
@@ -43,14 +43,14 @@ To report a user's choice, send the CHOICE_MADE event:
 {
   event: 'CHOICE_MADE',
   data: {
-    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_AGITATION | CHOICE_CHILLS
+    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ENERGY | CHOICE_CHILLS
     choice: String || Number,   // String for color, Number for the rest
     timestamp: String,
   },
 }
 ```
 
-For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_AGITATION events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
+For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ENERGY events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
 
 ### Event Stages
 #### 1 - Welcome
@@ -70,7 +70,7 @@ The user should be displayed the survey form found at `formUrl`, where they will
 #### 3 - Prompt for colors and emotions
 ```js
 {
-  stageId: 'STAGE_CHOICE_COLOR_EMOTION',
+  stageId: 'STAGE_CHOICE_SYNESTHESIA',
   startTime: String,
   endTime: String,
   frequency: Number,
@@ -146,7 +146,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
     [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
     ...
   },
-  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_AGITATION
+  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ENERGY
   emotions: {
     [timestamp]: intensity,
     ...
@@ -174,7 +174,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   emotions: {
     [timestamp]: {
       EMOTION_HAPPINESS: Number,    // Average audience happiness intensity
-      EMOTION_AGITATION: Number,
+      EMOTION_ENERGY: Number,
     },
     ...
   },
