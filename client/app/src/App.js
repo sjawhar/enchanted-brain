@@ -53,10 +53,13 @@ const handleStageNavigation = ({
   })();
 
   console.debug('Screen chosen', screen);
+  if (!choiceTypes) {
+    choiceTypes = [CHOICE_COLOR];
+  }
   NavigationService.navigate(screen, {
     ...stageData,
     choiceInverted,
-    choiceType: (choiceTypes || []).includes(choiceType) ? choiceType : CHOICE_COLOR,
+    choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
   });
 };
 
