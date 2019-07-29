@@ -23,11 +23,11 @@ const WINDOW_HEIGHT = window.height;
 
 class EmotionPicker extends Component {
   render() {
-    const { header, emotions } = EMOTIONS[this.props.choiceType];
+    let { header, emotions } = EMOTIONS[this.props.choiceType];
     const offset = Math.floor(emotions.length / 2);
     let direction = -1;
     if (this.props.choiceInverted) {
-      emotions.reverse();
+      emotions = emotions.slice().reverse();
       direction = 1;
     }
 
