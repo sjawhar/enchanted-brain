@@ -23,7 +23,7 @@ export default class SynesthsiaScreen extends Component {
     const {
       startTime,
       endTime,
-      frequency,
+      interval,
       timeout,
       choiceType,
       choiceInverted,
@@ -33,7 +33,7 @@ export default class SynesthsiaScreen extends Component {
       choiceType,
       choiceInverted,
       endTime,
-      frequency: frequency * 1000,
+      interval: interval * 1000,
       isShowPrompt: false,
       startTime,
       timeout: timeout * 1000,
@@ -47,12 +47,12 @@ export default class SynesthsiaScreen extends Component {
   }
 
   scheduleNextPrompt = () => {
-    const { timestamp: lastTimestamp, endTime, frequency, startTime } = this.state;
+    const { timestamp: lastTimestamp, endTime, interval, startTime } = this.state;
     let timestamp = lastTimestamp || Date.parse(startTime);
 
     const now = Date.now();
     while (timestamp < now) {
-      timestamp += frequency;
+      timestamp += interval;
     }
 
     if (timestamp > Date.parse(endTime)) {
