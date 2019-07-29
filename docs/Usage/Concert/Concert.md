@@ -73,15 +73,15 @@ The user should be displayed the survey form found at `formUrl`, where they will
   stageId: 'STAGE_CHOICE_SYNESTHESIA',
   startTime: String,
   endTime: String,
-  frequency: Number,
+  interval: Number,
   timeout: Number,
   choiceTypes: [String, ...],
 }
 ```
 
-This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `frequency` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
+This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `interval` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
 
-When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `frequency` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
+When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `interval` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
 
 `choiceTypes` will contain a list of choice types that the user can be presented with. The user should be shown the type corresponding to the `choiceType` value received on connect. If that is not in the list, the user should be shown the type corresponding to the first entry in the list. If the user has one of the emotion choice types, the `choiceInverted` value received on connect determines whether the scale should be displayed upside down (e.g. `choiceInverted = False` means happy on top, `choiceInverted = True` means sad on top). **NOTE**: The display should be inverted, but the value sent to the websocket should not.
 
