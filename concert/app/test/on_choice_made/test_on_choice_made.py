@@ -42,7 +42,7 @@ def get_event(
     [
         ("CHOICE_COLOR", "COLOR_RED", "2019-05-14T20:20:03.000Z", "colorUser"),
         ("CHOICE_EMOTION_HAPPINESS", 1, "2019-06-14T21:20:03.000Z", "happyUser"),
-        ("CHOICE_EMOTION_AGITATION", 1, "2019-07-14T21:20:03.000Z", "agitatedUser"),
+        ("CHOICE_EMOTION_ENERGY", 1, "2019-07-14T21:20:03.000Z", "energeticUser"),
         ("CHOICE_CHILLS", 1, "2019-08-14T11:20:03.000Z", "chillyUser"),
     ],
 )
