@@ -4,7 +4,15 @@ let ws = null;
 let isConnect = false;
 const emitter = new EventEmitter();
 
+if (process.env.REACT_APP_WEBSOCKET_EMITTER_EXPOSE === 'true') {
+  window.emitter = emitter;
+}
+
 const connect = idToken => {
+  if (process.env.REACT_APP_WEBSOCKET_API_STUB === 'true') {
+    return;
+  }
+
   if (ws) {
     return;
   }
