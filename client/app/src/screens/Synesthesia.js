@@ -30,13 +30,14 @@ export default class SynesthsiaScreen extends Component {
     } = props.navigation.state.params;
 
     this.state = {
-      choiceType,
       choiceInverted,
+      choiceType,
       endTime,
       interval: interval * 1000,
       isShowPrompt: false,
       startTime,
       timeout: timeout * 1000,
+      timeoutId: undefined,
       waitingHeader: MESSAGE_COMPLETE_HEADER,
       waitingMessage: MESSAGE_WAITING_BODY,
     };
@@ -44,6 +45,13 @@ export default class SynesthsiaScreen extends Component {
 
   componentDidMount() {
     this.scheduleNextPrompt();
+  }
+
+  componentWillUnmount() {
+    const { timeoutId } = this.state;
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+    }
   }
 
   scheduleNextPrompt = () => {
@@ -56,35 +64,42 @@ export default class SynesthsiaScreen extends Component {
     }
 
     if (timestamp > Date.parse(endTime)) {
-      this.setState({
-        waitingHeader: MESSAGE_COMPLETE_HEADER,
-        waitingMessage: MESSAGE_COMPLETE_BODY,
+      this.props.navigation.navigate({
+        routeName: 'Welcome',
+        params: {
+          headerText: MESSAGE_COMPLETE_HEADER,
+          messageText: MESSAGE_COMPLETE_BODY,
+        },
       });
       return;
     }
 
-    this.setState({ timestamp });
-    setTimeout(this.showPrompt, timestamp - Date.now());
+    const timeoutId = setTimeout(this.showPrompt, timestamp - Date.now());
+    this.setState({ timeoutId, timestamp });
   };
 
   showPrompt = () => {
-    this.setState({ isShowPrompt: true });
     Vibration.vibrate(VIBRATION_PATTERN);
-    setTimeout(this.handleChoice, this.state.timeout);
+    const timeoutId = setTimeout(this.handleChoice, this.state.timeout);
+    this.setState({
+      isShowPrompt: true,
+      timeoutId,
+    });
   };
 
   handleChoice = choice => {
-    if (choice === undefined && !this.state.isShowPrompt) {
+    const isChoice = choice !== undefined;
+    if (!isChoice && !this.state.isShowPrompt) {
       return;
     }
 
     this.setState({
       isShowPrompt: false,
-      waitingHeader: choice ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
+      waitingHeader: isChoice ? MESSAGE_WAITING_HEADER : MESSAGE_MISSED_HEADER,
     });
     Vibration.cancel();
 
-    if (choice !== undefined) {
+    if (isChoice) {
       concertApi.send({
         event: CHOICE_MADE,
         data: {

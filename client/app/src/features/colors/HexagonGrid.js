@@ -56,11 +56,7 @@ class HexagonGrid extends Component {
                   !j && i % 2 ? styles.lastHexagonContainerLeft : '',
                 ]}
                 key={color}>
-                <Hexagon
-                  onPress={() => onChoice(color)}
-                  width={HEXAGON_WIDTH}
-                  fill={color}
-                />
+                <Hexagon onPress={() => onChoice(color)} width={HEXAGON_WIDTH} fill={color} />
               </View>
             ))}
           </View>
