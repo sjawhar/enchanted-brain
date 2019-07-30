@@ -191,6 +191,10 @@ class App extends React.Component {
     store.dispatch(actions.setUID(idToken.payload['cognito:username']));
   }
 
+  componentWillUnmount() {
+    concertApi.disconnect();
+  }
+
   render() {
     return (
       <PaperProvider theme={theme}>
