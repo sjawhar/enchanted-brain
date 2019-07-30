@@ -4,6 +4,7 @@ import WaitingScreen from './Waiting';
 
 export default class WelcomeScreen extends Component {
   render() {
-    return <WaitingScreen />;
+    const { headerText, messageText } = this.props.navigation.state.params || {};
+    return <WaitingScreen headerText={headerText} messageText={messageText} />;
   }
 }
