@@ -36,8 +36,8 @@ const main = async () => {
               Item: {
                 recordId: 'CHOICE$1',
                 colors: {
-                  '2019-05-14T21:20:03.000Z': 'COLOR_RED',
-                  '2019-05-14T21:20:23.000Z': 'COLOR_BLUE',
+                  '2019-05-14T21:20:03.000Z': '#FFFF00',
+                  '2019-05-14T21:20:23.000Z': '#AB0000',
                 },
                 emotionType: 'EMOTION_HAPPINESS',
                 emotions: {

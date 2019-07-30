@@ -11,7 +11,7 @@ table_name = os.environ.get("DYNAMODB_TABLE_NAME")
 test_timestamp = "2019-05-14T21:20:03.000Z"
 
 
-def get_event(choice="COLOR_BLUE", choice_type="CHOICE_COLOR", user_id="userId"):
+def get_event(choice="#AB0000", choice_type="CHOICE_COLOR", user_id="userId"):
     return {
         "Records": [
             {
@@ -33,7 +33,7 @@ def get_event(choice="COLOR_BLUE", choice_type="CHOICE_COLOR", user_id="userId")
 @pytest.mark.parametrize(
     "choice_type, choice, choice_key, emotion_type, user_id",
     [
-        ("CHOICE_COLOR", "COLOR_RED", "colors", None, "colorUser"),
+        ("CHOICE_COLOR", "#00AB00", "colors", None, "colorUser"),
         ("CHOICE_EMOTION_HAPPINESS", 1, "emotions", "EMOTION_HAPPINESS", "happyUser"),
         ("CHOICE_EMOTION_ENERGY", 1, "emotions", "EMOTION_ENERGY", "energeticUser"),
         ("CHOICE_CHILLS", 1, "chills", None, "chillyUser"),

@@ -112,9 +112,9 @@ Display the chills UI and send CHOICE_MADE events as the user makes their choice
     {
       timestamp: String,
       choices: {
-        COLOR_BLUE: Number,
-        COLOR_GREEN: Number,
-        COLOR_RED: Number,
+        '#AB0000': Number,
+        '#00AB00': Number,
+        '#0000AB': Number,
         ...
       },
     },
@@ -143,7 +143,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 {
   recordId: ['CHOICE', userId].join('$'),
   colors: {
-    [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
+    [timestamp]: String,    // hex color string
     ...
   },
   emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ENERGY
@@ -164,9 +164,9 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
-      COLOR_BLUE: Number,           // Number of audience members whose latest color choice as of this time was COLOR_BLUE
-      COLOR_GREEN: Number,
-      COLOR_RED: Number,
+      '#AB0000': Number,           // Number of audience members whose latest color choice as of this time was #AB0000
+      '#00AB00': Number,
+      '#0000AB': Number,
       ...
     },
     ...
