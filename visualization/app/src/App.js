@@ -13,6 +13,7 @@ import CHOICE_TYPES, {
 Amplify.configure(amplifyConfig);
 
 const BUFFER_RING_SIZE = parseInt(process.env.REACT_APP_BUFFER_RING_SIZE, 10);
+const OFFSET_SIZE = 20;
 
 class App extends Component {
   constructor(props) {
@@ -82,6 +83,8 @@ class App extends Component {
     });
   };
 
+  perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
+
   render() {
     const { buffers } = this.state;
     const bees = Array.from(buffers[0], (x, index) => {
@@ -90,7 +93,7 @@ class App extends Component {
       if (x === undefined || y === undefined || color === undefined) {
         return null;
       }
-      return { x: 50 * (x + 1), y: 50 * (y + 1), color };
+      return { x: this.perturb(x), y: this.perturb(y), color };
     }).filter(el => el);
 
     return (
