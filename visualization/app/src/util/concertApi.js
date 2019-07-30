@@ -19,13 +19,17 @@ const connect = idToken => {
   };
 
   ws.onmessage = message => {
-    if (!message || !message.data) {
+    const { data: messageData } = message || {};
+    if (!messageData) {
       return;
     }
     try {
-      const { event, data } = JSON.parse(message.data);
-      console.log('MESSAGE', event, data);
-      emitter.emit(event, data);
+      console.log('MESSAGE', messageData);
+      let { event, data, ...eventData } = JSON.parse(messageData);
+      if (!event) {
+        event = 'CHOICE_MADE';
+      }
+      emitter.emit(event, { ...data, ...eventData });
     } catch (error) {
       console.error(error);
     }
