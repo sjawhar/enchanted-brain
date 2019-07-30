@@ -40,6 +40,10 @@ class App extends Component {
     concertApi.connect(idToken.getJwtToken());
   }
 
+  componentWillUnmount() {
+    concertApi.disconnect();
+  }
+
   handleChoiceMade = ({ choiceType, choice }) => {
     this.setState(({ [choiceType]: { buffer, index } }) => {
       buffer[index] = choice;
@@ -84,15 +88,15 @@ const styles = {
   App: {
     width: '100%',
     height: '100%',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   bee: {
     position: 'absolute',
     width: '50px',
     height: '50px',
     marginTop: '-25px',
-    marginLeft: '-25px',
-  },
+    marginLeft: '-25px'
+  }
 };
 
 export default withAuthenticator(App, true);
