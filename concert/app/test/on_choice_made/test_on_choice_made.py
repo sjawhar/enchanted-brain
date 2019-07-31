@@ -16,7 +16,7 @@ PUT_RECORD_SUCCESS_RESPONSE = {"RecordId": "record id"}
 
 
 def get_event(
-    choice="COLOR_BLUE",
+    choice="#AB0000",
     choice_type="CHOICE_COLOR",
     timestamp="2017-05-14T20:20:03.000Z",
     user_id="userId",
@@ -40,9 +40,9 @@ def get_event(
 @pytest.mark.parametrize(
     "choice_type, choice, timestamp, user_id",
     [
-        ("CHOICE_COLOR", "COLOR_RED", "2019-05-14T20:20:03.000Z", "colorUser"),
+        ("CHOICE_COLOR", "#00AB00", "2019-05-14T20:20:03.000Z", "colorUser"),
         ("CHOICE_EMOTION_HAPPINESS", 1, "2019-06-14T21:20:03.000Z", "happyUser"),
-        ("CHOICE_EMOTION_AGITATION", 1, "2019-07-14T21:20:03.000Z", "agitatedUser"),
+        ("CHOICE_EMOTION_ENERGY", 1, "2019-07-14T21:20:03.000Z", "energeticUser"),
         ("CHOICE_CHILLS", 1, "2019-08-14T11:20:03.000Z", "chillyUser"),
     ],
 )
