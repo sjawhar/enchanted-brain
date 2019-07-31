@@ -1,11 +1,11 @@
 {
   "event": "EVENT_STAGE_CHANGED",
   "data": {
-    "stageId": "STAGE_CHOICE_COLOR_EMOTION",
+    "stageId": "STAGE_CHOICE_SYNESTHESIA",
     "startTime": "2019-07-28T09:55:00.000Z",
     "endTime": "2019-07-28T09:57:00.000Z",
-    "frequency": 20,
+    "interval": 20,
     "timeout": 5,
-    "choiceTypes": ["CHOICE_COLOR", "CHOICE_EMOTION_HAPPINESS", "CHOICE_EMOTION_AGITATION"],
+    "choiceTypes": ["CHOICE_COLOR", "CHOICE_EMOTION_HAPPINESS", "CHOICE_EMOTION_ENERGY"],
   }
 }

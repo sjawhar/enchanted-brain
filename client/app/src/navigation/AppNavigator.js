@@ -1,7 +1,7 @@
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 
 import ChillsScreen from '../screens/Chills';
-import ColorPickerScreen from '../screens/ColorPicker';
+import SynesthesiaScreen from '../screens/Synesthesia';
 import MentalImageryScreen from '../screens/MentalImagery';
 import ResultsScreen from '../screens/Results';
 import WelcomeScreen from '../screens/Welcome';
@@ -13,7 +13,7 @@ export default createAppContainer(
     {
       Welcome: WelcomeScreen,
       MentalImagery: MentalImageryScreen,
-      Colors: ColorPickerScreen,
+      Synesthesia: SynesthesiaScreen,
       Chills: ChillsScreen,
       Results: ResultsScreen,
     },
