@@ -11,6 +11,8 @@ import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
+import { CHOICE_COLOR } from './constants/Choices';
+import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
 import config, { IS_IOS } from './config';
 
 // ** Event listeners ** //
@@ -36,11 +38,8 @@ const handleStageNavigation = ({
         return 'Welcome';
       case 'STAGE_CHOICE_IMAGERY':
         return 'MentalImagery';
-      case 'STAGE_CHOICE_COLOR_EMOTION':
-        if (choiceType !== 'CHOICE_COLOR' && choiceTypes && choiceTypes.includes(choiceType)) {
-          return 'Emotions';
-        }
-        return 'Colors';
+      case 'STAGE_CHOICE_SYNESTHESIA':
+        return 'Synesthesia';
       case 'STAGE_CHOICE_CHILLS':
         return 'Chills';
       case 'STAGE_END':
@@ -52,12 +51,20 @@ const handleStageNavigation = ({
         return 'Welcome';
     }
   })();
+
   console.debug('Screen chosen', screen);
-  NavigationService.navigate(screen, { ...stageData, choiceInverted });
+  if (!choiceTypes) {
+    choiceTypes = [CHOICE_COLOR];
+  }
+  NavigationService.navigate(screen, {
+    ...stageData,
+    choiceInverted,
+    choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+  });
 };
 
-concertApi.on('CONNECTED', handleStageNavigation);
-concertApi.on('EVENT_STAGE_CHANGED', handleStageNavigation);
+concertApi.on(CONNECTED, handleStageNavigation);
+concertApi.on(EVENT_STAGE_CHANGED, handleStageNavigation);
 
 // ** AWS Amplify config ** //
 Amplify.configure({

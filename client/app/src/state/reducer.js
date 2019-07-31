@@ -1,7 +1,8 @@
 import * as actionTypes from './actionTypes';
+import { CHOICE_COLOR } from '../constants/Choices';
 
 const INITIAL_STATE = {
-  choiceType: 'CHOICE_COLOR',
+  choiceType: CHOICE_COLOR,
   choiceInverted: false,
   uid: null,
 };
