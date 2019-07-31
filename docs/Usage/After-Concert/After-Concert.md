@@ -95,9 +95,9 @@ Use AWS Cognito libraries.
     {
       timeOffset: Number,
       choices: {
-        COLOR_BLUE: Number,
-        COLOR_GREEN: Number,
-        COLOR_RED: Number,
+        '#AB0000': Number,
+        '#00AB00': Number,
+        '#0000AB': Number,
         ...
       },
     },
@@ -213,9 +213,9 @@ Same as request body for [submitting listen choice(s)](#submit-listen-choices).
   [colors: {
     Number: Map,
     [timeOffset]: {
-      COLOR_BLUE: Number,
-      COLOR_GREEN: Number,
-      COLOR_RED: Number,
+      '#AB0000': Number,
+      '#00AB00': Number,
+      '#0000AB': Number,
       ...
     },
     ...

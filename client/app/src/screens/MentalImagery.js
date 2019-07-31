@@ -1,45 +1,57 @@
-import React, { useRef } from 'react';
+import React, { Component } from 'react';
 import { ActivityIndicator, SafeAreaView, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import EStyleSheet from 'react-native-extended-stylesheet';
+
+import WaitingScreen from './Waiting';
 import { store } from '../state';
 
-const MentalImageryScreen = ({ navigation }) => {
-  const webViewRef = useRef(null);
+export default class MentalImageryScreen extends Component {
+  constructor(props) {
+    super(props);
 
-  const loadingIndicator = (
-    <View style={styles.indicatorContainer}>
-      <ActivityIndicator size="large" color="red" />
-    </View>
-  );
+    const { formUrl } = props.navigation.state.params;
+    this.state = {
+      isShowPrompt: true,
+      endpoint: `${formUrl}?uid=${store.getState().uid}`,
+    };
+  }
 
-  const {
-    state: {
-      params: { formUrl },
-    },
-  } = navigation;
-  const { uid } = store.getState();
-  const endpoint = `${formUrl}?uid=${uid}`;
-
-  const handleNavigationStateChange = navState => {
-    const { url } = navState;
-    if (url !== endpoint) {
-      navigation.navigate('Welcome');
+  handleNavigationStateChange = ({ url }) => {
+    if (url === this.state.endpoint) {
+      return;
     }
+    this.setState({ isShowPrompt: false });
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <WebView
-        ref={webViewRef}
-        source={{ uri: endpoint }}
-        startInLoadingState
-        renderLoading={() => loadingIndicator}
-        onNavigationStateChange={handleNavigationStateChange}
-      />
-    </SafeAreaView>
-  );
-};
+  render() {
+    if (!this.state.isShowPrompt) {
+      return (
+        <WaitingScreen
+          headerText="Get Enchanted!"
+          messageText="Please enjoy the next stage of the concert!"
+        />
+      );
+    }
+
+    const loadingIndicator = (
+      <View style={styles.indicatorContainer}>
+        <ActivityIndicator size="large" color="red" />
+      </View>
+    );
+
+    return (
+      <SafeAreaView style={styles.container}>
+        <WebView
+          source={{ uri: this.state.endpoint }}
+          startInLoadingState
+          renderLoading={() => loadingIndicator}
+          onNavigationStateChange={this.handleNavigationStateChange}
+        />
+      </SafeAreaView>
+    );
+  }
+}
 
 const styles = EStyleSheet.create({
   container: {
@@ -52,5 +64,3 @@ const styles = EStyleSheet.create({
     alignItems: 'center',
   },
 });
-
-export default MentalImageryScreen;
