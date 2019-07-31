@@ -1,12 +1,12 @@
 import React from 'react';
-import { Platform, TouchableNativeFeedback, TouchableOpacity, Text, View } from 'react-native';
+import { TouchableNativeFeedback, TouchableOpacity, Text, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Emoji from 'react-native-emoji';
 import PropTypes from 'prop-types';
 
-const isAndroid = Platform.OS === 'android';
+import { IS_ANDROID } from '../../config';
 
-const Touchable = isAndroid ? TouchableNativeFeedback : TouchableOpacity;
+const Touchable = IS_ANDROID ? TouchableNativeFeedback : TouchableOpacity;
 
 const Emotion = props => {
   const { name, title, selected, onPress, emojiStyle, titleStyle } = props;

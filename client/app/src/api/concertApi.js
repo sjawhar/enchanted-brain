@@ -57,7 +57,7 @@ const send = message => {
     return false;
   }
 
-  ws.send(message);
+  ws.send(JSON.stringify(message));
 };
 
 export default Object.assign(events, { connect, disconnect, send });
