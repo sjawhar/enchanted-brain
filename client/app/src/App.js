@@ -1,8 +1,8 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
@@ -11,16 +11,24 @@ import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
-import config from './config';
+import config, { IS_IOS } from './config';
 
 // ** Event listeners ** //
-const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageData }) => {
+const handleStageNavigation = ({
+  choiceInverted,
+  choiceType,
+  choiceTypes,
+  stageId,
+  ...stageData
+}) => {
   if (choiceType) {
     store.dispatch(actions.setChoiceType(choiceType));
   }
   if (choiceInverted !== undefined) {
     store.dispatch(actions.setChoiceInverted(choiceInverted));
   }
+
+  ({ choiceType, choiceInverted } = store.getState());
 
   const screen = (() => {
     switch (stageId) {
@@ -29,10 +37,10 @@ const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageDa
       case 'STAGE_CHOICE_IMAGERY':
         return 'MentalImagery';
       case 'STAGE_CHOICE_COLOR_EMOTION':
-        if (store.getState().choiceType === 'CHOICE_COLOR') {
-          return 'Colors';
+        if (choiceType !== 'CHOICE_COLOR' && choiceTypes && choiceTypes.includes(choiceType)) {
+          return 'Emotions';
         }
-        return 'Emotions';
+        return 'Colors';
       case 'STAGE_CHOICE_CHILLS':
         return 'Chills';
       case 'STAGE_END':
@@ -44,9 +52,8 @@ const handleStageNavigation = ({ choiceType, choiceInverted, stageId, ...stageDa
         return 'Welcome';
     }
   })();
-
   console.debug('Screen chosen', screen);
-  NavigationService.navigate(screen, stageData);
+  NavigationService.navigate(screen, { ...stageData, choiceInverted });
 };
 
 concertApi.on('CONNECTED', handleStageNavigation);
@@ -178,13 +185,23 @@ const theme = {
 };
 
 class App extends React.Component {
+  async componentDidMount() {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    concertApi.connect(idToken.getJwtToken());
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+  }
+
+  componentWillUnmount() {
+    concertApi.disconnect();
+  }
+
   render() {
     return (
       <PaperProvider theme={theme}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
-              {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+              {IS_IOS && <StatusBar barStyle="default" />}
               <AppNavigator
                 ref={navigatorRef => {
                   NavigationService.setTopLevelNavigator(navigatorRef);
