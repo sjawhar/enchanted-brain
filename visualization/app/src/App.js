@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from 'aws-amplify-react';
 
+import './App.css';
 import concertApi from './util/concertApi';
 import amplifyConfig from './config/amplify';
 import CHOICE_TYPES, {
@@ -13,7 +14,8 @@ import CHOICE_TYPES, {
 Amplify.configure(amplifyConfig);
 
 const BUFFER_RING_SIZE = parseInt(process.env.REACT_APP_BUFFER_RING_SIZE, 10);
-const OFFSET_SIZE = 20;
+const OFFSET_SIZE = 5;
+const BEE_SIZE = 30;
 
 class App extends Component {
   constructor(props) {
@@ -41,13 +43,11 @@ class App extends Component {
   }
 
   async componentWillMount() {
-    Object.assign(document.body.style, styles.body);
     const idToken = (await Auth.currentSession()).getIdToken();
     concertApi.connect(idToken.getJwtToken());
   }
 
   componentWillUnmount() {
-    document.body.style.backgroundColor = null;
     concertApi.disconnect();
   }
 
@@ -103,10 +103,13 @@ class App extends Component {
             left: `${x}%`,
             top: `${y}%`,
             backgroundColor: color,
+            animationDelay: `${-Math.random().toFixed(2)}s`,
             ...styles.bee
           };
 
-          return <span key={index} style={style}></span>;
+          return (
+            <span key={index} style={style} className="jitter-forward"></span>
+          );
         })}
       </div>
     );
@@ -114,10 +117,6 @@ class App extends Component {
 }
 
 const styles = {
-  body: {
-    backgroundColor: 'rgb(95, 95, 95)',
-    overflow: 'hidden'
-  },
   App: {
     width: '100%',
     height: '100%',
@@ -125,10 +124,11 @@ const styles = {
   },
   bee: {
     position: 'absolute',
-    width: '50px',
-    height: '50px',
-    marginTop: '-25px',
-    marginLeft: '-25px'
+    width: `${BEE_SIZE}px`,
+    height: `${BEE_SIZE}px`,
+    marginTop: `-${BEE_SIZE / 2}px`,
+    marginLeft: `-${BEE_SIZE / 2}px`,
+    borderRadius: '100%'
   }
 };
 
