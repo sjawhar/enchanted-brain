@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Picker",
-    "slug": "picker",
+    "name": "Enchanted Brain",
+    "slug": "enchanted-brain",
     "privacy": "public",
     "sdkVersion": "33.0.0",
     "platforms": ["ios", "android"],
