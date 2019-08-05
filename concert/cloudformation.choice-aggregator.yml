@@ -30,7 +30,7 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub jboo-${Environment}-enchanted-brain-choices
+      BucketName: !Sub ${Environment}-enchanted-brain-choices
       AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
