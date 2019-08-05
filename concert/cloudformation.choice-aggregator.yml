@@ -30,8 +30,8 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ${Environment}-enchanted-brain-choices
-      AccessControl: private
+      BucketName: !Sub jboo-${Environment}-enchanted-brain-choices
+      AccessControl: Private
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -158,39 +158,40 @@ Resources:
       ServiceExecutionRole: !GetAtt KinesisAnalyticsApplicationRole.Arn
       ApplicationConfiguration:
         ApplicationCodeConfiguration:
-          CodeContentType: PLAINTEXT
-          CodeContent: !Sub
-            - |
-              CREATE OR REPLACE STREAM ${DestinationStream}
-              (
-                CHOICE_TIME   TIMESTAMP,
-                CHOICE_TYPE   VARCHAR(32),
-                CHOICE_SUM    DOUBLE,
-                CHOICE_COUNT  int
-              );
-
-              CREATE OR REPLACE PUMP NUMERIC_PUMP AS
-                INSERT INTO ${DestinationStream}
-                SELECT STREAM CHOICE_TIME,
-                  CHOICE_TYPE,
-                  SUM(CAST(CHOICE AS DOUBLE)) OVER (
-                    PARTITION BY CHOICE_TYPE
-                    RANGE INTERVAL '1' MINUTE PRECEDING
-                  ) AS choiceSum,
-                  COUNT(*) OVER W1 AS choiceCount
-                FROM ${SourceStreamPrefix}_001 AS SOURCE
-                WHERE CHOICE_TYPE NOT LIKE CHOICE_COLOR'
-                WINDOW W1 AS (
-                  PARTITION BY CHOICE_TIME
-                  RANGE INTERVAL '1' MINUTE PRECEDING
+          CodeContent:
+            TextContent: !Sub
+              - |
+                CREATE OR REPLACE STREAM ${DestinationStream}
+                (
+                  CHOICE_TIME   TIMESTAMP,
+                  CHOICE_TYPE   VARCHAR(32),
+                  CHOICE_SUM    DOUBLE,
+                  CHOICE_COUNT  int
                 );
-            - DestinationStream: !FindInMap [StreamNames, DestinationStream, Value]
-              SourceStreamPrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
+                CREATE OR REPLACE PUMP NUMERIC_PUMP AS
+                  INSERT INTO ${DestinationStream}
+                  SELECT STREAM CHOICE_TIME,
+                    CHOICE_TYPE,
+                    SUM(CAST(CHOICE AS DOUBLE)) OVER (
+                      PARTITION BY CHOICE_TYPE
+                      RANGE INTERVAL '1' MINUTE PRECEDING
+                    ) AS choiceSum,
+                    COUNT(*) OVER W1 AS choiceCount
+                  FROM ${SourceStreamPrefix}_001 AS SOURCE
+                  WHERE CHOICE_TYPE NOT LIKE CHOICE_COLOR'
+                  WINDOW W1 AS (
+                    PARTITION BY CHOICE_TIME
+                    RANGE INTERVAL '1' MINUTE PRECEDING
+                  );
+              - DestinationStream: !FindInMap [StreamNames, DestinationStream, Value]
+                SourceStreamPrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
+          CodeContentType: PLAINTEXT
         SqlApplicationConfiguration:
           Inputs:
             - KinesisFirehoseInput:
                 ResourceARN: !GetAtt KinesisFirehoseStream.Arn
-              InputParallelism: 1
+              InputParallelism:
+                Count: 1
               NamePrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
               InputSchema:
                 RecordFormat:
@@ -209,44 +210,44 @@ Resources:
                   Name: CHOICE
                   SqlType: VARCHAR(32)
 
-  AggregateWriterFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
-      Runtime: python3.7
-      CodeUri: app/src/aggregate-writer
-      Handler: index.handler
-      MemorySize: 128
-      Timeout: 3
-      AutoPublishAlias: live
-      Environment:
-        Variables:
-          DYNAMODB_ENDPOINT: ''
-          DYNAMODB_TABLE_NAME: !Ref TableName
-      Policies:
-        DynamoDBCrudPolicy:
-          TableName: !Ref TableName
-
-  AggregateWriterFunctionPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref AggregateWriterFunction.Alias
-      Principal: kinesisanalytics.amazonaws.com
-      SourceArn: !GetAtt KinesisAnalyticsApplication.Arn
-
-  KinesisAnalyticsApplicationOutput:
-    Type: AWS::KinesisAnalyticsV2::ApplicationOutput
-    DependsOn:
-      - AggregateWriterFunctionPermission
-    Properties:
-      ApplicationName: !Ref KinesisAnalyticsApplication
-      Output:
-        Name: !FindInMap [StreamNames, DestinationStream, Value]
-        DestinationSchema:
-          RecordFormatType: JSON
-        LambdaOutput:
-          ResourceArn: !Ref AggregateWriterFunction.Alias
+#  AggregateWriterFunction:
+#    Type: AWS::Serverless::Function
+#    Properties:
+#      FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
+#      Runtime: python3.7
+#      CodeUri: app/src/aggregate-writer
+#      Handler: index.handler
+#      MemorySize: 128
+#      Timeout: 3
+#      AutoPublishAlias: live
+#      Environment:
+#        Variables:
+#          DYNAMODB_ENDPOINT: ''
+#          DYNAMODB_TABLE_NAME: !Ref TableName
+#      Policies:
+#        DynamoDBCrudPolicy:
+#          TableName: !Ref TableName
+#
+#  AggregateWriterFunctionPermission:
+#    Type: AWS::Lambda::Permission
+#    Properties:
+#      Action: lambda:InvokeFunction
+#      FunctionName: !Ref AggregateWriterFunction.Alias
+#      Principal: kinesisanalytics.amazonaws.com
+#      SourceArn: !GetAtt KinesisAnalyticsApplication.Arn
+#
+#  KinesisAnalyticsApplicationOutput:
+#    Type: AWS::KinesisAnalyticsV2::ApplicationOutput
+#    DependsOn:
+#      - AggregateWriterFunctionPermission
+#    Properties:
+#      ApplicationName: !Ref KinesisAnalyticsApplication
+#      Output:
+#        Name: !FindInMap [StreamNames, DestinationStream, Value]
+#        DestinationSchema:
+#          RecordFormatType: JSON
+#        LambdaOutput:
+#          ResourceArn: !Ref AggregateWriterFunction.Alias
 
 
 Outputs:
