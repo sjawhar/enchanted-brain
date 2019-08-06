@@ -130,7 +130,7 @@ Resources:
   KinesisAnalyticsApplicationRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-v1
+      RoleName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-v2
       Path: !Sub /${AWS::Region}/${Environment}/enchanted-brain/
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -140,7 +140,7 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-read-firehose
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -149,6 +149,13 @@ Resources:
                   - firehose:DescribeDeliveryStream
                   - firehose:Get*
                 Resource: !GetAtt KinesisFirehoseStream.Arn
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-invoke-lambda
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt AggregateWriterFunction.Arn
 
   KinesisAnalyticsApplication:
     Type: AWS::KinesisAnalyticsV2::Application
@@ -210,44 +217,34 @@ Resources:
                   Name: CHOICE
                   SqlType: VARCHAR(32)
 
-#  AggregateWriterFunction:
-#    Type: AWS::Serverless::Function
-#    Properties:
-#      FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
-#      Runtime: python3.7
-#      CodeUri: app/src/aggregate-writer
-#      Handler: index.handler
-#      MemorySize: 128
-#      Timeout: 3
-#      AutoPublishAlias: live
-#      Environment:
-#        Variables:
-#          DYNAMODB_ENDPOINT: ''
-#          DYNAMODB_TABLE_NAME: !Ref TableName
-#      Policies:
-#        DynamoDBCrudPolicy:
-#          TableName: !Ref TableName
-#
-#  AggregateWriterFunctionPermission:
-#    Type: AWS::Lambda::Permission
-#    Properties:
-#      Action: lambda:InvokeFunction
-#      FunctionName: !Ref AggregateWriterFunction.Alias
-#      Principal: kinesisanalytics.amazonaws.com
-#      SourceArn: !GetAtt KinesisAnalyticsApplication.Arn
-#
-#  KinesisAnalyticsApplicationOutput:
-#    Type: AWS::KinesisAnalyticsV2::ApplicationOutput
-#    DependsOn:
-#      - AggregateWriterFunctionPermission
-#    Properties:
-#      ApplicationName: !Ref KinesisAnalyticsApplication
-#      Output:
-#        Name: !FindInMap [StreamNames, DestinationStream, Value]
-#        DestinationSchema:
-#          RecordFormatType: JSON
-#        LambdaOutput:
-#          ResourceArn: !Ref AggregateWriterFunction.Alias
+  AggregateWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
+      Runtime: python3.7
+      CodeUri: app/src/functions/aggregate_writer
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 3
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          DYNAMODB_ENDPOINT: ''
+          DYNAMODB_TABLE_NAME: !Ref TableName
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName: !Ref TableName
+
+  KinesisAnalyticsApplicationOutput:
+    Type: AWS::KinesisAnalyticsV2::ApplicationOutput
+    Properties:
+      ApplicationName: !Ref KinesisAnalyticsApplication
+      Output:
+        Name: !FindInMap [StreamNames, DestinationStream, Value]
+        DestinationSchema:
+          RecordFormatType: JSON
+        LambdaOutput:
+          ResourceARN: !GetAtt AggregateWriterFunction.Arn
 
 
 Outputs:
