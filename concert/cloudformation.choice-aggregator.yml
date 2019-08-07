@@ -50,6 +50,12 @@ Resources:
       LogGroupName: !Ref KinesisLogGroup
       LogStreamName: firehose
 
+  KinesisAnalyticsLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref KinesisLogGroup
+      LogStreamName: analytics
+
   KinesisFirehoseStreamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -93,7 +99,7 @@ Resources:
                     kms:EncryptionContext:aws:s3:arn: !Sub arn:aws:s3:::${S3Bucket}/*
               - Effect: Allow
                 Action: logs:PutLogEvents
-                Resource: !Sub ${KinesisLogGroup.Arn}:log-stream:${KinesisFirehoseStreamLogStream}
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisFirehoseStreamLogStream}
               - Effect: Allow
                 Action: kms:Decrypt
                 Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/kinesis
@@ -140,7 +146,7 @@ Resources:
               Service: kinesisanalytics.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-read-firehose
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -149,13 +155,12 @@ Resources:
                   - firehose:DescribeDeliveryStream
                   - firehose:Get*
                 Resource: !GetAtt KinesisFirehoseStream.Arn
-        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-invoke-lambda
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
               - Effect: Allow
                 Action: lambda:InvokeFunction
                 Resource: !GetAtt AggregateWriterFunction.Arn
+              - Effect: Allow
+                Action: logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisAnalyticsLogStream}
 
   KinesisAnalyticsApplication:
     Type: AWS::KinesisAnalyticsV2::Application
@@ -216,6 +221,13 @@ Resources:
                 - Mapping: choice
                   Name: CHOICE
                   SqlType: VARCHAR(32)
+
+  KinesisAnalyticsApplicationLogger:
+    Type: AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption
+    Properties:
+      ApplicationName: !Ref KinesisAnalyticsApplication
+      CloudWatchLoggingOption:
+        LogStreamARN: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisAnalyticsLogStream}
 
   AggregateWriterFunction:
     Type: AWS::Serverless::Function
