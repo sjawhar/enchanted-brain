@@ -32,6 +32,10 @@ Mappings:
     EventStageChanged:
       Key: EVENT_STAGE_CHANGED
 
+  CallbackParams:
+    Timeout:
+      Value: 30
+
 
 Globals:
 
@@ -169,6 +173,7 @@ Resources:
       CodeUri: app/src/functions/callback
       Layers:
         - !Ref LambdaLayer
+      Timeout: !FindInMap [CallbackParams, Timeout, Value]
       Environment:
         Variables:
           API_URL: !Sub
@@ -206,8 +211,9 @@ Resources:
         Variables:
           CALLBACK_FUNCTION_ARN: !Ref CallbackFunction.Alias
           CALLBACK_GLOBAL_SNS_TOPIC_ARN: !Ref CallbackGlobalSnsTopic
-          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
+          CALLBACK_TIMEOUT_SECONDS: !FindInMap [CallbackParams, Timeout, Value]
+          CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
@@ -314,6 +320,8 @@ Resources:
       Policies:
         - SNSPublishMessagePolicy:
             TopicName: !GetAtt ChoiceMadeSnsTopic.TopicName
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt CallbackVisualizationSnsTopic.TopicName
         - FirehoseWritePolicy:
             DeliveryStreamName: !GetAtt ChoiceAggregator.Outputs.KinesisFirehoseStreamName
 

@@ -29,8 +29,8 @@ On connection, the server will respond with the current event stage. This can be
 {
   event: 'CONNECTED',
   data: {
-    choiceType: String,      // For use in STAGE_CHOICE_COLOR_EMOTION
-    choiceInverted: Boolean, // For use in STAGE_CHOICE_COLOR_EMOTION
+    choiceType: String,      // For use in STAGE_CHOICE_SYNESTHESIA
+    choiceInverted: Boolean, // For use in STAGE_CHOICE_SYNESTHESIA
     stageId: String,         // The ID of the current stage
     ...                      // Other attributes of the stage
   },
@@ -43,14 +43,14 @@ To report a user's choice, send the CHOICE_MADE event:
 {
   event: 'CHOICE_MADE',
   data: {
-    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_AGITATION | CHOICE_CHILLS
+    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ENERGY | CHOICE_CHILLS
     choice: String || Number,   // String for color, Number for the rest
     timestamp: String,
   },
 }
 ```
 
-For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_AGITATION events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
+For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ENERGY events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
 
 ### Event Stages
 #### 1 - Welcome
@@ -70,18 +70,18 @@ The user should be displayed the survey form found at `formUrl`, where they will
 #### 3 - Prompt for colors and emotions
 ```js
 {
-  stageId: 'STAGE_CHOICE_COLOR_EMOTION',
+  stageId: 'STAGE_CHOICE_SYNESTHESIA',
   startTime: String,
   endTime: String,
-  frequency: Number,
+  interval: Number,
   timeout: Number,
   choiceTypes: [String, ...],
 }
 ```
 
-This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `frequency` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
+This stage indicates the start of a song (`startTime`). During the song, the user should prompted for a choice every `interval` seconds until the end of the song (`endTime`). If the user doesn't make a choice within `timeout` seconds after being prompted, the prompt should disappear.
 
-When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `frequency` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
+When sending the CHOICE_MADE event, the `timestamp` property should correspond to the time of the **prompt**, not the time of the response. For example, if `startTime` is `2019-06-26T19:15:03.000Z` and `interval` is 20, the fourth response (at 4 x 20 = 80 seconds) would have a `timestamp` of `2019-06-26T19:16:23.000Z`, even if the user actually made the response at 82 seconds.
 
 `choiceTypes` will contain a list of choice types that the user can be presented with. The user should be shown the type corresponding to the `choiceType` value received on connect. If that is not in the list, the user should be shown the type corresponding to the first entry in the list. If the user has one of the emotion choice types, the `choiceInverted` value received on connect determines whether the scale should be displayed upside down (e.g. `choiceInverted = False` means happy on top, `choiceInverted = True` means sad on top). **NOTE**: The display should be inverted, but the value sent to the websocket should not.
 
@@ -112,9 +112,9 @@ Display the chills UI and send CHOICE_MADE events as the user makes their choice
     {
       timestamp: String,
       choices: {
-        COLOR_BLUE: Number,
-        COLOR_GREEN: Number,
-        COLOR_RED: Number,
+        '#AB0000': Number,
+        '#00AB00': Number,
+        '#0000AB': Number,
         ...
       },
     },
@@ -143,10 +143,10 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
 {
   recordId: ['CHOICE', userId].join('$'),
   colors: {
-    [timestamp]: String,    // COLOR_RED | COLOR_BLUE | ...
+    [timestamp]: String,    // hex color string
     ...
   },
-  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_AGITATION
+  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ENERGY
   emotions: {
     [timestamp]: intensity,
     ...
@@ -164,9 +164,9 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
-      COLOR_BLUE: Number,           // Number of audience members whose latest color choice as of this time was COLOR_BLUE
-      COLOR_GREEN: Number,
-      COLOR_RED: Number,
+      '#AB0000': Number,           // Number of audience members whose latest color choice as of this time was #AB0000
+      '#00AB00': Number,
+      '#0000AB': Number,
       ...
     },
     ...
@@ -174,7 +174,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   emotions: {
     [timestamp]: {
       EMOTION_HAPPINESS: Number,    // Average audience happiness intensity
-      EMOTION_AGITATION: Number,
+      EMOTION_ENERGY: Number,
     },
     ...
   },

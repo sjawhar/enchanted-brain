@@ -27,7 +27,7 @@ CHOICE_BUCKETS = [
     "CHOICE_COLOR",
     "CHOICE_COLOR",
     "CHOICE_EMOTION_HAPPINESS",
-    "CHOICE_EMOTION_AGITATION",
+    "CHOICE_EMOTION_ENERGY",
 ]
 NUM_BUCKETS = len(CHOICE_BUCKETS)
 
@@ -47,15 +47,13 @@ def get_verified_token(token):
     return jwt.decode(token, JWKS_KEYS[key_index], audience=COGNITO_APP_CLIENT_ID)
 
 
-def get_user_context(user_id, groups):
+def get_choice_vars(user_id):
     user_id_hash = int(hashlib.md5(user_id.encode("utf-8")).hexdigest(), 16)
     choice_mod = user_id_hash % (NUM_BUCKETS * 2)
     context = {
         "choiceType": CHOICE_BUCKETS[int(choice_mod / 2)],
         "choiceInverted": bool(choice_mod % 2),
     }
-    for group in groups:
-        context["is{}".format(group)] = True
     return context
 
 
@@ -68,6 +66,7 @@ def handler(event, context):
                 {"Effect": "Deny", "Action": "execute-api:Invoke", "Resource": "*"}
             ],
         },
+        "context": {},
     }
 
     try:
@@ -84,7 +83,8 @@ def handler(event, context):
     statement["Resource"] = [
         "{}/{}".format(API_ARN, method) for method in ["$connect", "$disconnect"]
     ]
-    groups = token["cognito:groups"] if "cognito:groups" in token else []
+    groups = token.get("cognito:groups") or []
+
     if COGNITO_GROUP_ADMIN in groups:
         statement["Resource"].append(
             "{}/{}".format(API_ARN, API_METHOD_EVENT_STAGE_CHANGED)
@@ -92,5 +92,8 @@ def handler(event, context):
     elif COGNITO_GROUP_VISUALIZATION not in groups:
         # User is an audience member
         statement["Resource"].append("{}/{}".format(API_ARN, API_METHOD_CHOICE_MADE))
-        policy["context"] = get_user_context(policy["principalId"], groups)
+        policy["context"] = get_choice_vars(policy["principalId"])
+
+    for group in groups:
+        policy["context"]["is{}".format(group)] = True
     return policy

@@ -11,7 +11,7 @@ from enchanted_brain.attributes import (
     ATTR_RECORD_ID,
     CHOICE_CHILLS,
     CHOICE_COLOR,
-    CHOICE_EMOTION_AGITATION,
+    CHOICE_EMOTION_ENERGY,
     CHOICE_EMOTION_HAPPINESS,
     RECORD_ID_PREFIX_CHOICE,
 )
@@ -32,7 +32,7 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
 CHOICE_TYPE_KEYS = {
     CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
-    CHOICE_EMOTION_AGITATION: ATTR_CHOICE_VALUE_EMOTION,
+    CHOICE_EMOTION_ENERGY: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
     CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
 }
@@ -67,7 +67,7 @@ def get_update_args(event):
         "ReturnValues": "NONE",
     }
 
-    if choice_type in [CHOICE_EMOTION_AGITATION, CHOICE_EMOTION_HAPPINESS]:
+    if choice_type in [CHOICE_EMOTION_ENERGY, CHOICE_EMOTION_HAPPINESS]:
         update_args["UpdateExpression"] += ", #emotion_type = :emotion_type"
         update_args["ExpressionAttributeNames"][
             "#emotion_type"
