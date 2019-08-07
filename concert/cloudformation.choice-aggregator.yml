@@ -190,7 +190,7 @@ Resources:
                     ) AS choiceSum,
                     COUNT(*) OVER W1 AS choiceCount
                   FROM ${SourceStreamPrefix}_001 AS SOURCE
-                  WHERE CHOICE_TYPE NOT LIKE CHOICE_COLOR'
+                  WHERE CHOICE_TYPE NOT LIKE 'CHOICE_COLOR'
                   WINDOW W1 AS (
                     PARTITION BY CHOICE_TIME
                     RANGE INTERVAL '1' MINUTE PRECEDING
@@ -208,9 +208,6 @@ Resources:
               InputSchema:
                 RecordFormat:
                   RecordFormatType: JSON
-                  MappingParameters:
-                    JSONMappingParameters:
-                      RecordRowPath: $
                 RecordColumns:
                 - Mapping: timestamp
                   Name: CHOICE_TIME
