@@ -1,19 +1,80 @@
-import Amplify from 'aws-amplify';
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import Amplify, { Auth } from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import { withAuthenticator } from 'aws-amplify-react-native';
-
+import { persistor, store, actions } from './state';
+import concertApi from './api/concertApi';
+import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
-import config from './config';
+import { CHOICE_COLOR } from './constants/Choices';
+import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
+import config, { IS_IOS } from './config';
 
+// ** Event listeners ** //
+const handleStageNavigation = ({
+  choiceInverted,
+  choiceType,
+  choiceTypes,
+  stageId,
+  ...stageData
+}) => {
+  if (choiceType) {
+    store.dispatch(actions.setChoiceType(choiceType));
+  }
+  if (choiceInverted !== undefined) {
+    store.dispatch(actions.setChoiceInverted(choiceInverted));
+  }
+
+  ({ choiceType, choiceInverted } = store.getState());
+
+  const screen = (() => {
+    switch (stageId) {
+      case 'STAGE_WAITING':
+        return 'Welcome';
+      case 'STAGE_CHOICE_IMAGERY':
+        return 'MentalImagery';
+      case 'STAGE_CHOICE_SYNESTHESIA':
+        return 'Synesthesia';
+      case 'STAGE_CHOICE_CHILLS':
+        return 'Chills';
+      case 'STAGE_END':
+        return 'Results';
+      default:
+        // something went wrong
+        // navigate to 'something went wrong screen'?
+        console.log('stub: something went wrong in handleStageNavigation');
+        return 'Welcome';
+    }
+  })();
+
+  console.debug('Screen chosen', screen);
+  if (!choiceTypes) {
+    choiceTypes = [CHOICE_COLOR];
+  }
+  NavigationService.navigate(screen, {
+    ...stageData,
+    choiceInverted,
+    choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+  });
+};
+
+concertApi.on(CONNECTED, handleStageNavigation);
+concertApi.on(EVENT_STAGE_CHANGED, handleStageNavigation);
+
+// ** AWS Amplify config ** //
 Amplify.configure({
   Auth: {
     region: config.AMPLIFY_REGION,
     userPoolId: config.AMPLIFY_USER_POOL_ID,
     userPoolWebClientId: config.AMPLIFY_USER_POOL_WEB_CLIENT_ID,
+  },
+  Analytics: {
+    disabled: true,
   },
 });
 
@@ -78,6 +139,7 @@ const signUpConfig = {
   ],
 };
 
+// ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
 
 // Abitrary min, max for rem and width
@@ -115,6 +177,7 @@ const calculateRem = (width, minWidth, maxWidth, minRem, maxRem) => {
   return calculatedRem;
 };
 
+// ** Extended Stylesheet Setup ** //
 EStyleSheet.build({
   $rem: calculateRem(SCREEN_WIDTH, MIN_WIDTH, MAX_WIDTH, MIN_REM, MAX_REM),
 });
@@ -129,13 +192,31 @@ const theme = {
 };
 
 class App extends React.Component {
+  async componentDidMount() {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    concertApi.connect(idToken.getJwtToken());
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+  }
+
+  componentWillUnmount() {
+    concertApi.disconnect();
+  }
+
   render() {
     return (
       <PaperProvider theme={theme}>
-        <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
-        </View>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <View style={styles.container}>
+              {IS_IOS && <StatusBar barStyle="default" />}
+              <AppNavigator
+                ref={navigatorRef => {
+                  NavigationService.setTopLevelNavigator(navigatorRef);
+                }}
+              />
+            </View>
+          </PersistGate>
+        </Provider>
       </PaperProvider>
     );
   }

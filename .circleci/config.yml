@@ -32,6 +32,15 @@ jobs:
           at: client/app
       - run: cd client/app && npm run lint
 
+  client-test:
+    docker:
+      - image: circleci/node:10.16.0
+    steps:
+      - checkout
+      - attach_workspace:
+          at: client/app
+      - run: cd client/app && npm run test
+
   lambdas-test:
     docker:
       - image: circleci/python:3.7
@@ -69,7 +78,7 @@ jobs:
           name: Install dependencies
           command: pip install --user aws-sam-cli==0.17.0 awscli==1.16.192
       - run:
-          name: Validate CloudFormation template
+          name: CloudFormation Deploy
           command: PATH="~/.local/bin:${PATH}" ./deploy.sh development us-east-1
 
 
@@ -80,12 +89,16 @@ workflows:
       - client-lint:
           requires:
             - client-install
+      - client-test:
+          requires:
+            - client-install
       - lambdas-test
       - lambdas-lint
       - cloudformation-validate
       - deploy:
           requires:
             - client-lint
+            - client-test
             - lambdas-lint
             - lambdas-test
             - cloudformation-validate
@@ -93,6 +106,7 @@ workflows:
             branches:
               only: master
       - github-wiki/build-and-deploy:
+          name: deploy-wiki
           commit-user-email: circleci@enchanted-brain
           sidebar-placeholder: '{{SIDEBAR_GENERATE}}'
           ssh-key-fingerprint: 42:38:62:83:7e:81:3e:5f:b1:9c:5f:72:b3:78:9a:bc

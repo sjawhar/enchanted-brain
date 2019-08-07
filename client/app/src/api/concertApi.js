@@ -16,30 +16,16 @@ const connect = idToken => {
   });
 
   ws.onopen = () => {
-    console.log('CONNECTED');
-    ws.send(
-      JSON.stringify({
-        event: 'CHOICE_MADE',
-        data: {
-          choiceType: 'CHOICE_COLOR',
-          choice: 'COLOR_BLUE',
-          timestamp: new Date().toISOString(),
-        },
-      })
-    );
-    console.log('MESSAGE SENT.');
+    console.debug('CONNECTED');
   };
   ws.onmessage = message => {
     if (!message || !message.data) {
       return;
     }
-    console.log('MESSAGE', message.data);
     try {
       const { event, data } = JSON.parse(message.data);
-      if (event === 'EVENT_STAGE_CHANGED') {
-        console.log('emitting SHOW_COLOR_PICKER event');
-        events.emit('SHOW_COLOR_PICKER');
-      }
+      console.debug('MESSAGE', event, data);
+      events.emit(event, data);
     } catch (error) {
       console.error(error);
     }
@@ -51,7 +37,7 @@ const connect = idToken => {
 
   ws.onclose = e => {
     ws = null;
-    console.log('CLOSED', e.code, e.reason);
+    console.debug('CLOSED', e.code, e.reason);
     if (isConnect) {
       connect(idToken);
     }
@@ -71,7 +57,7 @@ const send = message => {
     return false;
   }
 
-  ws.send(message);
+  ws.send(JSON.stringify(message));
 };
 
 export default Object.assign(events, { connect, disconnect, send });

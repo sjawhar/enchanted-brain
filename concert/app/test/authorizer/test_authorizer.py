@@ -23,12 +23,15 @@ def make_event():
         if authorization is None:
             return event
 
+        payload = {
+            "sub": user_id,
+            "exp": time.time() + 3600 * (-1 if is_expired else 1),
+        }
+        if len(groups):
+            payload["cognito:groups"] = groups
+
         token = jwt.encode(
-            {
-                "sub": user_id,
-                "exp": time.time() + 3600 * (-1 if is_expired else 1),
-                "cognito:groups": groups,
-            },
+            payload,
             jwk.construct(TEST_KEY).to_pem(),
             algorithm=TEST_KEY["alg"],
             headers={"kid": TEST_KEY["kid"] if is_kid_match else "nope"},
@@ -114,3 +117,10 @@ def test_audience_user_has_context(make_event):
     assert type(policy["context"]["choiceType"]) is str
     assert type(policy["context"]["choiceInverted"]) is bool
     assert policy["context"].get("isJaguar") == True
+
+
+def test_visualization_user_has_context(make_event):
+    event = make_event(groups=["Visualization"])
+    policy = handler(event, {})
+    assert "context" in policy
+    assert policy["context"].get("isVisualization") == True
