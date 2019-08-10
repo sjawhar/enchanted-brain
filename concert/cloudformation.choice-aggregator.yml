@@ -15,6 +15,9 @@ Parameters:
   TableName:
     Type: String
 
+  LambdaLayer:
+    Type: String
+
 
 Mappings:
 
@@ -232,6 +235,8 @@ Resources:
       FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
       Runtime: python3.7
       CodeUri: app/src/functions/aggregate_writer
+      Layers:
+        - !Ref LambdaLayer
       Handler: index.handler
       MemorySize: 128
       Timeout: 3

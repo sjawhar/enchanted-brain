@@ -304,6 +304,7 @@ Resources:
       Parameters:
         Environment: !Ref Environment
         TableName: !Ref Table
+        LambdaLayer: !Ref LambdaLayer
 
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
