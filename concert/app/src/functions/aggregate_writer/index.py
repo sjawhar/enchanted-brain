@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+from decimal import *
 from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
@@ -10,7 +11,7 @@ from enchanted_brain.attributes import (
     CHOICE_COLOR,
     CHOICE_EMOTION_ENERGY,
     CHOICE_EMOTION_HAPPINESS,
-    RECORD_ID_AGGREGATE
+    RECORD_ID_AGGREGATE,
 )
 
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
@@ -41,7 +42,6 @@ def handler(event, context):
 
 
 def create_map_for_record_if_none_exists(timestamp, choice_key):
-    timestamp = data["CHOICE_TIME"]
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
         "UpdateExpression": "SET #choice_key.#timestamp = {}",
@@ -54,20 +54,18 @@ def create_map_for_record_if_none_exists(timestamp, choice_key):
     }
     return table.update_item(**update_args)
 
+
 def add_record_to_aggregate(record):
     data = record["data"]
     timestamp = data["CHOICE_TIME"]
     choice_type = data["CHOICE_TYPE"]
     choice_sum = data["CHOICE_SUM"]
     choice_count = data["CHOICE_COUNT"]
-    choice_average = choice_sum / choice_count
+    choice_average = Decimal(choice_sum) / Decimal(choice_count)
 
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
-        "UpdateExpression": update_expression,
-        "ExpressionAttributeNames": {
-            "#timestamp": timestamp,
-        },
+        "ExpressionAttributeNames": {"#timestamp": timestamp},
         "ExpressionAttributeValues": {":choice_average": choice_average},
         "ReturnValues": "NONE",
     }
@@ -75,12 +73,16 @@ def add_record_to_aggregate(record):
     if choice_type.startswith(CHOICE_COLOR):
         color = choice_type.split("_")[2]
         choice_type = CHOICE_COLOR
-        update_args["UpdateExpression"] = "ADD #choice_key.#timestamp.#color :choice_average"
+        update_args[
+            "UpdateExpression"
+        ] = "ADD #choice_key.#timestamp.#color :choice_average"
         update_args["ExpressionAttributeNames"]["#color"] = color
 
     elif choice_type.startswith("CHOICE_EMOTION"):
         emotion = choice_type[7:]
-        update_args["UpdateExpression"] = "ADD #choice_key.#timestamp.#emotion :choice_average"
+        update_args[
+            "UpdateExpression"
+        ] = "ADD #choice_key.#timestamp.#emotion :choice_average"
         update_args["ExpressionAttributeNames"]["#emotion"] = emotion
 
     else:
@@ -90,6 +92,8 @@ def add_record_to_aggregate(record):
     update_args["ExpressionAttributeNames"]["#choice_key"] = choice_key
 
     if choice_key == ATTR_CHOICE_VALUE_COLOR or choice_key == ATTR_CHOICE_VALUE_EMOTION:
-        ensure_map_available_for_record = create_map_for_record_if_none_exists(timestamp, choice_key)
+        ensure_map_available_for_record = create_map_for_record_if_none_exists(
+            timestamp, choice_key
+        )
 
     return table.update_item(**update_args)
