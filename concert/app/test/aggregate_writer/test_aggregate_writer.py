@@ -3,6 +3,7 @@ import os
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
+from base64 import b64encode
 from decimal import *
 from src.functions.aggregate_writer.index import handler, dynamodb
 
@@ -18,12 +19,18 @@ def get_event(choice_sum=5.0, choice_count=10, choice_type="CHOICE_COLOR_#AB0000
         "records": [
             {
                 "recordId": record_id,
-                "data": {
-                    "CHOICE_SUM": choice_sum,
-                    "CHOICE_COUNT": choice_count,
-                    "CHOICE_TYPE": choice_type,
-                    "CHOICE_TIME": test_timestamp,
-                },
+                "data": b64encode(
+                    str.encode(
+                        json.dumps(
+                            {
+                                "CHOICE_SUM": choice_sum,
+                                "CHOICE_COUNT": choice_count,
+                                "CHOICE_TYPE": choice_type,
+                                "CHOICE_TIME": test_timestamp,
+                            }
+                        )
+                    )
+                ),
             }
         ]
     }
@@ -46,11 +53,12 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     expected_map_creation_params = {
         "TableName": table_name,
         "Key": {"recordId": "AGGREGATE"},
-        "UpdateExpression": "SET #choice_key.#timestamp = {}",
+        "UpdateExpression": "SET #choice_key.#timestamp = :empty_map",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
         },
+        "ExpressionAttributeValues": {":empty_map": {}},
         "ConditionExpression": "attribute_not_exists(#choice_key.#timestamp)",
         "ReturnValues": "NONE",
     }

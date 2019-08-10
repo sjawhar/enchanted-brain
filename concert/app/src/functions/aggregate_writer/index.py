@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+from base64 import b64decode
 from decimal import *
 from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_COLOR,
@@ -44,11 +45,12 @@ def handler(event, context):
 def create_map_for_record_if_none_exists(timestamp, choice_key):
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
-        "UpdateExpression": "SET #choice_key.#timestamp = {}",
+        "UpdateExpression": "SET #choice_key.#timestamp = :empty_map",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": timestamp,
         },
+        "ExpressionAttributeValues": {":empty_map": {}},
         "ConditionExpression": "attribute_not_exists(#choice_key.#timestamp)",
         "ReturnValues": "NONE",
     }
@@ -56,7 +58,7 @@ def create_map_for_record_if_none_exists(timestamp, choice_key):
 
 
 def add_record_to_aggregate(record):
-    data = record["data"]
+    data = json.loads(b64decode(record["data"]).decode("utf-8"))
     timestamp = data["CHOICE_TIME"]
     choice_type = data["CHOICE_TYPE"]
     choice_sum = data["CHOICE_SUM"]
