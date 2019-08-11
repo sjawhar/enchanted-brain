@@ -183,7 +183,7 @@ Resources:
                   CHOICE_SUM    DOUBLE,
                   CHOICE_COUNT  int
                 );
-                CREATE OR REPLACE PUMP NUMERIC_PUMP AS
+                CREATE OR REPLACE PUMP SUM_PUMP AS
                   INSERT INTO ${DestinationStream}
                   SELECT STREAM CHOICE_TIME,
                     CHOICE_TYPE,
@@ -194,6 +194,21 @@ Resources:
                     COUNT(*) OVER W1 AS choiceCount
                   FROM ${SourceStreamPrefix}_001 AS SOURCE
                   WHERE CHOICE_TYPE NOT LIKE 'CHOICE_COLOR'
+                  WINDOW W1 AS (
+                    PARTITION BY CHOICE_TIME
+                    RANGE INTERVAL '1' MINUTE PRECEDING
+                  );
+                CREATE OR REPLACE PUMP COUNT_PUMP AS
+                  INSERT INTO ${DestinationStream}
+                  SELECT STREAM CHOICE_TIME,
+                    CHOICE_TYPE || '_' || CHOICE,
+                    COUNT(CHOICE) OVER (
+                      PARTITION BY CHOICE_TYPE, CHOICE
+                      RANGE INTERVAL '1' MINUTE PRECEDING
+                    ) AS choiceSum,
+                    COUNT(*) OVER W1 AS choiceCount
+                  FROM ${SourceStreamPrefix}_001 AS SOURCE
+                  WHERE CHOICE_TYPE LIKE 'CHOICE_COLOR'
                   WINDOW W1 AS (
                     PARTITION BY CHOICE_TIME
                     RANGE INTERVAL '1' MINUTE PRECEDING
