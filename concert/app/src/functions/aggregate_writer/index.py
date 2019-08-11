@@ -58,7 +58,7 @@ def create_map_for_record_if_none_exists(timestamp, choice_key):
     try:
         return table.update_item(**update_args)
     except ClientError as e:
-        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+        if e.response["Error"]["Code"] != "ConditionalCheckFailedException":
             raise
 
 
