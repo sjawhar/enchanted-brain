@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 from base64 import b64decode
+from botocore.exceptions import ClientError
 from decimal import *
 from enchanted_brain.attributes import (
     ATTR_CHOICE_VALUE_COLOR,
@@ -54,7 +55,11 @@ def create_map_for_record_if_none_exists(timestamp, choice_key):
         "ConditionExpression": "attribute_not_exists(#choice_key.#timestamp)",
         "ReturnValues": "NONE",
     }
-    return table.update_item(**update_args)
+    try:
+        return table.update_item(**update_args)
+    except ClientError as e:
+        if e.response['Error']['Code'] != 'ConditionalCheckFailedException':
+            raise
 
 
 def add_record_to_aggregate(record):
