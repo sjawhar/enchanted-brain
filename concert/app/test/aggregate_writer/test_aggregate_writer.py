@@ -66,45 +66,44 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     expected_aggregate_update_params = {
         "TableName": table_name,
         "Key": {"recordId": "AGGREGATE"},
+        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_string :choice_sum, #choice_key.#timestamp.#total_choices :choice_count",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
+            "#total_choices": "choices",
         },
         "ExpressionAttributeValues": {
-            ":choice_average": Decimal(choice_sum) / Decimal(choice_count)
+            ":choice_sum": Decimal(choice_sum),
+            ":choice_count": choice_count,
         },
         "ReturnValues": "NONE",
     }
 
     if choice_type.startswith("CHOICE_COLOR"):
-        expected_aggregate_update_params[
-            "UpdateExpression"
-        ] = "ADD #choice_key.#timestamp.#color :choice_average"
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#color"
+            "#choice_string"
         ] = emotion_or_color
 
     elif choice_type.startswith("CHOICE_EMOTION"):
-        expected_aggregate_update_params[
-            "UpdateExpression"
-        ] = "ADD #choice_key.#timestamp.#emotion :choice_average"
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#emotion"
+            "#choice_string"
         ] = emotion_or_color
+        expected_aggregate_update_params["ExpressionAttributeNames"][
+            "#total_choices"
+        ] = "choices_{}".format(emotion_or_color)
 
     elif choice_type == "CHOICE_CHILLS":
-        expected_aggregate_update_params[
-            "UpdateExpression"
-        ] = "ADD #choice_key.#timestamp :choice_average"
+        expected_aggregate_update_params["ExpressionAttributeNames"][
+            "#choice_string"
+        ] = "chills"
 
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
-        if choice_type != "CHOICE_CHILLS":
-            stub.add_response(
-                "update_item",
-                dynamo_update_item_success_response,
-                expected_map_creation_params,
-            )
+        stub.add_response(
+            "update_item",
+            dynamo_update_item_success_response,
+            expected_map_creation_params,
+        )
         stub.add_response(
             "update_item",
             dynamo_update_item_success_response,
@@ -116,13 +115,37 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     assert resp == {record_id: "Ok"}
 
 
-def test_dynamodb_update_error_raises_client_error():
-    with pytest.raises(ClientError):
+def test_dynamodb_update_conditional_check_fail_does_not_block_update():
+    resp = None
+    with Stubber(dynamodb.meta.client) as stub:
+        stub.add_client_error(
+            "update_item", service_error_code="ConditionalCheckFailedException"
+        )
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        resp = handler(get_event(), None)
+        stub.assert_no_pending_responses()
 
-        with Stubber(dynamodb.meta.client) as stub:
-            stub.add_client_error(
-                "update_item",
-                service_message="Jeff Bezos dislikes you personally and has sabotaged your Dynamo endpoint",
-                service_error_code=500,
-            )
-            handler(get_event(), None)
+    assert resp == {record_id: "Ok"}
+
+
+def test_dynamodb_update_error_results_in_delivery_failed():
+    resp = None
+    with Stubber(dynamodb.meta.client) as stub:
+        stub.add_client_error(
+            "update_item",
+            service_error_code="not a ConditionalCheckFailedException (conditional map creation failed)",
+        )
+        resp = handler(get_event(), None)
+
+    assert resp == {record_id: "DeliveryFailed"}
+
+    resp = None
+    with Stubber(dynamodb.meta.client) as stub:
+        stub.add_client_error(
+            "update_item", service_error_code="ConditionalCheckFailedException"
+        )
+        stub.add_client_error("update_item")
+        resp = handler(get_event(), None)
+        stub.assert_no_pending_responses()
+
+    assert resp == {record_id: "DeliveryFailed"}
