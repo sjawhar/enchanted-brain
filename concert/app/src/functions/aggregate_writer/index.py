@@ -38,8 +38,11 @@ def handler(event, context):
     records = event["records"]
     for record in records:
         record_id = record["recordId"]
-        put_response = add_record_to_aggregate(record)
-        firehose_response[record_id] = "Ok"
+        try:
+            put_response = add_record_to_aggregate(record)
+            firehose_response[record_id] = "Ok"
+        except:
+            firehose_response[record_id] = "DeliveryFailed"
     return firehose_response
 
 
