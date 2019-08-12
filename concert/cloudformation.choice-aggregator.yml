@@ -183,20 +183,29 @@ Resources:
                   CHOICE_SUM    DOUBLE,
                   CHOICE_COUNT  int
                 );
-                CREATE OR REPLACE PUMP NUMERIC_PUMP AS
+                CREATE OR REPLACE PUMP SUM_PUMP AS
                   INSERT INTO ${DestinationStream}
                   SELECT STREAM CHOICE_TIME,
                     CHOICE_TYPE,
-                    SUM(CAST(CHOICE AS DOUBLE)) OVER (
-                      PARTITION BY CHOICE_TYPE
-                      RANGE INTERVAL '1' MINUTE PRECEDING
-                    ) AS choiceSum,
-                    COUNT(*) OVER W1 AS choiceCount
+                    SUM(CAST(CHOICE AS DOUBLE)) AS choiceSum,
+                    COUNT(*) AS choiceCount
                   FROM ${SourceStreamPrefix}_001 AS SOURCE
                   WHERE CHOICE_TYPE NOT LIKE 'CHOICE_COLOR'
-                  WINDOW W1 AS (
-                    PARTITION BY CHOICE_TIME
-                    RANGE INTERVAL '1' MINUTE PRECEDING
+                  WINDOWED BY STAGGER (
+                    PARTITION BY CHOICE_TIME, CHOICE_TYPE
+                    RANGE INTERVAL '1' MINUTE
+                  );
+                CREATE OR REPLACE PUMP COUNT_PUMP AS
+                  INSERT INTO ${DestinationStream}
+                  SELECT STREAM CHOICE_TIME,
+                    CHOICE_TYPE || '_' || CHOICE,
+                    COUNT(*) AS choiceSum,
+                    COUNT(*) AS choiceCount
+                  FROM ${SourceStreamPrefix}_001 AS SOURCE
+                  WHERE CHOICE_TYPE = 'CHOICE_COLOR'
+                  WINDOWED BY STAGGER (
+                    PARTITION BY CHOICE_TIME, CHOICE_TYPE, CHOICE
+                    RANGE INTERVAL '1' MINUTE
                   );
               - DestinationStream: !FindInMap [StreamNames, DestinationStream, Value]
                 SourceStreamPrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
