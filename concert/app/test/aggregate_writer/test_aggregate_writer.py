@@ -112,7 +112,7 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
         resp = handler(event, None)
         stub.assert_no_pending_responses()
 
-    assert resp == {record_id: "Ok"}
+    assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
 
 
 def test_dynamodb_update_conditional_check_fail_does_not_block_update():
@@ -125,7 +125,7 @@ def test_dynamodb_update_conditional_check_fail_does_not_block_update():
         resp = handler(get_event(), None)
         stub.assert_no_pending_responses()
 
-    assert resp == {record_id: "Ok"}
+    assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
 
 
 def test_dynamodb_update_error_results_in_delivery_failed():
@@ -137,7 +137,7 @@ def test_dynamodb_update_error_results_in_delivery_failed():
         )
         resp = handler(get_event(), None)
 
-    assert resp == {record_id: "DeliveryFailed"}
+    assert resp == {"records": [{"recordId": record_id, "result": "DeliveryFailed"}]}
 
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
@@ -148,4 +148,4 @@ def test_dynamodb_update_error_results_in_delivery_failed():
         resp = handler(get_event(), None)
         stub.assert_no_pending_responses()
 
-    assert resp == {record_id: "DeliveryFailed"}
+    assert resp == {"records": [{"recordId": record_id, "result": "DeliveryFailed"}]}
