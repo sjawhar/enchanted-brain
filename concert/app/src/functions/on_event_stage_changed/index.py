@@ -1,7 +1,11 @@
 import boto3
 import json
 import os
-from enchanted_brain.attributes import ATTR_RECORD_ID, ATTR_STAGE_ID, RECORD_ID_EVENT_STAGE
+from enchanted_brain.attributes import (
+    ATTR_RECORD_ID,
+    ATTR_STAGE_ID,
+    RECORD_ID_EVENT_STAGE,
+)
 
 CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
