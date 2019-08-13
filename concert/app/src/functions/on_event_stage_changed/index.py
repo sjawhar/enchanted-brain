@@ -1,7 +1,7 @@
 import boto3
 import json
 import os
-from enchanted_brain.attributes import ATTR_RECORD_ID, RECORD_ID_PREFIX_EVENT_STAGE
+from enchanted_brain.attributes import ATTR_RECORD_ID, ATTR_STAGE_ID, RECORD_ID_EVENT_STAGE
 
 CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
@@ -28,20 +28,19 @@ def handler(event, context):
         },
     )
 
-    update_args = get_update_args(message)
-    table.update_item(**update_args)
+    stage_record_update_response = update_stage_record(message)
 
     return {"statusCode": 204}
 
 
-def get_update_args(message):
+def update_stage_record(message):
     data = message["data"]
-    stage_id = data.pop("stageId")
+    stage_id = data.pop(ATTR_STAGE_ID)
 
     update_args = {
-        "Key": {ATTR_RECORD_ID: RECORD_ID_PREFIX_EVENT_STAGE},
+        "Key": {ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE},
         "UpdateExpression": "SET #stage_id = :stage_id",
-        "ExpressionAttributeNames": {"#stage_id": "stage_id"},
+        "ExpressionAttributeNames": {"#stage_id": ATTR_STAGE_ID},
         "ExpressionAttributeValues": {":stage_id": stage_id},
         "ReturnValues": "NONE",
     }
@@ -51,4 +50,4 @@ def get_update_args(message):
         update_args["ExpressionAttributeNames"]["#{}".format(key)] = key
         update_args["ExpressionAttributeValues"][":{}".format(key)] = value
 
-    return update_args
+    return table.update_item(**update_args)

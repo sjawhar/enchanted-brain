@@ -54,7 +54,7 @@ def test_event_stage_changed():
         "Key": {"recordId": "EVENT_STAGE"},
         "UpdateExpression": "SET #stage_id = :stage_id, #startTime = :startTime, #endTime = :endTime, #frequency = :frequency",
         "ExpressionAttributeNames": {
-            "#stage_id": "stage_id",
+            "#stage_id": "stageId",
             "#startTime": "startTime",
             "#endTime": "endTime",
             "#frequency": "frequency",
