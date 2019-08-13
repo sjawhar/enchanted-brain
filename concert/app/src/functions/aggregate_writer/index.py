@@ -35,15 +35,17 @@ CHOICE_TYPE_KEYS = {
 
 
 def handler(event, context):
-    firehose_response = {}
+    firehose_response = {"records": []}
     records = event["records"]
     for record in records:
         record_id = record["recordId"]
+        record_response = {"recordId": record_id}
         try:
             put_response = add_record_to_aggregate(record)
-            firehose_response[record_id] = "Ok"
+            record_response["result"] = "Ok"
         except:
-            firehose_response[record_id] = "DeliveryFailed"
+            record_response["result"] = "DeliveryFailed"
+        firehose_response["records"].append(record_response)
     return firehose_response
 
 
