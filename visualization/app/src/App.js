@@ -5,6 +5,7 @@ import { withAuthenticator } from 'aws-amplify-react';
 import './App.css';
 import concertApi from './util/concertApi';
 import amplifyConfig from './config/amplify';
+import Bee from './Bee';
 import {
   CHOICE_COLOR,
   CHOICE_EMOTION_ENERGY,
@@ -15,7 +16,7 @@ Amplify.configure(amplifyConfig);
 
 const BUFFER_RING_SIZE = parseInt(process.env.REACT_APP_BUFFER_RING_SIZE, 10);
 const OFFSET_SIZE = 15;
-const BEE_SIZE = 30;
+const BEE_SIZE = 48;
 
 const UPDATE_BATCH_SIZE = parseInt(process.env.REACT_APP_UPDATE_BATCH_SIZE, 10);
 const UPDATE_TIMEOUT = parseInt(process.env.REACT_APP_UPDATE_TIMEOUT, 10);
@@ -31,7 +32,7 @@ class App extends Component {
       choiceCount: 0,
       listening: false,
       minTimestamp: 0,
-      timeout: null,
+      timeout: null
     };
     [CHOICE_EMOTION_HAPPINESS, CHOICE_EMOTION_ENERGY, CHOICE_COLOR].forEach(
       choiceType => {
@@ -125,13 +126,18 @@ class App extends Component {
           const style = {
             left: `${x}%`,
             top: `${y}%`,
-            backgroundColor: color,
             animationDelay: animationDelays[index],
             ...styles.bee
           };
 
           return (
-            <span key={index} style={style} className="jitter-forward"></span>
+            <Bee
+              key={index}
+              width={BEE_SIZE}
+              style={style}
+              fill={color}
+              className="jitter"
+            />
           );
         })}
       </div>
@@ -147,11 +153,8 @@ const styles = {
   },
   bee: {
     position: 'absolute',
-    width: `${BEE_SIZE}px`,
-    height: `${BEE_SIZE}px`,
     marginTop: `-${BEE_SIZE / 2}px`,
-    marginLeft: `-${BEE_SIZE / 2}px`,
-    borderRadius: '100%'
+    marginLeft: `-${BEE_SIZE / 2}px`
   }
 };
 
