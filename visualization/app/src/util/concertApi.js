@@ -32,7 +32,6 @@ const connect = idToken => {
       return;
     }
     try {
-      console.log('MESSAGE', messageData);
       let { event, data, ...eventData } = JSON.parse(messageData);
       if (!event) {
         event = 'CHOICE_MADE';

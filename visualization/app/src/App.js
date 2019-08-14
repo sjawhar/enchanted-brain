@@ -5,7 +5,7 @@ import { withAuthenticator } from 'aws-amplify-react';
 import './App.css';
 import concertApi from './util/concertApi';
 import amplifyConfig from './config/amplify';
-import CHOICE_TYPES, {
+import {
   CHOICE_COLOR,
   CHOICE_EMOTION_ENERGY,
   CHOICE_EMOTION_HAPPINESS
@@ -14,38 +14,41 @@ import CHOICE_TYPES, {
 Amplify.configure(amplifyConfig);
 
 const BUFFER_RING_SIZE = parseInt(process.env.REACT_APP_BUFFER_RING_SIZE, 10);
-const OFFSET_SIZE = 5;
+const OFFSET_SIZE = 15;
 const BEE_SIZE = 30;
+
+const UPDATE_BATCH_SIZE = parseInt(process.env.REACT_APP_UPDATE_BATCH_SIZE, 10);
+const UPDATE_TIMEOUT = parseInt(process.env.REACT_APP_UPDATE_TIMEOUT, 10);
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = Object.values(CHOICE_TYPES).reduce(
-      (state, choiceType) =>
-        Object.assign(state, {
-          [choiceType]: {
-            buffer: Array(BUFFER_RING_SIZE),
-            index: 0
-          }
-        }),
-      {}
+    this.state = {
+      animationDelays: Array(BUFFER_RING_SIZE)
+        .fill(0)
+        .map(() => `${-Math.random().toFixed(2)}s`),
+      buffers: [],
+      choiceCount: 0,
+      listening: false,
+      minTimestamp: 0,
+      timeout: null,
+    };
+    [CHOICE_EMOTION_HAPPINESS, CHOICE_EMOTION_ENERGY, CHOICE_COLOR].forEach(
+      choiceType => {
+        const buffer = Array(BUFFER_RING_SIZE);
+        this.state[choiceType] = {
+          buffer,
+          index: 0
+        };
+        this.state.buffers.push(buffer);
+      }
     );
-    this.state.buffers = [
-      this.state[CHOICE_EMOTION_HAPPINESS].buffer,
-      this.state[CHOICE_EMOTION_ENERGY].buffer,
-      this.state[CHOICE_COLOR].buffer
-    ];
-    this.state.listening = false;
-    this.state.minTimestamp = 0;
-    this.state.animationDelays = Array(BUFFER_RING_SIZE)
-      .fill(0)
-      .map(() => `${-Math.random().toFixed(2)}s`);
-    concertApi.on('CONNECTED', this.handleStageChange);
-    concertApi.on('EVENT_STAGE_CHANGED', this.handleStageChange);
+    concertApi.on('CONNECTED', this.handleStageChanged);
+    concertApi.on('EVENT_STAGE_CHANGED', this.handleStageChanged);
     concertApi.on('CHOICE_MADE', this.handleChoiceMade);
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
     const idToken = (await Auth.currentSession()).getIdToken();
     concertApi.connect(idToken.getJwtToken());
   }
@@ -54,7 +57,13 @@ class App extends Component {
     concertApi.disconnect();
   }
 
-  handleStageChange = ({ stageId, choiceTypes, startTime }) => {
+  shouldComponentUpdate(props, { choiceCount }) {
+    return choiceCount === 0;
+  }
+
+  perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
+
+  handleStageChanged = ({ stageId, choiceTypes, startTime }) => {
     if (
       stageId === 'STAGE_CHOICE_SYNESTHESIA' &&
       choiceTypes &&
@@ -75,19 +84,29 @@ class App extends Component {
     ) {
       return;
     }
-    this.setState(({ [choiceType]: { buffer, index } }) => {
-      buffer[index] =
-        choiceType === CHOICE_COLOR ? choice : this.perturb(choice);
-      return {
-        [choiceType]: {
-          buffer,
-          index: (index + 1) % BUFFER_RING_SIZE
+    this.setState(
+      ({ choiceCount, timeout, [choiceType]: { buffer, index } }) => {
+        buffer[index] =
+          choiceType === CHOICE_COLOR ? choice : this.perturb(choice);
+        if (timeout) {
+          clearTimeout(timeout);
         }
-      };
-    });
+        return {
+          choiceCount: (choiceCount + 1) % UPDATE_BATCH_SIZE,
+          timeout: setTimeout(() => {
+            if (this.state.choiceCount === 0) {
+              return;
+            }
+            this.setState({ choiceCount: 0 });
+          }, UPDATE_TIMEOUT),
+          [choiceType]: {
+            buffer,
+            index: (index + 1) % BUFFER_RING_SIZE
+          }
+        };
+      }
+    );
   };
-
-  perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
 
   render() {
     const { animationDelays, buffers } = this.state;
