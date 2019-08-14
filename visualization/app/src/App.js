@@ -152,6 +152,7 @@ class App extends Component {
                 key={index}
                 width={BEE_SIZE}
                 style={style}
+                fill="white"
                 stroke={color}
                 className="jitter"
               />
