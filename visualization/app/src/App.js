@@ -8,7 +8,7 @@ import amplifyConfig from './config/amplify';
 import Bee from './Bee';
 import {
   CHOICE_COLOR,
-  CHOICE_EMOTION_ENERGY,
+  CHOICE_EMOTION_ANGER,
   CHOICE_EMOTION_HAPPINESS
 } from './constants/ChoiceTypes';
 
@@ -34,7 +34,7 @@ class App extends Component {
       minTimestamp: 0,
       timeout: null
     };
-    [CHOICE_EMOTION_HAPPINESS, CHOICE_EMOTION_ENERGY, CHOICE_COLOR].forEach(
+    [CHOICE_EMOTION_HAPPINESS, CHOICE_EMOTION_ANGER, CHOICE_COLOR].forEach(
       choiceType => {
         const buffer = Array(BUFFER_RING_SIZE);
         this.state[choiceType] = {
