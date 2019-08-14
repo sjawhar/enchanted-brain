@@ -1,3 +1,8 @@
+.axis-label {
+    position: absolute;
+    color: white;
+    font-weight: bold;
+}
 .jitter {
   will-change: transform;
   animation-name: jitter;
