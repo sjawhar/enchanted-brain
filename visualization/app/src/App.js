@@ -121,37 +121,111 @@ class App extends Component {
     }).filter(el => el);
 
     return (
-      <div style={styles.App}>
-        {bees.map(({ x, y, color }, index) => {
-          const style = {
-            left: `${x}%`,
-            top: `${y}%`,
-            animationDelay: animationDelays[index],
-            ...styles.bee
-          };
+      <div>
+        <div style={styles.axesContainer}>
+          <span className="axis-label" style={styles.happy}>
+            Happy
+          </span>
+          <span className="axis-label" style={styles.sad}>
+            Sad
+          </span>
+          <span className="axis-label" style={styles.angry}>
+            Angry
+          </span>
+          <span className="axis-label" style={styles.calm}>
+            Calm
+          </span>
+          <div style={styles.axisX} />
+          <div style={styles.axisY} />
+        </div>
+        <div style={styles.beesContainer}>
+          {bees.map(({ x, y, color }, index) => {
+            const style = {
+              left: `${x}%`,
+              top: `${y}%`,
+              animationDelay: animationDelays[index],
+              ...styles.bee
+            };
 
-          return (
-            <Bee
-              key={index}
-              width={BEE_SIZE}
-              style={style}
-              fill={color}
-              className="jitter"
-            />
-          );
-        })}
+            return (
+              <Bee
+                key={index}
+                width={BEE_SIZE}
+                style={style}
+                stroke={color}
+                className="jitter"
+              />
+            );
+          })}
+        </div>
       </div>
     );
   }
 }
 
 const styles = {
-  App: {
+  axesContainer: {
+    position: 'fixed',
+    left: 0,
+    top: 0,
     width: '100%',
     height: '100%',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    zIndex: 100
+  },
+  happy: {
+    top: '50%',
+    right: 0,
+    marginTop: '-9px',
+    marginRight: '10px'
+  },
+  sad: {
+    top: '50%',
+    left: 0,
+    marginTop: '-9px',
+    marginLeft: '10px'
+  },
+  angry: {
+    left: 0,
+    width: '100%',
+    textAlign: 'center',
+    top: 0,
+    marginTop: '10px'
+  },
+  calm: {
+    left: 0,
+    width: '100%',
+    textAlign: 'center',
+    bottom: 0,
+    marginBottom: '10px'
+  },
+  axisX: {
+    background: 'white',
+    position: 'absolute',
+    top: '50%',
+    left: '5%',
+    height: '1px',
+    width: '90%'
+  },
+  axisY: {
+    background: 'white',
+    position: 'absolute',
+    top: '5%',
+    left: '50%',
+    height: '90%',
+    width: '1px'
+  },
+  beesContainer: {
+    position: 'fixed',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    zIndex: 150
   },
   bee: {
+    zIndex: 160,
     position: 'absolute',
     marginTop: `-${BEE_SIZE / 2}px`,
     marginLeft: `-${BEE_SIZE / 2}px`
