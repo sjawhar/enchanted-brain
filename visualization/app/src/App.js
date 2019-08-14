@@ -37,6 +37,9 @@ class App extends Component {
     ];
     this.state.listening = false;
     this.state.minTimestamp = 0;
+    this.state.animationDelays = Array(BUFFER_RING_SIZE)
+      .fill(0)
+      .map(() => `${-Math.random().toFixed(2)}s`);
     concertApi.on('CONNECTED', this.handleStageChange);
     concertApi.on('EVENT_STAGE_CHANGED', this.handleStageChange);
     concertApi.on('CHOICE_MADE', this.handleChoiceMade);
@@ -73,7 +76,8 @@ class App extends Component {
       return;
     }
     this.setState(({ [choiceType]: { buffer, index } }) => {
-      buffer[index] = choice;
+      buffer[index] =
+        choiceType === CHOICE_COLOR ? choice : this.perturb(choice);
       return {
         [choiceType]: {
           buffer,
@@ -86,14 +90,14 @@ class App extends Component {
   perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
 
   render() {
-    const { buffers } = this.state;
+    const { animationDelays, buffers } = this.state;
     const bees = Array.from(buffers[0], (x, index) => {
       const y = buffers[1][index];
       const color = buffers[2][index];
       if (x === undefined || y === undefined || color === undefined) {
         return null;
       }
-      return { x: this.perturb(x), y: this.perturb(y), color };
+      return { x, y, color };
     }).filter(el => el);
 
     return (
@@ -103,7 +107,7 @@ class App extends Component {
             left: `${x}%`,
             top: `${y}%`,
             backgroundColor: color,
-            animationDelay: `${-Math.random().toFixed(2)}s`,
+            animationDelay: animationDelays[index],
             ...styles.bee
           };
 
