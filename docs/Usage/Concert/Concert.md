@@ -1,5 +1,7 @@
 ## Authentication
-Authenticate with AWS Cognito. Include the Cognito ID JWT in the Authorization header of all API requests.
+There are two methods by which you can authenticate when connecting to the websocket server:
+* Include the user's JWT in the `Authentication` header and include a random unique value in the `token` query string parameter (recommended)
+* Include the user's JWT in the `token` query string parameter
 
 ## Websocket API
 The guided concert experience uses a websocket API for realtime communication between the client and server. Requests to the server are routed based on the `event` attribute of the request body. For example, a request with the following body would be treated as a FOO request:
