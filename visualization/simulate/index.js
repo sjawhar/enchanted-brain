@@ -40,7 +40,7 @@ const COLORS = [
   '#000000',
 ];
 const CHOICE_COLOR = 'CHOICE_COLOR';
-const CHOICE_EMOTION_ENERGY = 'CHOICE_EMOTION_ENERGY';
+const CHOICE_EMOTION_ANGER = 'CHOICE_EMOTION_ANGER';
 const CHOICE_EMOTION_HAPPINESS = 'CHOICE_EMOTION_HAPPINESS';
 
 const sqs = new aws.SQS();
@@ -51,7 +51,7 @@ const startTime = Date.now();
 const getRandomChoice = choiceType => {
   switch (choiceType) {
     case CHOICE_EMOTION_HAPPINESS:
-    case CHOICE_EMOTION_ENERGY:
+    case CHOICE_EMOTION_ANGER:
       return Math.floor(5 * Math.random() - 2);
     case CHOICE_COLOR:
     default:
@@ -69,7 +69,7 @@ const simulateResponses = async () => {
     sqs
       .sendMessageBatch({
         QueueUrl: queueUrl,
-        Entries: [CHOICE_COLOR, CHOICE_COLOR, CHOICE_EMOTION_ENERGY, CHOICE_EMOTION_HAPPINESS].map(
+        Entries: [CHOICE_COLOR, CHOICE_COLOR, CHOICE_EMOTION_ANGER, CHOICE_EMOTION_HAPPINESS].map(
           (choiceType, index) => ({
             Id: `${intervalTime}-${index + sent}`,
             MessageBody: JSON.stringify({

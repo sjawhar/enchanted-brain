@@ -45,14 +45,14 @@ To report a user's choice, send the CHOICE_MADE event:
 {
   event: 'CHOICE_MADE',
   data: {
-    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ENERGY | CHOICE_CHILLS
+    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ANGER | CHOICE_CHILLS
     choice: String || Number,   // String for color, Number for the rest
     timestamp: String,
   },
 }
 ```
 
-For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ENERGY events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
+For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ANGER events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
 
 ### Event Stages
 #### 1 - Welcome
@@ -148,7 +148,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
     [timestamp]: String,    // hex color string
     ...
   },
-  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ENERGY
+  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ANGER
   emotions: {
     [timestamp]: intensity,
     ...
@@ -176,7 +176,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   emotions: {
     [timestamp]: {
       EMOTION_HAPPINESS: Number,    // Average audience happiness intensity
-      EMOTION_ENERGY: Number,
+      EMOTION_ANGER: Number,
     },
     ...
   },
