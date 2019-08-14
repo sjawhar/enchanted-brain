@@ -49,15 +49,17 @@ def update_song_list(message):
     end_time = data.get(ATTR_END_TIME)
     if display_name and start_time and end_time:
 
-        song = {
-            ATTR_DISPLAY_NAME: display_name,
-            ATTR_START_TIME: start_time,
-            ATTR_END_TIME: end_time,
-        }
+        song = [
+            {
+                ATTR_DISPLAY_NAME: display_name,
+                ATTR_START_TIME: start_time,
+                ATTR_END_TIME: end_time,
+            }
+        ]
 
         update_args = {
             "Key": {ATTR_RECORD_ID: RECORD_ID_SONG_LIST},
-            "UpdateExpression": "ADD #songs :song",
+            "UpdateExpression": "SET #songs = list_append(#songs, :song)",
             "ExpressionAttributeNames": {"#songs": ATTR_SONGS},
             "ExpressionAttributeValues": {":song": song},
             "ReturnValues": "NONE",

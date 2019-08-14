@@ -58,14 +58,16 @@ def test_event_stage_changed(stage_id, display_name, start_time, end_time, frequ
     dynamo_song_list_expected_params = {
         "TableName": TABLE_NAME,
         "Key": {"recordId": "SONG_LIST"},
-        "UpdateExpression": "ADD #songs :song",
+        "UpdateExpression": "SET #songs = list_append(#songs, :song)",
         "ExpressionAttributeNames": {"#songs": "songs"},
         "ExpressionAttributeValues": {
-            ":song": {
-                "displayName": display_name,
-                "startTime": start_time,
-                "endTime": end_time,
-            }
+            ":song": [
+                {
+                    "displayName": display_name,
+                    "startTime": start_time,
+                    "endTime": end_time,
+                }
+            ]
         },
         "ReturnValues": "NONE",
     }
