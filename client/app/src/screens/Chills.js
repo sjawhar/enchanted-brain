@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { View, Text, Animated, PanResponder } from 'react-native';
+import { View, Text, Animated, PanResponder, PixelRatio } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import Constants from 'expo-constants';
 import Layout from '../constants/Layout';
 
-const WINDOW_HEIGHT = Layout.window.height;
+const INPUT_HEIGHT = Layout.window.height - Constants.statusBarHeight;
+const INPUT_BUFFER = 25;
 
 class ChillsScreen extends Component {
   constructor(props) {
@@ -44,9 +45,11 @@ class ChillsScreen extends Component {
       nextPollTime += this.interval;
     }
 
-    // TODO: Scale locationY to 0-1
     this.setState(({ touches }) => ({
-      touches: [...touches, { choice: locationY, timestamp: pollTime }],
+      touches: [
+        ...touches,
+        { choice: Math.max(0, 1 - locationY / INPUT_HEIGHT), timestamp: pollTime },
+      ],
       nextPollTime: this.roundTime(nextPollTime),
     }));
   };
@@ -66,14 +69,19 @@ class ChillsScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Animated.View style={styles.waveform}>
-          {this.state.touches.slice(-25).map(touch => (
-            <Text key={touch.timestamp}>{touch.choice}</Text>
+        <Animated.View style={styles.waveformContainer}>
+          {this.state.touches.slice(-INPUT_BUFFER).map(({ timestamp, choice }) => (
+            <View
+              key={timestamp}
+              style={[styles.waveform, { height: `${Math.ceil(100 * choice)}%` }]}
+            />
           ))}
         </Animated.View>
-        <View {...this._panResponder.panHandlers} style={styles.input} />
-        <View style={styles.instructions}>
-          <Text>Instructions here</Text>
+        <View style={styles.inputContainer}>
+          <View {...this._panResponder.panHandlers} style={styles.input} />
+          <Text style={styles.instruction}>High</Text>
+          <Text style={styles.instruction}>Touch and drag to indicate chills</Text>
+          <Text style={styles.instruction}>Low</Text>
         </View>
       </View>
     );
@@ -84,24 +92,42 @@ const styles = EStyleSheet.create({
   container: {
     marginTop: Constants.statusBarHeight,
     width: '100%',
-    height: WINDOW_HEIGHT - Constants.statusBarHeight,
+    height: INPUT_HEIGHT,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
-  waveform: {
+  waveformContainer: {
     backgroundColor: 'black',
-    width: '50%',
+    width: '67%',
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',
   },
-  input: {
-    width: '25%',
-    backgroundColor: 'red',
+  waveform: {
+    borderTopColor: 'red',
+    borderTopWidth: 2 * PixelRatio.get(),
+    width: `${100 / INPUT_BUFFER}%`,
   },
-  instructions: {
-    width: '25%',
+  inputContainer: {
+    width: '33%',
+    backgroundColor: 'red',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
+  },
+  input: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    height: '100%',
+    width: '100%',
+    zIndex: 999,
+  },
+  instruction: {
+    textAlign: 'center',
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
