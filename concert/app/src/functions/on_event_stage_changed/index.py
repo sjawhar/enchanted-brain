@@ -27,9 +27,6 @@ def handler(event, context):
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
         Message=json.dumps(message),
         MessageStructure="string",
-        MessageAttributes={
-            "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
-        },
     )
 
     stage_record_update_response = update_stage_record(message)

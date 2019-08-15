@@ -44,9 +44,6 @@ def test_event_stage_changed():
         "TopicArn": CALLBACK_SNS_ARN,
         "Message": expectedMessage,
         "MessageStructure": "string",
-        "MessageAttributes": {
-            "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
-        },
     }
 
     dynamo_expected_params = {
