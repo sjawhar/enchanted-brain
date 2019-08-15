@@ -145,9 +145,9 @@ class App extends Component {
               width={BEE_SIZE}
               style={{
                 ...styles.bee,
-                animationDelay: animationDelays[index]
+                animationDelay: animationDelays[index],
                 left: `${x}%`,
-                top: `${y}%`,
+                top: `${y}%`
               }}
               fill="white"
               stroke={color}
