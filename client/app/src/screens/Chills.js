@@ -29,7 +29,10 @@ class ChillsScreen extends Component {
   }
 
   _onPanResponderGrant = event => {
-    this.setState({ touches: [] });
+    this.setState({
+      touches: [],
+      opacity: new Animated.Value(1),
+    });
     this._onPanResponderMove(event);
   };
 
@@ -58,6 +61,10 @@ class ChillsScreen extends Component {
     const { touches } = this.state;
     this.setState({ nextPollTime: undefined });
     this.sendTouches(touches);
+    Animated.timing(this.state.opacity, {
+      toValue: 0,
+      duration: 500,
+    }).start();
   };
 
   roundTime = time => this.interval * Math.floor(time / this.interval);
@@ -67,16 +74,17 @@ class ChillsScreen extends Component {
   };
 
   render() {
+    const { touches, opacity } = this.state;
     return (
       <View style={styles.container}>
-        <Animated.View style={styles.waveformContainer}>
-          {this.state.touches.slice(-INPUT_BUFFER).map(({ timestamp, choice }) => (
-            <View
+        <View style={styles.waveformContainer}>
+          {touches.slice(-INPUT_BUFFER).map(({ timestamp, choice }) => (
+            <Animated.View
               key={timestamp}
-              style={[styles.waveform, { height: `${Math.ceil(100 * choice)}%` }]}
+              style={[styles.waveform, { height: `${Math.ceil(100 * choice)}%`, opacity }]}
             />
           ))}
-        </Animated.View>
+        </View>
         <View style={styles.inputContainer}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
           <Text style={styles.instruction}>High</Text>
