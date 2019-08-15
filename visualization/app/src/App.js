@@ -144,14 +144,13 @@ class App extends Component {
               left: `${x}%`,
               top: `${y}%`,
               animationDelay: animationDelays[index],
-              ...styles.bee
             };
 
             return (
               <Bee
                 key={index}
                 width={BEE_SIZE}
-                style={style}
+                style={[style, styles.bee]}
                 fill="white"
                 stroke={color}
                 className="jitter"
