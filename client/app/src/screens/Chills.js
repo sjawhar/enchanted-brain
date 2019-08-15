@@ -117,7 +117,7 @@ const styles = EStyleSheet.create({
     alignItems: 'stretch',
   },
   waveformContainer: {
-    backgroundColor: 'black',
+    backgroundColor: 'rgb(95, 95, 95)',
     width: '67%',
     flexDirection: 'row',
     justifyContent: 'flex-end',
