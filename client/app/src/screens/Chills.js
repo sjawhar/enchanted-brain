@@ -92,7 +92,11 @@ class ChillsScreen extends Component {
           {touches.slice(-INPUT_BUFFER).map(({ timestamp, choice }) => (
             <Animated.View
               key={timestamp}
-              style={[styles.waveform, { height: `${Math.ceil(100 * choice)}%`, opacity }]}
+              style={{
+                ...styles.waveform,
+                height: `${Math.ceil(100 * choice)}%`,
+                opacity,
+              }}
             />
           ))}
         </View>
