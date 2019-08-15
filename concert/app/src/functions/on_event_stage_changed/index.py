@@ -3,7 +3,7 @@ import json
 import os
 from enchanted_brain.attributes import (
     ATTR_RECORD_ID,
-    ATTR_STAGE_ID,
+    ATTR_EVENT_STAGE_ID,
     RECORD_ID_EVENT_STAGE,
 )
 
@@ -36,12 +36,12 @@ def handler(event, context):
 
 def update_stage_record(message):
     data = message["data"]
-    stage_id = data.pop(ATTR_STAGE_ID)
+    stage_id = data.pop(ATTR_EVENT_STAGE_ID)
 
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE},
         "UpdateExpression": "SET #stage_id = :stage_id",
-        "ExpressionAttributeNames": {"#stage_id": ATTR_STAGE_ID},
+        "ExpressionAttributeNames": {"#stage_id": ATTR_EVENT_STAGE_ID},
         "ExpressionAttributeValues": {":stage_id": stage_id},
         "ReturnValues": "NONE",
     }
