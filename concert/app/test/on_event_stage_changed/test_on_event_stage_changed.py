@@ -80,22 +80,14 @@ def test_event_stage_changed():
 
 def test_sns_publish_error_raises_client_error():
     with pytest.raises(ClientError):
-        with Stubber(sns) as sns_stub:
-            sns_stub.add_client_error(
-                "publish",
-                service_message="Jeff Bezos dislikes you personally and has sabotaged your SNS endpoint",
-                service_error_code=500,
-            )
+        with Stubber(sns) as sns_stub, Stubber(dynamodb.meta.client) as dynamo_stub:
+            dynamo_stub.add_response("update_item", SUCCESS_RESPONSE)
+            sns_stub.add_client_error("publish")
             handler(get_event(), None)
 
 
 def test_dynamodb_update_error_raises_client_error():
     with pytest.raises(ClientError):
         with Stubber(sns) as sns_stub, Stubber(dynamodb.meta.client) as dynamo_stub:
-            sns_stub.add_response("publish", SUCCESS_RESPONSE)
-            dynamo_stub.add_client_error(
-                "update_item",
-                service_message="Jeff Bezos dislikes you personally and has sabotaged your Dynamo endpoint",
-                service_error_code=500,
-            )
+            dynamo_stub.add_client_error("update_item")
             handler(get_event(), None)
