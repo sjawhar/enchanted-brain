@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+from copy import copy
 from enchanted_brain.attributes import (
     ATTR_RECORD_ID,
     ATTR_EVENT_STAGE_ID,
@@ -23,19 +24,19 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 def handler(event, context):
     message = json.loads(event["body"])
 
+    stage_record_update_response = update_stage_record(message)
+
     sns_response = sns.publish(
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
         Message=json.dumps(message),
         MessageStructure="string",
     )
 
-    stage_record_update_response = update_stage_record(message)
-
     return {"statusCode": 204}
 
 
 def update_stage_record(message):
-    data = message["data"]
+    data = copy(message["data"])
     stage_id = data.pop(ATTR_EVENT_STAGE_ID)
 
     update_args = {
