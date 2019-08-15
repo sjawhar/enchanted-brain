@@ -135,8 +135,8 @@ class App extends Component {
           <span className="axis-label" style={styles.calm}>
             Calm
           </span>
-          <div style={styles.axisX} />
-          <div style={styles.axisY} />
+          <div className="axis" style={styles.axisX} />
+          <div className="axis" style={styles.axisY} />
         </div>
         <div style={styles.beesContainer}>
           {bees.map(({ x, y, color }, index) => {
@@ -177,44 +177,38 @@ const styles = {
   happy: {
     top: '50%',
     right: 0,
-    marginTop: '-9px',
-    marginRight: '10px'
+    width: '7%',
+    marginTop: '-21px'
   },
   sad: {
     top: '50%',
     left: 0,
-    marginTop: '-9px',
-    marginLeft: '10px'
+    width: '7%',
+    marginTop: '-21px'
   },
   angry: {
     left: 0,
     width: '100%',
-    textAlign: 'center',
     top: 0,
     marginTop: '10px'
   },
   calm: {
     left: 0,
     width: '100%',
-    textAlign: 'center',
     bottom: 0,
     marginBottom: '10px'
   },
   axisX: {
-    background: 'white',
-    position: 'absolute',
     top: '50%',
-    left: '5%',
-    height: '1px',
-    width: '90%'
+    left: '7%',
+    height: '2px',
+    width: '86%'
   },
   axisY: {
-    background: 'white',
-    position: 'absolute',
-    top: '5%',
+    top: '7%',
     left: '50%',
-    height: '90%',
-    width: '1px'
+    height: '86%',
+    width: '2px'
   },
   beesContainer: {
     position: 'fixed',
