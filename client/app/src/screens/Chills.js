@@ -70,7 +70,7 @@ class ChillsScreen extends Component {
     }).start();
   };
 
-  roundTime = time => this.interval * Math.floor(time / this.interval);
+  roundTime = time => time - (time % this.interval);
 
   sendTouches = touches =>
     touches.forEach(({ timestamp, choice }) =>
