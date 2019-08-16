@@ -1,0 +1,13 @@
+{
+    "ApplicationName": "development-enchanted-brain-aggregate",
+    "RunConfiguration": {
+        "SqlRunConfigurations": [
+            {
+                "InputId": "1.1",
+                "InputStartingPositionConfiguration": {
+                    "InputStartingPosition": "NOW"
+                }
+            }
+        ]
+    }
+}
