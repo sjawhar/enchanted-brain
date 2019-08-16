@@ -5,7 +5,7 @@ from base64 import b64decode
 from botocore.exceptions import ClientError
 from decimal import *
 from enchanted_brain.attributes import (
-    ATTR_TOTAL_CHOICES,
+    ATTR_AGGREGATE_TOTAL_CHOICES,
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
     ATTR_CHOICE_VALUE_CHILLS,
@@ -52,20 +52,16 @@ def handler(event, context):
 def create_map_for_record_if_none_exists(timestamp, choice_key):
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
-        "UpdateExpression": "SET #choice_key.#timestamp = :empty_map",
+        "UpdateExpression": "SET #choice_key.#timestamp = if_not_exists(#choice_key.#timestamp, :empty_map)",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": timestamp,
         },
         "ExpressionAttributeValues": {":empty_map": {}},
-        "ConditionExpression": "attribute_not_exists(#choice_key.#timestamp)",
         "ReturnValues": "NONE",
     }
-    try:
-        return table.update_item(**update_args)
-    except ClientError as e:
-        if e.response["Error"]["Code"] != "ConditionalCheckFailedException":
-            raise
+
+    return table.update_item(**update_args)
 
 
 def add_record_to_aggregate(record):
@@ -80,7 +76,7 @@ def add_record_to_aggregate(record):
         "UpdateExpression": "ADD #choice_key.#timestamp.#choice_string :choice_sum, #choice_key.#timestamp.#total_choices :choice_count",
         "ExpressionAttributeNames": {
             "#timestamp": timestamp,
-            "#total_choices": ATTR_TOTAL_CHOICES,
+            "#total_choices": ATTR_AGGREGATE_TOTAL_CHOICES,
         },
         "ExpressionAttributeValues": {
             ":choice_sum": choice_sum,

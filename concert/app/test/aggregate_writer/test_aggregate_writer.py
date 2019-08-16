@@ -53,13 +53,12 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     expected_map_creation_params = {
         "TableName": table_name,
         "Key": {"recordId": "AGGREGATE"},
-        "UpdateExpression": "SET #choice_key.#timestamp = :empty_map",
+        "UpdateExpression": "SET #choice_key.#timestamp = if_not_exists(#choice_key.#timestamp, :empty_map)",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
         },
         "ExpressionAttributeValues": {":empty_map": {}},
-        "ConditionExpression": "attribute_not_exists(#choice_key.#timestamp)",
         "ReturnValues": "NONE",
     }
 
@@ -115,19 +114,6 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
 
 
-def test_dynamodb_update_conditional_check_fail_does_not_block_update():
-    resp = None
-    with Stubber(dynamodb.meta.client) as stub:
-        stub.add_client_error(
-            "update_item", service_error_code="ConditionalCheckFailedException"
-        )
-        stub.add_response("update_item", dynamo_update_item_success_response)
-        resp = handler(get_event(), None)
-        stub.assert_no_pending_responses()
-
-    assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
-
-
 def test_dynamodb_update_error_results_in_delivery_failed():
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
@@ -136,16 +122,5 @@ def test_dynamodb_update_error_results_in_delivery_failed():
             service_error_code="not a ConditionalCheckFailedException (conditional map creation failed)",
         )
         resp = handler(get_event(), None)
-
-    assert resp == {"records": [{"recordId": record_id, "result": "DeliveryFailed"}]}
-
-    resp = None
-    with Stubber(dynamodb.meta.client) as stub:
-        stub.add_client_error(
-            "update_item", service_error_code="ConditionalCheckFailedException"
-        )
-        stub.add_client_error("update_item")
-        resp = handler(get_event(), None)
-        stub.assert_no_pending_responses()
 
     assert resp == {"records": [{"recordId": record_id, "result": "DeliveryFailed"}]}
