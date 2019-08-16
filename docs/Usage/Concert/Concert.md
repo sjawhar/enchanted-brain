@@ -166,22 +166,28 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   recordId: 'AGGREGATE',
   colors: {
     [timestamp]: {
-      '#AB0000': Number,           // Number of audience members whose latest color choice as of this time was #AB0000
-      '#00AB00': Number,
-      '#0000AB': Number,
+      count: Number                   // Total number of choices made for all colors at this time
+      'sum_#AB0000': Number,            // Number of audience members whose latest color choice as of this time was #AB0000
+      'sum_#00AB00': Number,
+      'sum_#0000AB': Number,
       ...
     },
     ...
   },
   emotions: {
     [timestamp]: {
-      EMOTION_HAPPINESS: Number,    // Average audience happiness intensity
-      EMOTION_ANGER: Number,
+      count_EMOTION_HAPPINESS: Number,  // Count of audience happiness intensity choices
+      count_EMOTION_ANGER: Number,
+      sum_EMOTION_HAPPINESS: Number,    // Sum of audience happiness intensity choices
+      sum_EMOTION_ANGER: Number,
     },
     ...
   },
   chills: {
-    [timestamp]: Number,            // Total audience chill intensity
+    [timestamp]: {
+      count: Number,                    // Count of audience chill choices
+      sum: Number,                      // Sum of audience chill choices
+    }
     ...
   },
 }
