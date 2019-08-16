@@ -65,11 +65,11 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     expected_aggregate_update_params = {
         "TableName": table_name,
         "Key": {"recordId": "AGGREGATE"},
-        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_string :choice_sum, #choice_key.#timestamp.#total_choices :choice_count",
+        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
-            "#total_choices": "choices",
+            "#choice_count": "choices",
         },
         "ExpressionAttributeValues": {
             ":choice_sum": Decimal(choice_sum),
@@ -80,20 +80,20 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
 
     if choice_type.startswith("CHOICE_COLOR"):
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_string"
+            "#choice_sum"
         ] = emotion_or_color
 
     elif choice_type.startswith("CHOICE_EMOTION"):
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_string"
+            "#choice_sum"
         ] = emotion_or_color
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#total_choices"
+            "#choice_count"
         ] = "choices_{}".format(emotion_or_color)
 
     elif choice_type == "CHOICE_CHILLS":
         expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_string"
+            "#choice_sum"
         ] = "chills"
 
     resp = None

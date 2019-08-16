@@ -73,10 +73,10 @@ def add_record_to_aggregate(record):
 
     update_args = {
         "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
-        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_string :choice_sum, #choice_key.#timestamp.#total_choices :choice_count",
+        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
         "ExpressionAttributeNames": {
             "#timestamp": timestamp,
-            "#total_choices": ATTR_AGGREGATE_TOTAL_CHOICES,
+            "#choice_count": ATTR_AGGREGATE_TOTAL_CHOICES,
         },
         "ExpressionAttributeValues": {
             ":choice_sum": choice_sum,
@@ -88,18 +88,18 @@ def add_record_to_aggregate(record):
     if choice_type.startswith(CHOICE_COLOR):
         color = choice_type.split("_")[2]
         choice_type = CHOICE_COLOR
-        update_args["ExpressionAttributeNames"]["#choice_string"] = color
+        update_args["ExpressionAttributeNames"]["#choice_sum"] = color
 
     elif choice_type.startswith("CHOICE_EMOTION"):
         emotion = choice_type[7:]
-        update_args["ExpressionAttributeNames"]["#choice_string"] = emotion
-        update_args["ExpressionAttributeNames"]["#total_choices"] += "_{}".format(
+        update_args["ExpressionAttributeNames"]["#choice_sum"] = emotion
+        update_args["ExpressionAttributeNames"]["#choice_count"] += "_{}".format(
             emotion
         )
 
     else:
         update_args["ExpressionAttributeNames"][
-            "#choice_string"
+            "#choice_sum"
         ] = ATTR_CHOICE_VALUE_CHILLS
 
     choice_key = CHOICE_TYPE_KEYS[choice_type]
