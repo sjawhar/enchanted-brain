@@ -1,5 +1,6 @@
 ATTR_RECORD_ID = "recordId"
 ATTR_CREATED_AT = "createdAt"
+ATTR_EVENT_STAGE_ID = "stageId"
 
 ATTR_CHOICE_TIMESTAMP = "timestamp"
 ATTR_CHOICE_TYPE = "choiceType"
