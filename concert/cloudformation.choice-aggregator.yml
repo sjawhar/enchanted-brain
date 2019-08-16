@@ -1,0 +1,276 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  TableName:
+    Type: String
+
+  LambdaLayer:
+    Type: String
+
+
+Mappings:
+
+  StreamNames:
+    DestinationStream:
+      Value: DESTINATION_STREAM
+    SourceStreamPrefix:
+      Value: CHOICES
+
+
+Resources:
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${Environment}-enchanted-brain-choices
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
+
+  KinesisLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis
+      RetentionInDays: 30
+
+  KinesisFirehoseStreamLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref KinesisLogGroup
+      LogStreamName: firehose
+
+  KinesisAnalyticsLogStream:
+    Type: AWS::Logs::LogStream
+    Properties:
+      LogGroupName: !Ref KinesisLogGroup
+      LogStreamName: analytics
+
+  KinesisFirehoseStreamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-firehose-v1
+      Path: !Sub /${AWS::Region}/${Environment}/enchanted-brain/
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: firehose.amazonaws.com
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref AWS::AccountId
+      Policies:
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-firehose
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
+                Resource:
+                  - arn:aws:s3:::${S3Bucket}
+                  - arn:aws:s3:::${S3Bucket}/*
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3
+                Condition:
+                  StringEquals:
+                    kms:ViaService: !Sub s3.${AWS::Region}.amazonaws.com
+                  StringLike:
+                    kms:EncryptionContext:aws:s3:arn: !Sub arn:aws:s3:::${S3Bucket}/*
+              - Effect: Allow
+                Action: logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisFirehoseStreamLogStream}
+              - Effect: Allow
+                Action: kms:Decrypt
+                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/kinesis
+                Condition:
+                  StringEquals:
+                    kms:ViaService: !Sub kinesis.${AWS::AccountId}.amazonaws.com
+                  StringLike:
+                    kms:EncryptionContext:aws:kinesis:arn: !Join
+                      - ''
+                      - - !Sub arn:aws:kinesis:${AWS::AccountId}:${AWS::AccountId}:stream
+                        - !Sub /${Environment}-enchanted-brain-kinesis-firehose
+
+  KinesisFirehoseStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub ${Environment}-enchanted-brain-kinesis-firehose
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt S3Bucket.Arn
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 50
+        CloudWatchLoggingOptions:
+          Enabled: true
+          LogGroupName: !Ref KinesisLogGroup
+          LogStreamName: !Ref KinesisFirehoseStreamLogStream
+        CompressionFormat: GZIP
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/kinesis
+        Prefix: YYYY/MM/DD/HH
+        RoleARN: !GetAtt KinesisFirehoseStreamRole.Arn
+
+  KinesisAnalyticsApplicationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics-v2
+      Path: !Sub /${AWS::Region}/${Environment}/enchanted-brain/
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: kinesisanalytics.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-kinesis-analytics
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - firehose:DescribeDeliveryStream
+                  - firehose:Get*
+                Resource: !GetAtt KinesisFirehoseStream.Arn
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt AggregateWriterFunction.Arn
+              - Effect: Allow
+                Action: logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisAnalyticsLogStream}
+
+  KinesisAnalyticsApplication:
+    Type: AWS::KinesisAnalyticsV2::Application
+    Properties:
+      ApplicationName: !Sub ${Environment}-enchanted-brain-aggregate
+      RuntimeEnvironment: SQL-1_0
+      ServiceExecutionRole: !GetAtt KinesisAnalyticsApplicationRole.Arn
+      ApplicationConfiguration:
+        ApplicationCodeConfiguration:
+          CodeContent:
+            TextContent: !Sub
+              - |
+                CREATE OR REPLACE STREAM ${DestinationStream}
+                (
+                  CHOICE_TIME   TIMESTAMP,
+                  CHOICE_TYPE   VARCHAR(32),
+                  CHOICE_SUM    DOUBLE,
+                  CHOICE_COUNT  int
+                );
+                CREATE OR REPLACE PUMP SUM_PUMP AS
+                  INSERT INTO ${DestinationStream}
+                  SELECT STREAM CHOICE_TIME,
+                    CHOICE_TYPE,
+                    SUM(CAST(CHOICE AS DOUBLE)) AS choiceSum,
+                    COUNT(*) AS choiceCount
+                  FROM ${SourceStreamPrefix}_001 AS SOURCE
+                  WHERE CHOICE_TYPE NOT LIKE 'CHOICE_COLOR'
+                  WINDOWED BY STAGGER (
+                    PARTITION BY CHOICE_TIME, CHOICE_TYPE
+                    RANGE INTERVAL '1' MINUTE
+                  );
+                CREATE OR REPLACE PUMP COUNT_PUMP AS
+                  INSERT INTO ${DestinationStream}
+                  SELECT STREAM CHOICE_TIME,
+                    CHOICE_TYPE || '_' || CHOICE,
+                    COUNT(*) AS choiceSum,
+                    COUNT(*) AS choiceCount
+                  FROM ${SourceStreamPrefix}_001 AS SOURCE
+                  WHERE CHOICE_TYPE = 'CHOICE_COLOR'
+                  WINDOWED BY STAGGER (
+                    PARTITION BY CHOICE_TIME, CHOICE_TYPE, CHOICE
+                    RANGE INTERVAL '1' MINUTE
+                  );
+              - DestinationStream: !FindInMap [StreamNames, DestinationStream, Value]
+                SourceStreamPrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
+          CodeContentType: PLAINTEXT
+        SqlApplicationConfiguration:
+          Inputs:
+            - KinesisFirehoseInput:
+                ResourceARN: !GetAtt KinesisFirehoseStream.Arn
+              InputParallelism:
+                Count: 1
+              NamePrefix: !FindInMap [StreamNames, SourceStreamPrefix, Value]
+              InputSchema:
+                RecordFormat:
+                  RecordFormatType: JSON
+                RecordColumns:
+                - Mapping: timestamp
+                  Name: CHOICE_TIME
+                  SqlType: TIMESTAMP
+                - Mapping: choiceType
+                  Name: CHOICE_TYPE
+                  SqlType: VARCHAR(32)
+                - Mapping: choice
+                  Name: CHOICE
+                  SqlType: VARCHAR(32)
+
+  KinesisAnalyticsApplicationLogger:
+    Type: AWS::KinesisAnalyticsV2::ApplicationCloudWatchLoggingOption
+    Properties:
+      ApplicationName: !Ref KinesisAnalyticsApplication
+      CloudWatchLoggingOption:
+        LogStreamARN: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisAnalyticsLogStream}
+
+  AggregateWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-aggregate-writer
+      Runtime: python3.7
+      CodeUri: app/src/functions/aggregate_writer
+      Layers:
+        - !Ref LambdaLayer
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 3
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          DYNAMODB_ENDPOINT: ''
+          DYNAMODB_TABLE_NAME: !Ref TableName
+      Policies:
+        DynamoDBCrudPolicy:
+          TableName: !Ref TableName
+
+  KinesisAnalyticsApplicationOutput:
+    Type: AWS::KinesisAnalyticsV2::ApplicationOutput
+    Properties:
+      ApplicationName: !Ref KinesisAnalyticsApplication
+      Output:
+        Name: !FindInMap [StreamNames, DestinationStream, Value]
+        DestinationSchema:
+          RecordFormatType: JSON
+        LambdaOutput:
+          ResourceARN: !GetAtt AggregateWriterFunction.Arn
+
+
+Outputs:
+
+  KinesisFirehoseStreamName:
+    Value: !Ref KinesisFirehoseStream
