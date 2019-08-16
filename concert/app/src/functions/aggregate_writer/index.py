@@ -7,14 +7,15 @@ from decimal import *
 from enchanted_brain.attributes import (
     ATTR_AGGREGATE_CHOICE_COUNT,
     ATTR_AGGREGATE_CHOICE_SUM,
+    ATTR_CHOICE_VALUE_CHILLS,
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
-    ATTR_CHOICE_VALUE_CHILLS,
     ATTR_RECORD_ID,
     CHOICE_CHILLS,
     CHOICE_COLOR,
     CHOICE_EMOTION_ENERGY,
     CHOICE_EMOTION_HAPPINESS,
+    PREFIX_CHOICE_TYPE_EMOTION,
     RECORD_ID_AGGREGATE,
 )
 
@@ -50,19 +51,18 @@ def handler(event, context):
     return firehose_response
 
 
-def create_map_for_record_if_none_exists(timestamp, choice_key):
-    update_args = {
-        "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
-        "UpdateExpression": "SET #choice_key.#timestamp = if_not_exists(#choice_key.#timestamp, :empty_map)",
-        "ExpressionAttributeNames": {
-            "#choice_key": choice_key,
-            "#timestamp": timestamp,
-        },
-        "ExpressionAttributeValues": {":empty_map": {}},
-        "ReturnValues": "NONE",
-    }
+def update_aggregate_record(**update_args):
+    return table.update_item(
+        Key={ATTR_RECORD_ID: RECORD_ID_AGGREGATE}, ReturnValues="NONE", **update_args
+    )
 
-    return table.update_item(**update_args)
+
+def create_map_for_record_if_none_exists(timestamp, choice_key):
+    return update_aggregate_record(
+        UpdateExpression="SET #choice_key.#timestamp = if_not_exists(#choice_key.#timestamp, :empty_map)",
+        ExpressionAttributeNames={"#choice_key": choice_key, "#timestamp": timestamp},
+        ExpressionAttributeValues={":empty_map": {}},
+    )
 
 
 def add_record_to_aggregate(record):
@@ -73,7 +73,6 @@ def add_record_to_aggregate(record):
     choice_count = data["CHOICE_COUNT"]
 
     update_args = {
-        "Key": {ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
         "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
         "ExpressionAttributeNames": {
             "#timestamp": timestamp,
@@ -84,7 +83,6 @@ def add_record_to_aggregate(record):
             ":choice_sum": choice_sum,
             ":choice_count": choice_count,
         },
-        "ReturnValues": "NONE",
     }
 
     if choice_type.startswith(CHOICE_COLOR):
@@ -92,7 +90,7 @@ def add_record_to_aggregate(record):
         choice_type = CHOICE_COLOR
         update_args["ExpressionAttributeNames"]["#choice_sum"] += "_{}".format(color)
 
-    elif choice_type.startswith("CHOICE_EMOTION"):
+    elif choice_type.startswith(PREFIX_CHOICE_TYPE_EMOTION):
         emotion = choice_type[7:]
         update_args["ExpressionAttributeNames"]["#choice_sum"] += "_{}".format(emotion)
         update_args["ExpressionAttributeNames"]["#choice_count"] += "_{}".format(
@@ -106,4 +104,4 @@ def add_record_to_aggregate(record):
         timestamp, choice_key
     )
 
-    return table.update_item(**update_args)
+    return update_aggregate_record(**update_args)

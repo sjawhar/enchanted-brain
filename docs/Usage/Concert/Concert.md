@@ -165,9 +165,9 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   colors: {
     [timestamp]: {
       count: Number                   // Total number of choices made for all colors at this time
-      sum_#AB0000: Number,            // Number of audience members whose latest color choice as of this time was #AB0000
-      sum_#00AB00: Number,
-      sum_#0000AB: Number,
+      'sum_#AB0000': Number,            // Number of audience members whose latest color choice as of this time was #AB0000
+      'sum_#00AB00': Number,
+      'sum_#0000AB': Number,
       ...
     },
     ...
