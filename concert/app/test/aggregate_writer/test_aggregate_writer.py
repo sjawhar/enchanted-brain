@@ -69,7 +69,8 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
         "ExpressionAttributeNames": {
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
-            "#choice_count": "choices",
+            "#choice_count": "count",
+            "#choice_sum": "sum",
         },
         "ExpressionAttributeValues": {
             ":choice_sum": Decimal(choice_sum),
@@ -81,20 +82,15 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
     if choice_type.startswith("CHOICE_COLOR"):
         expected_aggregate_update_params["ExpressionAttributeNames"][
             "#choice_sum"
-        ] = emotion_or_color
+        ] += "_{}".format(emotion_or_color)
 
     elif choice_type.startswith("CHOICE_EMOTION"):
         expected_aggregate_update_params["ExpressionAttributeNames"][
             "#choice_sum"
-        ] = emotion_or_color
+        ] += "_{}".format(emotion_or_color)
         expected_aggregate_update_params["ExpressionAttributeNames"][
             "#choice_count"
-        ] = "choices_{}".format(emotion_or_color)
-
-    elif choice_type == "CHOICE_CHILLS":
-        expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_sum"
-        ] = "chills"
+        ] += "_{}".format(emotion_or_color)
 
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
