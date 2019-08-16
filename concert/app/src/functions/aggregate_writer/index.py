@@ -5,7 +5,8 @@ from base64 import b64decode
 from botocore.exceptions import ClientError
 from decimal import *
 from enchanted_brain.attributes import (
-    ATTR_AGGREGATE_TOTAL_CHOICES,
+    ATTR_AGGREGATE_CHOICE_COUNT,
+    ATTR_AGGREGATE_CHOICE_SUM,
     ATTR_CHOICE_VALUE_COLOR,
     ATTR_CHOICE_VALUE_EMOTION,
     ATTR_CHOICE_VALUE_CHILLS,
@@ -76,7 +77,8 @@ def add_record_to_aggregate(record):
         "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
         "ExpressionAttributeNames": {
             "#timestamp": timestamp,
-            "#choice_count": ATTR_AGGREGATE_TOTAL_CHOICES,
+            "#choice_count": ATTR_AGGREGATE_CHOICE_COUNT,
+            "#choice_sum": ATTR_AGGREGATE_CHOICE_SUM,
         },
         "ExpressionAttributeValues": {
             ":choice_sum": choice_sum,
@@ -88,19 +90,14 @@ def add_record_to_aggregate(record):
     if choice_type.startswith(CHOICE_COLOR):
         color = choice_type.split("_")[2]
         choice_type = CHOICE_COLOR
-        update_args["ExpressionAttributeNames"]["#choice_sum"] = color
+        update_args["ExpressionAttributeNames"]["#choice_sum"] += "_{}".format(color)
 
     elif choice_type.startswith("CHOICE_EMOTION"):
         emotion = choice_type[7:]
-        update_args["ExpressionAttributeNames"]["#choice_sum"] = emotion
+        update_args["ExpressionAttributeNames"]["#choice_sum"] += "_{}".format(emotion)
         update_args["ExpressionAttributeNames"]["#choice_count"] += "_{}".format(
             emotion
         )
-
-    else:
-        update_args["ExpressionAttributeNames"][
-            "#choice_sum"
-        ] = ATTR_CHOICE_VALUE_CHILLS
 
     choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args["ExpressionAttributeNames"]["#choice_key"] = choice_key
