@@ -1,6 +1,6 @@
 ATTR_RECORD_ID = "recordId"
 ATTR_CREATED_AT = "createdAt"
-ATTR_TOTAL_CHOICES = "choices"
+ATTR_AGGREGATE_TOTAL_CHOICES = "choices"
 
 ATTR_CHOICE_TIMESTAMP = "timestamp"
 ATTR_CHOICE_TYPE = "choiceType"
