@@ -14,7 +14,12 @@ test_timestamp = "2019-05-14T21:20:03.000Z"
 record_id = "record id"
 
 
-def get_event(choice_sum=5.0, choice_count=10, choice_type="CHOICE_COLOR_#AB0000"):
+def get_event(
+    choice_sum=5.0,
+    choice_count=10,
+    choice_type="CHOICE_COLOR_#AB0000",
+    record_id=record_id,
+):
     return {
         "records": [
             {
@@ -146,13 +151,38 @@ def test_choices_added_to_aggregate_record(
     assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
 
 
+def test_multiple_records_result_in_multiple_dynamo_calls():
+    event1 = get_event(record_id="record id 1")
+    event2 = get_event(record_id="record id 2")
+    event3 = get_event(record_id="record id 3")
+    event = {
+        "records": [event1["records"][0], event2["records"][0], event3["records"][0]]
+    }
+
+    resp = None
+    with Stubber(dynamodb.meta.client) as stub:
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        resp = handler(event, None)
+        stub.assert_no_pending_responses()
+
+    assert resp == {
+        "records": [
+            {"recordId": "record id 1", "result": "Ok"},
+            {"recordId": "record id 2", "result": "Ok"},
+            {"recordId": "record id 3", "result": "Ok"},
+        ]
+    }
+
+
 def test_dynamodb_update_error_results_in_delivery_failed():
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
-        stub.add_client_error(
-            "update_item",
-            service_error_code="not a ConditionalCheckFailedException (conditional map creation failed)",
-        )
+        stub.add_client_error("update_item")
         resp = handler(get_event(), None)
 
     assert resp == {"records": [{"recordId": record_id, "result": "DeliveryFailed"}]}
