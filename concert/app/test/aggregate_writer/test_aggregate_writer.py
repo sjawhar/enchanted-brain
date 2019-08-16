@@ -45,7 +45,9 @@ def get_event(choice_sum=5.0, choice_count=10, choice_type="CHOICE_COLOR_#AB0000
         ("CHOICE_CHILLS", 1.5, 3, "chills", None),
     ],
 )
-def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_color):
+def test_empty_map_created_for_choices(
+    choice_type, choice_sum, choice_count, choice_key, emotion_or_color
+):
     event = get_event(
         choice_sum=choice_sum, choice_count=choice_count, choice_type=choice_type
     )
@@ -62,36 +64,6 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
         "ReturnValues": "NONE",
     }
 
-    expected_aggregate_update_params = {
-        "TableName": table_name,
-        "Key": {"recordId": "AGGREGATE"},
-        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
-        "ExpressionAttributeNames": {
-            "#choice_key": choice_key,
-            "#timestamp": test_timestamp,
-            "#choice_count": "count",
-            "#choice_sum": "sum",
-        },
-        "ExpressionAttributeValues": {
-            ":choice_sum": Decimal(choice_sum),
-            ":choice_count": choice_count,
-        },
-        "ReturnValues": "NONE",
-    }
-
-    if choice_type.startswith("CHOICE_COLOR"):
-        expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_sum"
-        ] += "_{}".format(emotion_or_color)
-
-    elif choice_type.startswith("CHOICE_EMOTION"):
-        expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_sum"
-        ] += "_{}".format(emotion_or_color)
-        expected_aggregate_update_params["ExpressionAttributeNames"][
-            "#choice_count"
-        ] += "_{}".format(emotion_or_color)
-
     resp = None
     with Stubber(dynamodb.meta.client) as stub:
         stub.add_response(
@@ -99,6 +71,70 @@ def test_choices(choice_type, choice_sum, choice_count, choice_key, emotion_or_c
             dynamo_update_item_success_response,
             expected_map_creation_params,
         )
+        stub.add_response("update_item", dynamo_update_item_success_response)
+        resp = handler(event, None)
+        stub.assert_no_pending_responses()
+
+    assert resp == {"records": [{"recordId": record_id, "result": "Ok"}]}
+
+
+@pytest.mark.parametrize(
+    "choice_type, choice_sum_key, choice_count_key, choice_sum_value, choice_count_value, choice_key",
+    [
+        ("CHOICE_COLOR_#00AB00", "sum_#00AB00", "count", 10.0, 5, "colors"),
+        (
+            "CHOICE_EMOTION_HAPPINESS",
+            "sum_EMOTION_HAPPINESS",
+            "count_EMOTION_HAPPINESS",
+            12.0,
+            7,
+            "emotions",
+        ),
+        (
+            "CHOICE_EMOTION_ENERGY",
+            "sum_EMOTION_ENERGY",
+            "count_EMOTION_ENERGY",
+            0.5,
+            1,
+            "emotions",
+        ),
+        ("CHOICE_CHILLS", "sum", "count", 1.5, 3, "chills"),
+    ],
+)
+def test_choices_added_to_aggregate_record(
+    choice_type,
+    choice_sum_key,
+    choice_count_key,
+    choice_sum_value,
+    choice_count_value,
+    choice_key,
+):
+    event = get_event(
+        choice_sum=choice_sum_value,
+        choice_count=choice_count_value,
+        choice_type=choice_type,
+    )
+
+    expected_aggregate_update_params = {
+        "TableName": table_name,
+        "Key": {"recordId": "AGGREGATE"},
+        "UpdateExpression": "ADD #choice_key.#timestamp.#choice_sum :choice_sum, #choice_key.#timestamp.#choice_count :choice_count",
+        "ExpressionAttributeNames": {
+            "#choice_key": choice_key,
+            "#timestamp": test_timestamp,
+            "#choice_count": choice_count_key,
+            "#choice_sum": choice_sum_key,
+        },
+        "ExpressionAttributeValues": {
+            ":choice_sum": Decimal(choice_sum_value),
+            ":choice_count": choice_count_value,
+        },
+        "ReturnValues": "NONE",
+    }
+
+    resp = None
+    with Stubber(dynamodb.meta.client) as stub:
+        stub.add_response("update_item", dynamo_update_item_success_response)
         stub.add_response(
             "update_item",
             dynamo_update_item_success_response,
