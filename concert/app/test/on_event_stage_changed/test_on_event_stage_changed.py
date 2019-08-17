@@ -39,8 +39,7 @@ def get_event(
             "2019-05-14T21:20:03.000Z",
             "2019-05-14T21:21:33.000Z",
             20,
-        ),
-        ("some other stage type", None, None, None, None),
+        )
     ],
 )
 def test_event_stage_changed(stage_id, display_name, start_time, end_time, frequency):
@@ -50,9 +49,6 @@ def test_event_stage_changed(stage_id, display_name, start_time, end_time, frequ
         "TopicArn": CALLBACK_SNS_ARN,
         "Message": event["body"],
         "MessageStructure": "string",
-        "MessageAttributes": {
-            "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
-        },
     }
 
     dynamo_song_list_expected_params = {
@@ -72,9 +68,34 @@ def test_event_stage_changed(stage_id, display_name, start_time, end_time, frequ
         "ReturnValues": "NONE",
     }
 
+    dynamo_event_stage_expected_params = {
+        "TableName": TABLE_NAME,
+        "Key": {"recordId": "EVENT_STAGE"},
+        "UpdateExpression": "SET #stage_id = :stage_id, #displayName = :displayName, #startTime = :startTime, #endTime = :endTime, #frequency = :frequency",
+        "ExpressionAttributeNames": {
+            "#displayName": "displayName",
+            "#stage_id": "stageId",
+            "#startTime": "startTime",
+            "#endTime": "endTime",
+            "#frequency": "frequency",
+        },
+        "ExpressionAttributeValues": {
+            ":stage_id": stage_id,
+            ":displayName": display_name,
+            ":startTime": start_time,
+            ":endTime": end_time,
+            ":frequency": frequency,
+        },
+        "ReturnValues": "NONE",
+    }
+
     resp = None
     with Stubber(sns) as sns_stub, Stubber(dynamodb.meta.client) as dynamo_stub:
         sns_stub.add_response("publish", SUCCESS_RESPONSE, sns_expected_params)
+
+        dynamo_stub.add_response(
+            "update_item", SUCCESS_RESPONSE, dynamo_event_stage_expected_params
+        )
 
         if display_name and start_time and end_time:
             dynamo_stub.add_response(
@@ -90,26 +111,14 @@ def test_event_stage_changed(stage_id, display_name, start_time, end_time, frequ
 
 def test_sns_publish_error_raises_client_error():
     with pytest.raises(ClientError):
-        with Stubber(sns) as sns_stub:
-            sns_stub.add_client_error(
-                "publish",
-                service_message="Jeff Bezos dislikes you personally and has sabotaged your SNS endpoint",
-                service_error_code=500,
-            )
+        with Stubber(sns) as sns_stub, Stubber(dynamodb.meta.client) as dynamo_stub:
+            dynamo_stub.add_response("update_item", SUCCESS_RESPONSE)
+            sns_stub.add_client_error("publish")
             handler(get_event(), None)
 
 
 def test_dynamodb_update_error_raises_client_error():
     with pytest.raises(ClientError):
         with Stubber(sns) as sns_stub, Stubber(dynamodb.meta.client) as dynamo_stub:
-            sns_stub.add_response("publish", SUCCESS_RESPONSE)
             dynamo_stub.add_client_error("update_item")
-            handler(
-                get_event(
-                    stageId="stage id",
-                    display_name="song name",
-                    start_time="start time",
-                    end_time="end time",
-                ),
-                None,
-            )
+            handler(get_event(), None)

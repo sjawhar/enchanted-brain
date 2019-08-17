@@ -1,12 +1,15 @@
 import boto3
 import json
 import os
+from copy import copy
 from enchanted_brain.attributes import (
     ATTR_DISPLAY_NAME,
+    ATTR_EVENT_STAGE_ID,
     ATTR_END_TIME,
     ATTR_RECORD_ID,
     ATTR_SONGS,
     ATTR_START_TIME,
+    RECORD_ID_EVENT_STAGE,
     RECORD_ID_SONG_LIST,
 )
 
@@ -26,13 +29,12 @@ table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 def handler(event, context):
     message = json.loads(event["body"])
 
+    stage_record_update_response = update_stage_record(message)
+
     sns_response = sns.publish(
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
         Message=json.dumps(message),
         MessageStructure="string",
-        MessageAttributes={
-            "connection_type": {"DataType": "String", "StringValue": "GLOBAL"}
-        },
     )
 
     song_list_update_response = update_song_list(message)
@@ -68,3 +70,23 @@ def update_song_list(message):
         response = table.update_item(**update_args)
 
     return response
+
+
+def update_stage_record(message):
+    data = copy(message["data"])
+    stage_id = data.pop(ATTR_EVENT_STAGE_ID)
+
+    update_args = {
+        "Key": {ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE},
+        "UpdateExpression": "SET #stage_id = :stage_id",
+        "ExpressionAttributeNames": {"#stage_id": ATTR_EVENT_STAGE_ID},
+        "ExpressionAttributeValues": {":stage_id": stage_id},
+        "ReturnValues": "NONE",
+    }
+
+    for key, value in data.items():
+        update_args["UpdateExpression"] += ", #{} = :{}".format(key, key)
+        update_args["ExpressionAttributeNames"]["#{}".format(key)] = key
+        update_args["ExpressionAttributeValues"][":{}".format(key)] = value
+
+    return table.update_item(**update_args)
