@@ -1,0 +1,48 @@
+.axis {
+  background: #999;
+  position: absolute;
+}
+.axis-label {
+  color: white;
+  font-size: 35px;
+  font-weight: bold;
+  padding: 0;
+  position: absolute;
+  text-align: center;
+}
+.jitter {
+  will-change: transform;
+  animation-name: jitter;
+  animation-duration: 0.2s;
+  animation-timing-function: linear;
+  animation-delay: 0s;
+  animation-fill-mode: none;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  animation-direction: forward;
+  animation-play-state: running;
+}
+
+@keyframes jitter {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  16% {
+    transform: translate(-5px, 0px);
+  }
+  33% {
+    transform: translate(0px, 5px);
+  }
+  50% {
+    transform: translate(0px, 0px);
+  }
+  66% {
+    transform: translate(5px, 0px);
+  }
+  83% {
+    transform: translate(0px, -5px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}

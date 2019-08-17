@@ -11,7 +11,7 @@ const connect = idToken => {
   }
 
   isConnect = true;
-  ws = new WebSocket(config.WEBSOCKET_API_URL, null, {
+  ws = new WebSocket(`${config.WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
 
