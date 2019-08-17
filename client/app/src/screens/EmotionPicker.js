@@ -5,12 +5,12 @@ import Constants from 'expo-constants';
 
 import EmotionButton from '../features/emotions/EmotionButton';
 import Layout from '../constants/Layout';
-import { CHOICE_EMOTION_ENERGY, CHOICE_EMOTION_HAPPINESS } from '../constants/Choices';
+import { CHOICE_EMOTION_ANGER, CHOICE_EMOTION_HAPPINESS } from '../constants/Choices';
 
 const EMOTIONS = {
-  [CHOICE_EMOTION_ENERGY]: {
-    header: 'Energetic/Calm',
-    emotions: ['Very energetic', 'Somewhat energetic', 'Neutral', 'Somewhat calm', 'Very calm'],
+  [CHOICE_EMOTION_ANGER]: {
+    header: 'Angry/Calm',
+    emotions: ['Very angry', 'Somewhat angry', 'Neutral', 'Somewhat calm', 'Very calm'],
   },
   [CHOICE_EMOTION_HAPPINESS]: {
     header: 'Happy/Sad',

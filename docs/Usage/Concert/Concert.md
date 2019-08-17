@@ -1,5 +1,7 @@
 ## Authentication
-Authenticate with AWS Cognito. Include the Cognito ID JWT in the Authorization header of all API requests.
+There are two methods by which you can authenticate when connecting to the websocket server:
+* Include the user's JWT in the `Authentication` header and include a random unique value in the `token` query string parameter (recommended)
+* Include the user's JWT in the `token` query string parameter
 
 ## Websocket API
 The guided concert experience uses a websocket API for realtime communication between the client and server. Requests to the server are routed based on the `event` attribute of the request body. For example, a request with the following body would be treated as a FOO request:
@@ -43,14 +45,14 @@ To report a user's choice, send the CHOICE_MADE event:
 {
   event: 'CHOICE_MADE',
   data: {
-    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ENERGY | CHOICE_CHILLS
+    choiceType: String,         // CHOICE_COLOR | CHOICE_EMOTION_HAPPINESS | CHOICE_EMOTION_ANGER | CHOICE_CHILLS
     choice: String || Number,   // String for color, Number for the rest
     timestamp: String,
   },
 }
 ```
 
-For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ENERGY events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
+For the CHOICE_COLOR, CHOICE_EMOTION_HAPPINESS, and CHOICE_EMOTION_ANGER events, `timestamp` should be the time the user was **prompted**, not the time they actually responded.
 
 ### Event Stages
 #### 1 - Welcome
@@ -148,7 +150,7 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
     [timestamp]: String,    // hex color string
     ...
   },
-  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ENERGY
+  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ANGER
   emotions: {
     [timestamp]: intensity,
     ...
@@ -177,9 +179,9 @@ The event body here is the same as the CHOICE_MADE event [sent by the mobile app
   emotions: {
     [timestamp]: {
       count_EMOTION_HAPPINESS: Number,  // Count of audience happiness intensity choices
-      count_EMOTION_ENERGY: Number,
+      count_EMOTION_ANGER: Number,
       sum_EMOTION_HAPPINESS: Number,    // Sum of audience happiness intensity choices
-      sum_EMOTION_ENERGY: Number,
+      sum_EMOTION_ANGER: Number,
     },
     ...
   },
