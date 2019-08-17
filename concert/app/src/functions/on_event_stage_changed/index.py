@@ -3,12 +3,12 @@ import json
 import os
 from copy import copy
 from enchanted_brain.attributes import (
-    ATTR_DISPLAY_NAME,
     ATTR_EVENT_STAGE_ID,
-    ATTR_END_TIME,
     ATTR_RECORD_ID,
-    ATTR_SONGS,
-    ATTR_START_TIME,
+    ATTR_SONG_LIST_DISPLAY_NAME,
+    ATTR_SONG_LIST_END_TIME,
+    ATTR_SONG_LIST_SONGS,
+    ATTR_SONG_LIST_START_TIME,
     RECORD_ID_EVENT_STAGE,
     RECORD_ID_SONG_LIST,
 )
@@ -46,23 +46,23 @@ def update_song_list(message):
     response = None
 
     data = message["data"]
-    display_name = data.get(ATTR_DISPLAY_NAME)
-    start_time = data.get(ATTR_START_TIME)
-    end_time = data.get(ATTR_END_TIME)
+    display_name = data.get(ATTR_SONG_LIST_DISPLAY_NAME)
+    start_time = data.get(ATTR_SONG_LIST_START_TIME)
+    end_time = data.get(ATTR_SONG_LIST_END_TIME)
     if display_name and start_time and end_time:
 
         song = [
             {
-                ATTR_DISPLAY_NAME: display_name,
-                ATTR_START_TIME: start_time,
-                ATTR_END_TIME: end_time,
+                ATTR_SONG_LIST_DISPLAY_NAME: display_name,
+                ATTR_SONG_LIST_START_TIME: start_time,
+                ATTR_SONG_LIST_END_TIME: end_time,
             }
         ]
 
         update_args = {
             "Key": {ATTR_RECORD_ID: RECORD_ID_SONG_LIST},
             "UpdateExpression": "SET #songs = list_append(#songs, :song)",
-            "ExpressionAttributeNames": {"#songs": ATTR_SONGS},
+            "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
             "ExpressionAttributeValues": {":song": song},
             "ReturnValues": "NONE",
         }
