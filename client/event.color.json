@@ -6,6 +6,6 @@
     "endTime": "2019-07-28T09:57:00.000Z",
     "interval": 20,
     "timeout": 5,
-    "choiceTypes": ["CHOICE_COLOR", "CHOICE_EMOTION_HAPPINESS", "CHOICE_EMOTION_ENERGY"],
+    "choiceTypes": ["CHOICE_COLOR", "CHOICE_EMOTION_HAPPINESS", "CHOICE_EMOTION_ANGER"],
   }
 }

@@ -117,7 +117,7 @@ Resources:
         - - !Sub arn:aws:apigateway:${AWS::Region}:lambda:path
           - !Sub /2015-03-31/functions/${AuthorizerFunction.Alias}/invocations
       IdentitySource:
-        - route.request.header.Authorization
+        - route.request.querystring.token
 
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion

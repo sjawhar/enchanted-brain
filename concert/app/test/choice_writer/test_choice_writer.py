@@ -35,7 +35,7 @@ def get_event(choice="#AB0000", choice_type="CHOICE_COLOR", user_id="userId"):
     [
         ("CHOICE_COLOR", "#00AB00", "colors", None, "colorUser"),
         ("CHOICE_EMOTION_HAPPINESS", 1, "emotions", "EMOTION_HAPPINESS", "happyUser"),
-        ("CHOICE_EMOTION_ENERGY", 1, "emotions", "EMOTION_ENERGY", "energeticUser"),
+        ("CHOICE_EMOTION_ANGER", 1, "emotions", "EMOTION_ANGER", "angryUser"),
         ("CHOICE_CHILLS", 1, "chills", None, "chillyUser"),
     ],
 )

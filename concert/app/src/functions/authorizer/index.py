@@ -27,12 +27,15 @@ CHOICE_BUCKETS = [
     "CHOICE_COLOR",
     "CHOICE_COLOR",
     "CHOICE_EMOTION_HAPPINESS",
-    "CHOICE_EMOTION_ENERGY",
+    "CHOICE_EMOTION_ANGER",
 ]
 NUM_BUCKETS = len(CHOICE_BUCKETS)
 
 
-def get_verified_token(token):
+def get_verified_token(event):
+    token = event["headers"].get("Authorization") or event["queryStringParameters"].get(
+        "token"
+    )
     headers = jwt.get_unverified_headers(token)
     kid = headers["kid"]
 
@@ -70,7 +73,7 @@ def handler(event, context):
     }
 
     try:
-        token = get_verified_token(event["headers"]["Authorization"])
+        token = get_verified_token(event)
         if not token:
             raise Exception("Token not verified")
     except Exception as e:
