@@ -42,7 +42,7 @@
 | **Response timing**                   | Every 20 seconds                               |
 | **Response type, Group A (50%)**      | Selection from a grid of TBD number of colors  |
 | **Response type, Group B (25%)**      | Selection from five degrees of happy/sad       |
-| **Response type, Group C (25%)**      | Selection from five degrees of energetic/calm  |
+| **Response type, Group C (25%)**      | Selection from five degrees of angry/calm  |
 | **Central visualization type**        | Bees                                           |
 | **Intermission visualization in app** | Choices over time compared to aggregate        |
 

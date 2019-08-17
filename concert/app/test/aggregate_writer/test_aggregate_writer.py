@@ -46,7 +46,7 @@ def get_event(
     [
         ("CHOICE_COLOR_#00AB00", 10.0, 5, "colors", "#00AB00"),
         ("CHOICE_EMOTION_HAPPINESS", 12.0, 7, "emotions", "EMOTION_HAPPINESS"),
-        ("CHOICE_EMOTION_ENERGY", 0.5, 1, "emotions", "EMOTION_ENERGY"),
+        ("CHOICE_EMOTION_ANGER", 0.5, 1, "emotions", "EMOTION_ANGER"),
         ("CHOICE_CHILLS", 1.5, 3, "chills", None),
     ],
 )
@@ -96,9 +96,9 @@ def test_empty_map_created_for_choices(
             "emotions",
         ),
         (
-            "CHOICE_EMOTION_ENERGY",
-            "sum_EMOTION_ENERGY",
-            "count_EMOTION_ENERGY",
+            "CHOICE_EMOTION_ANGER",
+            "sum_EMOTION_ANGER",
+            "count_EMOTION_ANGER",
             0.5,
             1,
             "emotions",
