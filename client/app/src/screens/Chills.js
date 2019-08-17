@@ -10,6 +10,8 @@ import { CHOICE_MADE } from '../constants/Events';
 
 const INPUT_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const INPUT_BUFFER = 25;
+const WAVEFORM_WIDTH = Math.floor(0.67 * Layout.window.width);
+const WAVEFORM_SIZE = Math.floor(WAVEFORM_WIDTH / INPUT_BUFFER);
 
 class ChillsScreen extends Component {
   constructor(props) {
@@ -51,13 +53,21 @@ class ChillsScreen extends Component {
       nextPollTime += this.interval;
     }
 
-    this.setState(({ touches }) => ({
-      touches: [
-        ...touches,
-        { choice: Math.max(0, 1 - locationY / INPUT_HEIGHT), timestamp: pollTime },
-      ],
-      nextPollTime: this.roundTime(nextPollTime),
-    }));
+    this.setState(
+      ({ touches }) => ({
+        touches: [
+          ...touches,
+          { choice: Math.max(0, 1 - locationY / INPUT_HEIGHT), timestamp: pollTime },
+        ],
+        offset: new Animated.Value(-WAVEFORM_SIZE),
+        nextPollTime: this.roundTime(nextPollTime),
+      }),
+      () =>
+        Animated.timing(this.state.offset, {
+          toValue: 0,
+          duration: this.interval,
+        }).start()
+    );
   };
 
   _onPanResponderRelease = () => {
@@ -85,20 +95,24 @@ class ChillsScreen extends Component {
     );
 
   render() {
-    const { touches, opacity } = this.state;
+    const { touches, opacity, offset } = this.state;
     return (
       <View style={styles.container}>
         <View style={styles.waveformContainer}>
-          {touches.slice(-INPUT_BUFFER).map(({ timestamp, choice }) => (
-            <Animated.View
-              key={timestamp}
-              style={{
-                ...styles.waveform,
-                height: `${Math.ceil(100 * choice)}%`,
-                opacity,
-              }}
-            />
-          ))}
+          {touches
+            .slice(-INPUT_BUFFER)
+            .reverse()
+            .map(({ timestamp, choice }, index) => (
+              <Animated.View
+                key={timestamp}
+                style={{
+                  ...styles.waveform,
+                  opacity,
+                  bottom: choice * INPUT_HEIGHT,
+                  right: Animated.add(index * WAVEFORM_SIZE, offset),
+                }}
+              />
+            ))}
         </View>
         <View style={styles.inputContainer}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
@@ -119,21 +133,22 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
+    backgroundColor: 'rgb(95, 95, 95)',
   },
   waveformContainer: {
-    backgroundColor: 'rgb(95, 95, 95)',
-    width: '67%',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
+    overflow: 'hidden',
+    width: WAVEFORM_WIDTH,
   },
   waveform: {
-    borderTopColor: 'red',
-    borderTopWidth: 2 * PixelRatio.get(),
-    width: `${100 / INPUT_BUFFER}%`,
+    position: 'absolute',
+    backgroundColor: 'red',
+    width: WAVEFORM_SIZE,
+    height: WAVEFORM_SIZE,
+    marginBottom: -WAVEFORM_SIZE / 2,
+    borderRadius: WAVEFORM_SIZE,
   },
   inputContainer: {
-    width: '33%',
+    width: Layout.window.width - WAVEFORM_WIDTH,
     backgroundColor: 'red',
     flexDirection: 'column',
     justifyContent: 'space-between',
