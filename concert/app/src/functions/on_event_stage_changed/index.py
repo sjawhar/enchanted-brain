@@ -89,9 +89,9 @@ def get_song_list_update_transaction_item(message_data):
 
     song_list_update_args = {
         "Key": {ATTR_RECORD_ID: {"S": RECORD_ID_SONG_LIST}},
-        "UpdateExpression": "SET #songs = list_append(#songs, :song)",
+        "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
         "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
-        "ExpressionAttributeValues": {":song": {"L": song}},
+        "ExpressionAttributeValues": {":song": {"L": song}, ":empty_list": {"L": []}},
         "TableName": DYNAMODB_TABLE_NAME,
     }
 
