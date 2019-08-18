@@ -105,7 +105,7 @@ def test_callback_message_published_on_event_stage_change(
                 {
                     "Update": {
                         "Key": {"recordId": {"S": "SONG_LIST"}},
-                        "UpdateExpression": "SET #songs = list_append(#songs, :song)",
+                        "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
                         "ExpressionAttributeNames": {"#songs": "songs"},
                         "ExpressionAttributeValues": {
                             ":song": {
@@ -122,7 +122,8 @@ def test_callback_message_published_on_event_stage_change(
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            ":empty_list": {"L": []},
                         },
                         "TableName": TABLE_NAME,
                     }
@@ -152,7 +153,7 @@ def test_callback_message_published_on_event_stage_change(
                 {
                     "Update": {
                         "Key": {"recordId": {"S": "SONG_LIST"}},
-                        "UpdateExpression": "SET #songs = list_append(#songs, :song)",
+                        "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
                         "ExpressionAttributeNames": {"#songs": "songs"},
                         "ExpressionAttributeValues": {
                             ":song": {
@@ -169,7 +170,8 @@ def test_callback_message_published_on_event_stage_change(
                                         }
                                     }
                                 ]
-                            }
+                            },
+                            ":empty_list": {"L": []},
                         },
                         "TableName": TABLE_NAME,
                     }
