@@ -34,7 +34,7 @@ def get_event(
 
 
 @pytest.mark.parametrize(
-    "stage_id, display_name, start_time, end_time, frequency, form_url",
+    "stage_id, display_name, start_time, end_time, frequency, form_url, expected_message",
     [
         (
             "STAGE_CHOICE_SYNESTHESIA",
@@ -43,6 +43,18 @@ def get_event(
             "2019-05-14T21:21:33.000Z",
             20,
             None,
+            json.dumps(
+                {
+                    "event": "EVENT_STAGE_CHANGED",
+                    "data": {
+                        "stageId": "STAGE_CHOICE_SYNESTHESIA",
+                        "displayName": "Canon in D",
+                        "startTime": "2019-05-14T21:20:03.000Z",
+                        "endTime": "2019-05-14T21:21:33.000Z",
+                        "frequency": 20,
+                    },
+                }
+            ),
         ),
         (
             "STAGE_CHOICE_CHILLS",
@@ -51,18 +63,45 @@ def get_event(
             "2019-05-14T21:21:33.000Z",
             None,
             None,
+            json.dumps(
+                {
+                    "event": "EVENT_STAGE_CHANGED",
+                    "data": {
+                        "stageId": "STAGE_CHOICE_CHILLS",
+                        "displayName": "Canon in E",
+                        "startTime": "2019-05-14T21:20:03.000Z",
+                        "endTime": "2019-05-14T21:21:33.000Z",
+                    },
+                }
+            ),
         ),
-        ("STAGE_CHOICE_IMAGERY", "Canon in F", None, None, None, "website.com"),
+        (
+            "STAGE_CHOICE_IMAGERY",
+            None,
+            None,
+            None,
+            None,
+            "website.com",
+            json.dumps(
+                {
+                    "event": "EVENT_STAGE_CHANGED",
+                    "data": {
+                        "stageId": "STAGE_CHOICE_IMAGERY",
+                        "formUrl": "website.com",
+                    },
+                }
+            ),
+        ),
     ],
 )
 def test_callback_message_published_on_event_stage_change(
-    stage_id, display_name, start_time, end_time, frequency, form_url
+    stage_id, display_name, start_time, end_time, frequency, form_url, expected_message
 ):
     event = get_event(stage_id, display_name, start_time, end_time, frequency, form_url)
 
     sns_expected_params = {
         "TopicArn": CALLBACK_SNS_ARN,
-        "Message": event["body"],
+        "Message": expected_message,
         "MessageStructure": "string",
     }
 
