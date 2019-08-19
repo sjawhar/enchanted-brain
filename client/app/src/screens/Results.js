@@ -21,8 +21,8 @@ class ResultsScreen extends Component {
     songs.sort((a, b) => a.startTime.localeCompare(b.startTime));
     return (
       <View style={styles.container}>
-        <View styles={styles.header}>
-          <Text>Results</Text>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Results</Text>
         </View>
         <SideSwipe
           data={songs}
@@ -64,16 +64,23 @@ const styles = EStyleSheet.create({
     height: Layout.window.height - Constants.statusBarHeight,
     marginTop: Constants.statusBarHeight,
     flexDirection: 'column',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'stretch',
   },
   header: {
+    backgroundColor: '#000081',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 4,
+  },
+  headerText: {
+    fontSize: 21,
+    color: 'white',
+    fontWeight: 'bold',
   },
   carousel: {
-    height: '90%',
+    height: '85%',
   },
   card: {
     width: CARD_WIDTH,
@@ -90,7 +97,7 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingBottom: 13,
   },
   paginationDotContainer: {
     justifyContent: 'center',
