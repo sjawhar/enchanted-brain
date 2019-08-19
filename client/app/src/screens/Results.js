@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
 import Constants from 'expo-constants';
@@ -31,15 +31,28 @@ class ResultsScreen extends Component {
           itemWidth={Layout.window.width}
           onIndexChange={this.handleIndexChange}
           style={styles.carousel}
-          renderItem={({ itemIndex, currentIndex, item, animatedValue }) => {
-            return (
-              <View style={styles.card}>
-                <Text>{item.displayName}</Text>
-              </View>
-            );
-          }}
+          renderItem={({ itemIndex, currentIndex, item, animatedValue }) => (
+            <View style={styles.card}>
+              <Text>{item.displayName}</Text>
+            </View>
+          )}
         />
-        <Text>{this.state.currentIndex}</Text>
+        <View style={styles.pagination}>
+          {songs.map((_, index) => (
+            <TouchableOpacity
+              key={index}
+              accessible={false}
+              style={styles.paginationDotContainer}
+              onPress={() => this.handleIndexChange(index)}>
+              <View
+                style={{
+                  ...styles.paginationDot,
+                  opacity: index === this.state.currentIndex ? 1 : 0.5,
+                }}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     );
   }
@@ -70,8 +83,25 @@ const styles = EStyleSheet.create({
     borderWidth: 1,
     borderRadius: 13,
     flexDirection: 'column',
-    sjustifyContent: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  paginationDotContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    marginHorizontal: 13,
   },
 });
 
