@@ -1,32 +1,30 @@
 import boto3
 import json
 import os
-from copy import copy
 from enchanted_brain.attributes import (
-    ATTR_RECORD_ID,
     ATTR_EVENT_STAGE_ID,
+    ATTR_RECORD_ID,
+    ATTR_SONG_LIST_DISPLAY_NAME,
+    ATTR_SONG_LIST_END_TIME,
+    ATTR_SONG_LIST_SONGS,
+    ATTR_SONG_LIST_START_TIME,
     RECORD_ID_EVENT_STAGE,
+    RECORD_ID_SONG_LIST,
 )
 
 CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
-DYNAMODB_ENDPOINT = os.environ.get("DYNAMODB_ENDPOINT")
-
-dynamodb_args = {}
-if DYNAMODB_ENDPOINT:
-    dynamodb_args["endpoint_url"] = DYNAMODB_ENDPOINT
 
 sns = boto3.client("sns")
-dynamodb = boto3.resource("dynamodb", **dynamodb_args)
-table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+dynamodb = boto3.client("dynamodb")
 
 
 def handler(event, context):
     message = json.loads(event["body"])
 
-    stage_record_update_response = update_stage_record(message)
+    update_event_stage_and_song_list(message)
 
-    sns_response = sns.publish(
+    sns.publish(
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
         Message=json.dumps(message),
         MessageStructure="string",
@@ -35,21 +33,58 @@ def handler(event, context):
     return {"statusCode": 204}
 
 
-def update_stage_record(message):
-    data = copy(message["data"])
-    stage_id = data.pop(ATTR_EVENT_STAGE_ID)
+def update_event_stage_and_song_list(message):
+    data = message["data"]
 
-    update_args = {
-        "Key": {ATTR_RECORD_ID: RECORD_ID_EVENT_STAGE},
-        "UpdateExpression": "SET #stage_id = :stage_id",
-        "ExpressionAttributeNames": {"#stage_id": ATTR_EVENT_STAGE_ID},
-        "ExpressionAttributeValues": {":stage_id": stage_id},
-        "ReturnValues": "NONE",
+    event_stage_put_transaction_item = get_event_stage_put_transaction_item(data)
+    song_list_update_transaction_item = get_song_list_update_transaction_item(data)
+
+    transaction_items = [event_stage_put_transaction_item]
+    if song_list_update_transaction_item:
+        transaction_items.append(song_list_update_transaction_item)
+
+    return dynamodb.transact_write_items(TransactItems=transaction_items)
+
+
+def get_event_stage_put_transaction_item(message_data):
+    serializer = boto3.dynamodb.types.TypeSerializer()
+    event_stage_update_args = {
+        "Item": {k: serializer.serialize(v) for k, v in message_data.items()},
+        "TableName": DYNAMODB_TABLE_NAME,
+    }
+    event_stage_update_args["Item"][ATTR_RECORD_ID] = serializer.serialize(
+        RECORD_ID_EVENT_STAGE
+    )
+
+    return {"Put": event_stage_update_args}
+
+
+def get_song_list_update_transaction_item(message_data):
+    display_name = message_data.get(ATTR_SONG_LIST_DISPLAY_NAME)
+    start_time = message_data.get(ATTR_SONG_LIST_START_TIME)
+    end_time = message_data.get(ATTR_SONG_LIST_END_TIME)
+
+    if not (display_name and start_time and end_time):
+        return
+
+    song = [
+        {
+            ATTR_SONG_LIST_DISPLAY_NAME: display_name,
+            ATTR_SONG_LIST_START_TIME: start_time,
+            ATTR_SONG_LIST_END_TIME: end_time,
+        }
+    ]
+
+    serializer = boto3.dynamodb.types.TypeSerializer()
+    song_list_update_args = {
+        "Key": {ATTR_RECORD_ID: serializer.serialize(RECORD_ID_SONG_LIST)},
+        "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
+        "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
+        "ExpressionAttributeValues": {
+            ":song": serializer.serialize(song),
+            ":empty_list": serializer.serialize([]),
+        },
+        "TableName": DYNAMODB_TABLE_NAME,
     }
 
-    for key, value in data.items():
-        update_args["UpdateExpression"] += ", #{} = :{}".format(key, key)
-        update_args["ExpressionAttributeNames"]["#{}".format(key)] = key
-        update_args["ExpressionAttributeValues"][":{}".format(key)] = value
-
-    return table.update_item(**update_args)
+    return {"Update": song_list_update_args}
