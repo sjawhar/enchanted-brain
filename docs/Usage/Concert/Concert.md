@@ -73,6 +73,7 @@ The user should be displayed the survey form found at `formUrl`, where they will
 ```js
 {
   stageId: 'STAGE_CHOICE_SYNESTHESIA',
+  displayName: String,
   startTime: String,
   endTime: String,
   interval: Number,
@@ -91,6 +92,7 @@ When sending the CHOICE_MADE event, the `timestamp` property should correspond t
 ```js
 {
   stageId: 'STAGE_CHOICE_CHILLS',
+  displayName: String,
   startTime: String,
   endTime: String,
 }
