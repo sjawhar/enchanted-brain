@@ -52,7 +52,9 @@ def get_event_stage_put_transaction_item(message_data):
         "Item": {k: serializer.serialize(v) for k, v in message_data.items()},
         "TableName": DYNAMODB_TABLE_NAME,
     }
-    event_stage_update_args["Item"][ATTR_RECORD_ID] = {"S": RECORD_ID_EVENT_STAGE}
+    event_stage_update_args["Item"][ATTR_RECORD_ID] = serializer.serialize(
+        RECORD_ID_EVENT_STAGE
+    )
 
     return {"Put": event_stage_update_args}
 
@@ -67,19 +69,21 @@ def get_song_list_update_transaction_item(message_data):
 
     song = [
         {
-            "M": {
-                ATTR_SONG_LIST_DISPLAY_NAME: {"S": display_name},
-                ATTR_SONG_LIST_START_TIME: {"S": start_time},
-                ATTR_SONG_LIST_END_TIME: {"S": end_time},
-            }
+            ATTR_SONG_LIST_DISPLAY_NAME: display_name,
+            ATTR_SONG_LIST_START_TIME: start_time,
+            ATTR_SONG_LIST_END_TIME: end_time,
         }
     ]
 
+    serializer = boto3.dynamodb.types.TypeSerializer()
     song_list_update_args = {
-        "Key": {ATTR_RECORD_ID: {"S": RECORD_ID_SONG_LIST}},
+        "Key": {ATTR_RECORD_ID: serializer.serialize(RECORD_ID_SONG_LIST)},
         "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
         "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
-        "ExpressionAttributeValues": {":song": {"L": song}, ":empty_list": {"L": []}},
+        "ExpressionAttributeValues": {
+            ":song": serializer.serialize(song),
+            ":empty_list": serializer.serialize([]),
+        },
         "TableName": DYNAMODB_TABLE_NAME,
     }
 
