@@ -1,7 +1,6 @@
 import boto3
 import json
 import os
-from copy import copy
 from enchanted_brain.attributes import (
     ATTR_EVENT_STAGE_ID,
     ATTR_RECORD_ID,
@@ -35,7 +34,7 @@ def handler(event, context):
 
 
 def update_event_stage_and_song_list(message):
-    data = copy(message["data"])
+    data = message["data"]
 
     event_stage_put_transaction_item = get_event_stage_put_transaction_item(data)
     song_list_update_transaction_item = get_song_list_update_transaction_item(data)
@@ -48,23 +47,12 @@ def update_event_stage_and_song_list(message):
 
 
 def get_event_stage_put_transaction_item(message_data):
-    stage_id = message_data.pop(ATTR_EVENT_STAGE_ID)
-
+    serializer = boto3.dynamodb.types.TypeSerializer()
     event_stage_update_args = {
-        "Item": {
-            ATTR_RECORD_ID: {"S": RECORD_ID_EVENT_STAGE},
-            ATTR_EVENT_STAGE_ID: {"S": stage_id},
-        },
+        "Item": {k: serializer.serialize(v) for k, v in message_data.items()},
         "TableName": DYNAMODB_TABLE_NAME,
     }
-
-    for key, value in message_data.items():
-        if isinstance(value, int):
-            value_data_type = "N"
-            value = str(value)
-        else:
-            value_data_type = "S"
-        event_stage_update_args["Item"][key] = {value_data_type: value}
+    event_stage_update_args["Item"][ATTR_RECORD_ID] = {"S": RECORD_ID_EVENT_STAGE}
 
     return {"Put": event_stage_update_args}
 
