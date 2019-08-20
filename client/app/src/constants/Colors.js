@@ -33,4 +33,5 @@ export default {
   tintColor,
   warningBackground: '#EAEB5E',
   warningText: '#666804',
+  primaryBlue: '#000081',
 };

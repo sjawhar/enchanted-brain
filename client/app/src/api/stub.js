@@ -1,12 +1,12 @@
+import { sendChoice } from '../state/actions';
 import { swatchColors } from '../constants/Colors';
 import { CHOICE_COLOR } from '../constants/Choices';
 
 const colors = swatchColors.flat();
-
 const now = new Date();
 
-const STAGE_END = {
-  eventData: {
+const generateStageEnd = () => {
+  const eventData = {
     stageId: 'STAGE_END',
     songs: [
       {
@@ -41,44 +41,64 @@ const STAGE_END = {
       },
     ],
     colors: [],
-    chills: [
-      {
-        timestamp: String,
-        chills: Number,
-      },
-    ],
-  },
-  storeActions: [],
-};
+    chills: [],
+  };
+  const storeActions = [];
 
-STAGE_END.eventData.songs.slice(0, -1).forEach(({ startTime, endTime }) => {
-  let time = new Date(startTime);
+  eventData.songs.slice(0, -1).forEach(({ startTime, endTime }) => {
+    let time = new Date(startTime);
 
-  while (time.valueOf() < Date.parse(endTime)) {
-    time.setSeconds(time.getSeconds() + 20);
-    const timestamp = time.toISOString();
-    STAGE_END.eventData.colors.push({
-      timestamp,
-      choices: colors.reduce(
-        (choices, color) => Object.assign(choices, { [color.hex]: Math.floor(Math.random() * 25) }),
-        {}
-      ),
-    });
+    while (time.valueOf() < Date.parse(endTime)) {
+      time.setSeconds(time.getSeconds() + 20);
+      const timestamp = time.toISOString();
 
-    if (Math.random() < 0.25) {
-      continue;
-    }
-    STAGE_END.storeActions.push({
-      action: 'sendChoice',
-      args: [
-        {
+      eventData.colors.push({
+        timestamp,
+        choices: colors.reduce(
+          (choices, color) =>
+            Object.assign(choices, { [color.hex]: Math.floor(Math.random() * 25) }),
+          {}
+        ),
+      });
+
+      if (Math.random() < 0.25) {
+        continue;
+      }
+      storeActions.push(
+        sendChoice({
           choice: colors[Math.floor(Math.random() * colors.length)].hex,
           choiceType: CHOICE_COLOR,
           timestamp,
-        },
-      ],
+        })
+      );
+    }
+  });
+
+  const [{ startTime, endTime }] = eventData.songs.slice(-1);
+  let time = new Date(startTime);
+  let isChilled = false;
+
+  while (time.valueOf() < Date.parse(endTime)) {
+    time.setSeconds(time.getSeconds() + 5);
+    const timestamp = time.toISOString();
+
+    let { chills = 0 } = eventData.chills.slice(-1)[0] || {};
+    if (chills < 0.5) {
+      chills += Math.random() * 0.1;
+    } else {
+      chills += 0.5 * (Math.random() - 0.5);
+    }
+
+    eventData.chills.push({
+      timestamp,
+      sum: parseFloat(Math.max(0, chills).toFixed(2)),
+      count: Math.ceil(chills) + Math.ceil(Math.random() * 4),
     });
   }
-});
+
+  return { eventData, storeActions };
+};
+
+const STAGE_END = generateStageEnd();
 
 export default { STAGE_END };
