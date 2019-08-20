@@ -2,43 +2,77 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
+import { StackedAreaChart } from 'react-native-svg-charts';
+import * as shape from 'd3-shape';
 import Constants from 'expo-constants';
 
 import Layout from '../constants/Layout';
+import { swatchColorInfo } from '../constants/Colors';
 
-const CARD_WIDTH = 0.9 * Layout.window.width;
+const COLOR_KEYS = Object.keys(swatchColorInfo);
 const CARD_MARGIN = 0.05 * Layout.window.width;
+const CARD_WIDTH = 0.9 * Layout.window.width;
+const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
+const CARD_HEIGHT = 0.85 * CONTAINER_HEIGHT;
+const CHART_HEIGHT = 0.8 * CARD_HEIGHT;
 
 class ResultsScreen extends Component {
-  state = {
-    currentIndex: 0,
-  };
+  constructor(props) {
+    super(props);
+    const { songs, colors } = props.navigation.state.params;
+    this.songs = songs
+      .sort((a, b) => a.startTime.localeCompare(b.startTime))
+      .map(({ displayName, startTime, endTime }) => ({
+        displayName,
+        startTime,
+        endTime,
+        colors: colors
+          .filter(({ timestamp }) => timestamp >= startTime && timestamp <= endTime)
+          .map(({ timestamp, choices }) => ({ timestamp: new Date(timestamp), ...choices })),
+      }));
+    this.state = {
+      currentIndex: 0,
+    };
+  }
 
   handleIndexChange = index => this.setState({ currentIndex: index });
 
+  renderItem = ({
+    animatedValue,
+    currentIndex,
+    item: { colors, displayName, startTime, endTime },
+    itemIndex,
+  }) => (
+    <View style={styles.card}>
+      <Text style={styles.cardHeaderText}>{displayName}</Text>
+      <StackedAreaChart
+        colors={COLOR_KEYS}
+        curve={shape.curveNatural}
+        data={colors}
+        keys={COLOR_KEYS}
+        style={styles.colorChart}
+      />
+    </View>
+  );
+
   render() {
-    const { songs } = this.props.navigation.state.params;
-    songs.sort((a, b) => a.startTime.localeCompare(b.startTime));
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Results</Text>
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageHeaderText}>Results</Text>
         </View>
         <SideSwipe
-          data={songs}
+          data={this.songs}
           extractKey={({ displayName }) => displayName}
           index={this.state.currentIndex}
           itemWidth={Layout.window.width}
           onIndexChange={this.handleIndexChange}
+          renderItem={this.renderItem}
           style={styles.carousel}
-          renderItem={({ itemIndex, currentIndex, item, animatedValue }) => (
-            <View style={styles.card}>
-              <Text>{item.displayName}</Text>
-            </View>
-          )}
+          useVelocityForIndex={false}
         />
         <View style={styles.pagination}>
-          {songs.map((_, index) => (
+          {this.songs.map((_, index) => (
             <TouchableOpacity
               key={index}
               accessible={false}
@@ -61,37 +95,48 @@ class ResultsScreen extends Component {
 const styles = EStyleSheet.create({
   container: {
     width: '100%',
-    height: Layout.window.height - Constants.statusBarHeight,
+    height: CONTAINER_HEIGHT,
     marginTop: Constants.statusBarHeight,
+    backgroundColor: '#222',
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'stretch',
   },
-  header: {
+  pageHeader: {
     backgroundColor: '#000081',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 4,
   },
-  headerText: {
+  pageHeaderText: {
     fontSize: 21,
     color: 'white',
     fontWeight: 'bold',
   },
   carousel: {
-    height: '85%',
+    height: CARD_HEIGHT,
   },
   card: {
     width: CARD_WIDTH,
     marginLeft: CARD_MARGIN,
     marginRight: CARD_MARGIN,
-    borderColor: 'black',
     borderWidth: 1,
     borderRadius: 13,
     flexDirection: 'column',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: 'rgb(95, 95, 95)',
+  },
+  cardHeaderText: {
+    color: 'white',
+    fontSize: 13,
+    fontWeight: 'bold',
+    marginVertical: 3,
+  },
+  colorChart: {
+    height: CHART_HEIGHT,
+    width: CARD_WIDTH,
   },
   pagination: {
     flexDirection: 'row',
@@ -107,7 +152,7 @@ const styles = EStyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
     marginHorizontal: 13,
   },
 });
