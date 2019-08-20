@@ -2,13 +2,13 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
-import { BarChart, StackedAreaChart } from 'react-native-svg-charts';
+import { AreaChart, BarChart, StackedAreaChart } from 'react-native-svg-charts';
 import { curveNatural } from 'd3-shape';
 import { scaleTime } from 'd3-scale';
 import Constants from 'expo-constants';
 
 import Layout from '../constants/Layout';
-import { swatchColorInfo } from '../constants/Colors';
+import COLORS, { swatchColorInfo } from '../constants/Colors';
 import { store } from '../state';
 
 const COLOR_KEYS = Object.keys(swatchColorInfo);
@@ -23,23 +23,25 @@ class ResultsScreen extends Component {
   constructor(props) {
     super(props);
 
-    const { songs, colors } = props.navigation.state.params;
+    const { songs, colors, chills } = props.navigation.state.params;
     const { choices: userChoices } = store.getState();
 
     this.songs = songs
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
       .map(({ displayName, startTime, endTime }) => {
+        const filterTime = ({ timestamp }) => timestamp >= startTime && timestamp <= endTime;
         const song = {
           displayName,
           startTime,
           endTime,
-          colors: colors
-            .filter(({ timestamp }) => timestamp >= startTime && timestamp <= endTime)
-            .map(({ timestamp, choice, choices }) => ({
-              timestamp: new Date(timestamp),
-              choice,
-              ...choices,
-            })),
+          colors: colors.filter(filterTime).map(({ timestamp, choices }) => ({
+            timestamp: new Date(timestamp),
+            ...choices,
+          })),
+          chills: chills.filter(filterTime).map(({ timestamp, sum, count }) => ({
+            timestamp: new Date(timestamp),
+            value: sum / count,
+          })),
         };
 
         song.userColors = song.colors.map(({ timestamp }) => {
@@ -65,14 +67,8 @@ class ResultsScreen extends Component {
 
   handleIndexChange = index => this.setState({ currentIndex: index });
 
-  renderItem = ({
-    animatedValue,
-    currentIndex,
-    item: { colors, displayName, startTime, endTime, userColors },
-    itemIndex,
-  }) => (
-    <View style={styles.card}>
-      <Text style={styles.cardHeaderText}>{displayName}</Text>
+  renderColorCard = ({ colors, userColors }) => (
+    <React.Fragment>
       <Text style={styles.chartTitle}>Total Audience Choices</Text>
       <StackedAreaChart
         data={colors}
@@ -83,14 +79,37 @@ class ResultsScreen extends Component {
         xAccessor={({ item }) => item.timestamp}
         xScale={scaleTime}
       />
-      <BarChart
-        data={userColors}
-        style={styles.colorUserChart}
-        xAccessor={({ item }) => item.timestamp}
-        xScale={scaleTime}
-        yAccessor={({ item }) => item.value}
-      />
-      <Text style={styles.chartTitle}>Your Choices</Text>
+      {userColors.length > 0 && (
+        <React.Fragment>
+          <BarChart
+            data={userColors}
+            style={styles.colorUserChart}
+            xAccessor={({ item }) => item.timestamp}
+            xScale={scaleTime}
+            yAccessor={({ item }) => item.value}
+          />
+          <Text style={styles.chartTitle}>Your Choices</Text>
+        </React.Fragment>
+      )}
+    </React.Fragment>
+  );
+
+  renderChillsCard = ({ chills }) => (
+    <AreaChart
+      data={chills}
+      curve={curveNatural}
+      style={styles.colorAggregateChart}
+      xAccessor={({ item }) => item.timestamp}
+      xScale={scaleTime}
+      yAccessor={({ item }) => item.value}
+      svg={{ fill: COLORS.primaryBlue }}
+    />
+  );
+
+  renderSongCard = ({ animatedValue, currentIndex, item: { displayName, ...item }, itemIndex }) => (
+    <View style={styles.card}>
+      <Text style={styles.cardHeaderText}>{displayName}</Text>
+      {item.colors.length > 0 ? this.renderColorCard(item) : this.renderChillsCard(item)}
     </View>
   );
 
@@ -106,7 +125,7 @@ class ResultsScreen extends Component {
           index={this.state.currentIndex}
           itemWidth={Layout.window.width}
           onIndexChange={this.handleIndexChange}
-          renderItem={this.renderItem}
+          renderItem={this.renderSongCard}
           style={styles.carousel}
           useVelocityForIndex={false}
         />
@@ -142,7 +161,7 @@ const styles = EStyleSheet.create({
     alignItems: 'stretch',
   },
   pageHeader: {
-    backgroundColor: '#000081',
+    backgroundColor: COLORS.primaryBlue,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -163,10 +182,10 @@ const styles = EStyleSheet.create({
     borderWidth: 1,
     borderRadius: 13,
     flexDirection: 'column',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'rgb(95, 95, 95)',
-    paddingVertical: 3,
+    paddingVertical: 5,
   },
   cardHeaderText: {
     color: 'white',

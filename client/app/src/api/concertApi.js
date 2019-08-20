@@ -11,8 +11,8 @@ const connect = idToken => {
   if (isStub) {
     const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB];
     if (storeActions) {
-      const { store, actions } = require('../state');
-      storeActions.forEach(({ action, args }) => store.dispatch(actions[action](...args)));
+      const { store } = require('../state');
+      storeActions.forEach(store.dispatch);
     }
     events.emit('EVENT_STAGE_CHANGED', eventData);
     return;
