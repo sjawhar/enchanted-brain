@@ -4,7 +4,7 @@ import { Vibration } from 'react-native';
 import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
-import { store, actions } from '../state;';
+import { store, actions } from '../state';
 import { VIBRATION_PATTERN } from '../config';
 import { CHOICE_COLOR } from '../constants/Choices';
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Animated, PanResponder, PixelRatio } from 'react-native';
+import { View, Text, Animated, PanResponder } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Constants from 'expo-constants';
 
