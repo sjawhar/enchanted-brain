@@ -4,10 +4,9 @@ import { Vibration } from 'react-native';
 import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
+import { store, actions } from '../state;';
 import { VIBRATION_PATTERN } from '../config';
-import concertApi from '../api/concertApi';
 import { CHOICE_COLOR } from '../constants/Choices';
-import { CHOICE_MADE } from '../constants/Events';
 
 const MESSAGE_MISSED_HEADER = '';
 
@@ -100,14 +99,13 @@ export default class SynesthsiaScreen extends Component {
     Vibration.cancel();
 
     if (isChoice) {
-      concertApi.send({
-        event: CHOICE_MADE,
-        data: {
+      store.dispatch(
+        actions.sendChoice({
           choiceType: this.state.choiceType,
           choice,
           timestamp: new Date(this.state.timestamp).toISOString(),
-        },
-      });
+        })
+      );
     }
 
     this.scheduleNextPrompt();
