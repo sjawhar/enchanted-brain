@@ -9,8 +9,12 @@ const isStub = WEBSOCKET_API_STUB !== 'false';
 
 const connect = idToken => {
   if (isStub) {
-    const stageData = require('./stub').default;
-    events.emit('EVENT_STAGE_CHANGED', stageData[WEBSOCKET_API_STUB]);
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB];
+    if (storeActions) {
+      const { store, actions } = require('../state');
+      storeActions.forEach(({ action, args }) => store.dispatch(actions[action](...args)));
+    }
+    events.emit('EVENT_STAGE_CHANGED', eventData);
     return;
   } else if (ws) {
     return;

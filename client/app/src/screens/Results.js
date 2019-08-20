@@ -2,34 +2,62 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
-import { StackedAreaChart } from 'react-native-svg-charts';
-import * as shape from 'd3-shape';
+import { BarChart, StackedAreaChart } from 'react-native-svg-charts';
+import { curveNatural } from 'd3-shape';
+import { scaleTime } from 'd3-scale';
 import Constants from 'expo-constants';
 
 import Layout from '../constants/Layout';
 import { swatchColorInfo } from '../constants/Colors';
+import { store } from '../state';
 
 const COLOR_KEYS = Object.keys(swatchColorInfo);
 const CARD_MARGIN = 0.05 * Layout.window.width;
 const CARD_WIDTH = 0.9 * Layout.window.width;
 const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const CARD_HEIGHT = 0.85 * CONTAINER_HEIGHT;
-const CHART_HEIGHT = 0.8 * CARD_HEIGHT;
+const CHART_AGGREGATE_HEIGHT = 0.75 * CARD_HEIGHT;
+const CHART_USER_HEIGHT = 0.075 * CARD_HEIGHT;
 
 class ResultsScreen extends Component {
   constructor(props) {
     super(props);
+
     const { songs, colors } = props.navigation.state.params;
+    const { choices: userChoices } = store.getState();
+
     this.songs = songs
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
-      .map(({ displayName, startTime, endTime }) => ({
-        displayName,
-        startTime,
-        endTime,
-        colors: colors
-          .filter(({ timestamp }) => timestamp >= startTime && timestamp <= endTime)
-          .map(({ timestamp, choices }) => ({ timestamp: new Date(timestamp), ...choices })),
-      }));
+      .map(({ displayName, startTime, endTime }) => {
+        const song = {
+          displayName,
+          startTime,
+          endTime,
+          colors: colors
+            .filter(({ timestamp }) => timestamp >= startTime && timestamp <= endTime)
+            .map(({ timestamp, choice, choices }) => ({
+              timestamp: new Date(timestamp),
+              choice,
+              ...choices,
+            })),
+        };
+
+        song.userColors = song.colors.map(({ timestamp }) => {
+          const entry = { timestamp, value: 0 };
+
+          const timeString = timestamp.toISOString();
+          const userChoice = userChoices.find(choice => choice.timestamp === timeString);
+          if (userChoice) {
+            Object.assign(entry, {
+              value: 1,
+              svg: { fill: userChoice.choice },
+            });
+          }
+          return entry;
+        });
+
+        return song;
+      });
     this.state = {
       currentIndex: 0,
     };
@@ -40,18 +68,29 @@ class ResultsScreen extends Component {
   renderItem = ({
     animatedValue,
     currentIndex,
-    item: { colors, displayName, startTime, endTime },
+    item: { colors, displayName, startTime, endTime, userColors },
     itemIndex,
   }) => (
     <View style={styles.card}>
       <Text style={styles.cardHeaderText}>{displayName}</Text>
+      <Text style={styles.chartTitle}>Total Audience Choices</Text>
       <StackedAreaChart
-        colors={COLOR_KEYS}
-        curve={shape.curveNatural}
         data={colors}
         keys={COLOR_KEYS}
-        style={styles.colorChart}
+        colors={COLOR_KEYS}
+        style={styles.colorAggregateChart}
+        curve={curveNatural}
+        xAccessor={({ item }) => item.timestamp}
+        xScale={scaleTime}
       />
+      <BarChart
+        data={userColors}
+        style={styles.colorUserChart}
+        xAccessor={({ item }) => item.timestamp}
+        xScale={scaleTime}
+        yAccessor={({ item }) => item.value}
+      />
+      <Text style={styles.chartTitle}>Your Choices</Text>
     </View>
   );
 
@@ -124,18 +163,26 @@ const styles = EStyleSheet.create({
     borderWidth: 1,
     borderRadius: 13,
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: 'rgb(95, 95, 95)',
+    paddingVertical: 3,
   },
   cardHeaderText: {
     color: 'white',
-    fontSize: 13,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginVertical: 3,
   },
-  colorChart: {
-    height: CHART_HEIGHT,
+  chartTitle: {
+    color: 'white',
+    fontSize: 13,
+  },
+  colorAggregateChart: {
+    height: CHART_AGGREGATE_HEIGHT,
+    width: CARD_WIDTH,
+  },
+  colorUserChart: {
+    height: CHART_USER_HEIGHT,
     width: CARD_WIDTH,
   },
   pagination: {
