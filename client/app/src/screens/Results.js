@@ -18,8 +18,9 @@ const CARD_MARGIN = 0.05 * Layout.window.width;
 const CARD_WIDTH = 0.9 * Layout.window.width;
 const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const CARD_HEIGHT = 0.85 * CONTAINER_HEIGHT;
-const CHART_AGGREGATE_HEIGHT = 0.75 * CARD_HEIGHT;
-const CHART_USER_HEIGHT = 0.075 * CARD_HEIGHT;
+const CHART_COLOR_AGGREGATE_HEIGHT = 0.75 * CARD_HEIGHT;
+const CHART_COLOR_USER_HEIGHT = 0.075 * CARD_HEIGHT;
+const CHART_CHILLS_HEIGHT = 0.8 * CARD_HEIGHT;
 
 class ResultsScreen extends Component {
   constructor(props) {
@@ -114,18 +115,6 @@ class ResultsScreen extends Component {
     }
   };
 
-  findUserChoices = ({ aggregate, userChoices, modifier }) =>
-    aggregate.map(({ timestamp }) => {
-      const entry = { timestamp, value: 0 };
-
-      const timeString = timestamp.toISOString();
-      const userChoice = userChoices.find(choice => choice.timestamp === timeString);
-      if (!userChoice) {
-        return entry;
-      }
-      return Object.assign(entry, modifier(userChoice));
-    });
-
   handleIndexChange = index => this.setState({ currentIndex: index });
 
   renderColorCard = ({ choices, userChoices, chartProps }) => (
@@ -155,18 +144,50 @@ class ResultsScreen extends Component {
 
   renderChillsCard = ({ choices, userChoices, chartProps }) => (
     <React.Fragment>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <View style={styles.chillsLegendGroup}>
+          <View
+            style={[
+              styles.chillsLegendIcon,
+              {
+                backgroundColor: COLORS.primaryBlue,
+                height: 10,
+              },
+            ]}
+          />
+          <Text style={styles.chillsLegendText}>Audience</Text>
+        </View>
+        <View style={styles.chillsLegendGroup}>
+          <View
+            style={[
+              styles.chillsLegendIcon,
+              {
+                backgroundColor: COLORS.primaryOrange,
+                height: 4,
+              },
+            ]}
+          />
+          <Text style={styles.chillsLegendText}>Your Choices</Text>
+        </View>
+      </View>
       <AreaChart
         data={choices}
         curve={curveNatural}
-        style={[styles.chillsChart, { zIndex: 100 }]}
+        style={[styles.chillsChart, { marginBottom: -5, zIndex: 100 }]}
         svg={{ fill: COLORS.primaryBlue }}
         {...chartProps}
       />
       <LineChart
         data={userChoices}
-        // curve={curveNatural}
-        style={[styles.chillsChart, { zIndex: 101 }]}
-        svg={{ stroke: COLORS.primaryOrange }}
+        style={[
+          styles.chillsChart,
+          {
+            position: 'absolute',
+            bottom: 0,
+            zIndex: 101,
+          },
+        ]}
+        svg={{ stroke: COLORS.primaryOrange, strokeWidth: 2 }}
         {...chartProps}
       />
     </React.Fragment>
@@ -261,18 +282,28 @@ const styles = EStyleSheet.create({
     fontSize: 13,
   },
   colorAggregateChart: {
-    height: CHART_AGGREGATE_HEIGHT,
+    height: CHART_COLOR_AGGREGATE_HEIGHT,
     width: CARD_WIDTH,
   },
   colorUserChart: {
-    height: CHART_USER_HEIGHT,
+    height: CHART_COLOR_USER_HEIGHT,
     width: CARD_WIDTH,
   },
   chillsChart: {
-    height: CHART_AGGREGATE_HEIGHT,
+    height: CHART_CHILLS_HEIGHT,
     width: CARD_WIDTH,
-    position: 'absolute',
-    bottom: 0,
+  },
+  chillsLegendGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  chillsLegendIcon: {
+    marginHorizontal: 3,
+    width: 10,
+  },
+  chillsLegendText: {
+    color: 'white',
   },
   pagination: {
     flexDirection: 'row',
