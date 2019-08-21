@@ -1,8 +1,17 @@
 import { SEND_CHOICE, SET_CHOICE_TYPE, SET_CHOICE_INVERTED, SET_UID } from './actions';
-import { CHOICE_COLOR } from '../constants/Choices';
+import {
+  CHOICE_CHILLS,
+  CHOICE_COLOR,
+  CHOICE_EMOTION_ANGER,
+  CHOICE_EMOTION_HAPPINESS,
+} from '../constants/Choices';
 
 const INITIAL_STATE = {
-  choices: [],
+  choices: {
+    colors: [],
+    emotions: [],
+    chills: [],
+  },
   choiceType: CHOICE_COLOR,
   choiceInverted: false,
   uid: null,
@@ -13,7 +22,21 @@ const reducer = (state = INITIAL_STATE, action) => {
   switch (type) {
     case SEND_CHOICE: {
       const { choices, ...otherState } = state;
-      choices.push(payload.choice);
+      const { choiceType } = payload.choice;
+      switch (choiceType) {
+        case CHOICE_CHILLS:
+          choices.chills.push(payload.choice);
+          break;
+        case CHOICE_COLOR:
+          choices.colors.push(payload.choice);
+          break;
+        case CHOICE_EMOTION_HAPPINESS:
+        case CHOICE_EMOTION_ANGER:
+          choices.emotion.push(payload.choice);
+          break;
+        default:
+          throw new Error(`Unknown choice type ${choiceType}`);
+      }
       return { choices, ...otherState };
     }
     case SET_CHOICE_TYPE: {

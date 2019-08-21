@@ -34,4 +34,5 @@ export default {
   warningBackground: '#EAEB5E',
   warningText: '#666804',
   primaryBlue: '#000081',
+  primaryOrange: '#d15700',
 };

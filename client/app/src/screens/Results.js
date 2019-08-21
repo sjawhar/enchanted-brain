@@ -2,16 +2,18 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
-import { AreaChart, BarChart, StackedAreaChart } from 'react-native-svg-charts';
+import { AreaChart, BarChart, LineChart, StackedAreaChart } from 'react-native-svg-charts';
 import { curveNatural } from 'd3-shape';
 import { scaleTime } from 'd3-scale';
 import Constants from 'expo-constants';
 
+import { store } from '../state';
 import Layout from '../constants/Layout';
 import COLORS, { swatchColorInfo } from '../constants/Colors';
-import { store } from '../state';
+import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 
 const COLOR_KEYS = Object.keys(swatchColorInfo);
+const COLOR_EMPTY = Object.fromEntries(COLOR_KEYS.map(color => [color, 0]));
 const CARD_MARGIN = 0.05 * Layout.window.width;
 const CARD_WIDTH = 0.9 * Layout.window.width;
 const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
@@ -23,70 +25,127 @@ class ResultsScreen extends Component {
   constructor(props) {
     super(props);
 
-    const { songs, colors, chills } = props.navigation.state.params;
+    const { songs } = props.navigation.state.params;
     const { choices: userChoices } = store.getState();
 
     this.songs = songs
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
-      .map(({ displayName, startTime, endTime }) => {
-        const filterTime = ({ timestamp }) => timestamp >= startTime && timestamp <= endTime;
+      .map(({ startTime, endTime, choices, choiceType, ...songInfo }) => {
         const song = {
-          displayName,
           startTime,
           endTime,
-          colors: colors.filter(filterTime).map(({ timestamp, choices }) => ({
+          choices: choices.map(({ timestamp, ...choice }) => ({
             timestamp: new Date(timestamp),
-            ...choices,
+            ...choice,
           })),
-          chills: chills.filter(filterTime).map(({ timestamp, sum, count }) => ({
-            timestamp: new Date(timestamp),
-            value: sum / count,
-          })),
+          choiceType,
+          chartProps: {
+            xAccessor: ({ item }) => item.timestamp,
+            xMax: new Date(endTime),
+            xMin: new Date(startTime),
+            xScale: scaleTime,
+          },
+          ...songInfo,
         };
-
-        song.userColors = song.colors.map(({ timestamp }) => {
-          const entry = { timestamp, value: 0 };
-
-          const timeString = timestamp.toISOString();
-          const userChoice = userChoices.find(choice => choice.timestamp === timeString);
-          if (userChoice) {
-            Object.assign(entry, {
-              value: 1,
-              svg: { fill: userChoice.choice },
+        switch (choiceType) {
+          case CHOICE_COLOR:
+            this.prepChoices({
+              song,
+              leftPad: COLOR_EMPTY,
+              userChoices: userChoices.colors,
+              userChoiceModifier: choice => ({ value: 1, svg: { fill: choice } }),
             });
-          }
-          return entry;
-        });
+            return song;
+          case CHOICE_CHILLS:
+            this.prepChoices({
+              song,
+              chartProps: {
+                yAccessor: ({ item }) => item.value,
+                yMax: 1,
+                yMin: 0,
+              },
+              modifier: ({ sum, count }) => ({ value: sum / count }),
+              leftPad: { value: 0 },
+              userChoices: userChoices.chills,
+              userChoiceModifier: choice => ({ value: choice }),
+            });
+            return song;
+          default:
+            return null;
+        }
+      })
+      .filter(song => !!song);
 
-        return song;
-      });
     this.state = {
       currentIndex: 0,
     };
   }
 
+  prepChoices = ({ chartProps = {}, leftPad, modifier, song, userChoiceModifier, userChoices }) => {
+    Object.assign(song.chartProps, chartProps);
+    if (modifier) {
+      song.choices = song.choices.map(choice => Object.assign(choice, modifier(choice)));
+    }
+    if (song.chartProps.xMin < song.choices[0].timestamp) {
+      song.choices.unshift({ timestamp: song.chartProps.xMin, ...leftPad });
+    }
+    song.userChoices = userChoices
+      .filter(({ timestamp }) => timestamp >= song.startTime && timestamp <= song.endTime)
+      .map(({ timestamp, choice }) => ({
+        timestamp: new Date(timestamp),
+        ...userChoiceModifier(choice),
+      }));
+
+    let filled = false;
+    song.choices.forEach(({ timestamp }) => {
+      const userChoice = song.userChoices.find(
+        choice => choice.timestamp.valueOf() === timestamp.valueOf()
+      );
+      if (userChoice) {
+        return;
+      }
+      song.userChoices.push({ timestamp, value: 0 });
+      filled = true;
+    });
+    if (filled) {
+      song.userChoices.sort(({ timestamp: a }, { timestamp: b }) =>
+        a.valueOf() === b.valueOf() ? 0 : a < b ? -1 : 1
+      );
+    }
+  };
+
+  findUserChoices = ({ aggregate, userChoices, modifier }) =>
+    aggregate.map(({ timestamp }) => {
+      const entry = { timestamp, value: 0 };
+
+      const timeString = timestamp.toISOString();
+      const userChoice = userChoices.find(choice => choice.timestamp === timeString);
+      if (!userChoice) {
+        return entry;
+      }
+      return Object.assign(entry, modifier(userChoice));
+    });
+
   handleIndexChange = index => this.setState({ currentIndex: index });
 
-  renderColorCard = ({ colors, userColors }) => (
+  renderColorCard = ({ choices, userChoices, chartProps }) => (
     <React.Fragment>
       <Text style={styles.chartTitle}>Total Audience Choices</Text>
       <StackedAreaChart
-        data={colors}
+        data={choices}
         keys={COLOR_KEYS}
         colors={COLOR_KEYS}
         style={styles.colorAggregateChart}
         curve={curveNatural}
-        xAccessor={({ item }) => item.timestamp}
-        xScale={scaleTime}
+        {...chartProps}
       />
-      {userColors.length > 0 && (
+      {userChoices.length > 0 && (
         <React.Fragment>
           <BarChart
-            data={userColors}
+            data={userChoices}
             style={styles.colorUserChart}
-            xAccessor={({ item }) => item.timestamp}
-            xScale={scaleTime}
             yAccessor={({ item }) => item.value}
+            {...chartProps}
           />
           <Text style={styles.chartTitle}>Your Choices</Text>
         </React.Fragment>
@@ -94,22 +153,29 @@ class ResultsScreen extends Component {
     </React.Fragment>
   );
 
-  renderChillsCard = ({ chills }) => (
-    <AreaChart
-      data={chills}
-      curve={curveNatural}
-      style={styles.colorAggregateChart}
-      xAccessor={({ item }) => item.timestamp}
-      xScale={scaleTime}
-      yAccessor={({ item }) => item.value}
-      svg={{ fill: COLORS.primaryBlue }}
-    />
+  renderChillsCard = ({ choices, userChoices, chartProps }) => (
+    <React.Fragment>
+      <AreaChart
+        data={choices}
+        curve={curveNatural}
+        style={[styles.chillsChart, { zIndex: 100 }]}
+        svg={{ fill: COLORS.primaryBlue }}
+        {...chartProps}
+      />
+      <LineChart
+        data={userChoices}
+        // curve={curveNatural}
+        style={[styles.chillsChart, { zIndex: 101 }]}
+        svg={{ stroke: COLORS.primaryOrange }}
+        {...chartProps}
+      />
+    </React.Fragment>
   );
 
   renderSongCard = ({ animatedValue, currentIndex, item: { displayName, ...item }, itemIndex }) => (
     <View style={styles.card}>
       <Text style={styles.cardHeaderText}>{displayName}</Text>
-      {item.colors.length > 0 ? this.renderColorCard(item) : this.renderChillsCard(item)}
+      {item.choiceType === CHOICE_COLOR ? this.renderColorCard(item) : this.renderChillsCard(item)}
     </View>
   );
 
@@ -179,8 +245,6 @@ const styles = EStyleSheet.create({
     width: CARD_WIDTH,
     marginLeft: CARD_MARGIN,
     marginRight: CARD_MARGIN,
-    borderWidth: 1,
-    borderRadius: 13,
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -203,6 +267,12 @@ const styles = EStyleSheet.create({
   colorUserChart: {
     height: CHART_USER_HEIGHT,
     width: CARD_WIDTH,
+  },
+  chillsChart: {
+    height: CHART_AGGREGATE_HEIGHT,
+    width: CARD_WIDTH,
+    position: 'absolute',
+    bottom: 0,
   },
   pagination: {
     flexDirection: 'row',
