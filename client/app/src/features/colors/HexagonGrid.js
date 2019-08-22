@@ -4,7 +4,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import PropTypes from 'prop-types';
 import Layout from '../../constants/Layout';
 
-import { swatchColors } from '../../constants/Colors';
+import { COLOR_BACKGROUND_DARK, swatchColors } from '../../constants/Colors';
 
 import Hexagon from './Hexagon';
 
@@ -74,7 +74,7 @@ const styles = EStyleSheet.create({
   container: {
     width: WINDOW_WIDTH,
     height: '100%',
-    backgroundColor: 'rgb(95, 95, 95)',
+    backgroundColor: COLOR_BACKGROUND_DARK,
     justifyContent: 'center',
   },
   row: {

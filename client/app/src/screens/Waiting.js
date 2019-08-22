@@ -3,6 +3,9 @@ import { SafeAreaView, Text } from 'react-native';
 import PropTypes from 'prop-types';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
+import { COLOR_BACKGROUND_DARK } from '../constants/Colors';
+import { MESSAGE_WELCOME_BODY, MESSAGE_WELCOME_HEADER } from '../constants/Messages';
+
 class WaitingScreen extends Component {
   static propTypes = {
     headerText: PropTypes.string,
@@ -10,8 +13,8 @@ class WaitingScreen extends Component {
   };
 
   static defaultProps = {
-    headerText: 'Welcome to the Enchanted Brain Concert!',
-    messageText: 'Please listen to the concert and wait to be prompted for a response.',
+    headerText: MESSAGE_WELCOME_HEADER,
+    messageText: MESSAGE_WELCOME_BODY,
   };
 
   render() {
@@ -30,17 +33,20 @@ const styles = EStyleSheet.create({
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLOR_BACKGROUND_DARK,
+    paddingHorizontal: 13,
   },
   headerText: {
     fontSize: '2rem',
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: '1rem',
+    color: 'white',
   },
   messageText: {
     fontSize: '1rem',
     textAlign: 'center',
+    color: 'white',
   },
 });
 

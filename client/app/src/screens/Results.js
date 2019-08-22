@@ -9,7 +9,7 @@ import Constants from 'expo-constants';
 
 import { store } from '../state';
 import Layout from '../constants/Layout';
-import COLORS, { swatchColorInfo } from '../constants/Colors';
+import COLORS, { swatchColorInfo, COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 
 const COLOR_KEYS = Object.keys(swatchColorInfo);
@@ -269,7 +269,7 @@ const styles = EStyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgb(95, 95, 95)',
+    backgroundColor: COLOR_BACKGROUND_DARK,
     paddingVertical: 5,
   },
   cardHeaderText: {

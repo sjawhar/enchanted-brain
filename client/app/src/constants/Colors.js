@@ -21,6 +21,8 @@ export const swatchColorInfo = swatchColors
   .flat()
   .reduce((obj, { hex, ...color }) => Object.assign(obj, { [hex]: color }), {});
 
+export const COLOR_BACKGROUND_DARK = 'rgb(95, 95, 95)';
+
 export default {
   errorBackground: 'red',
   errorText: '#fff',

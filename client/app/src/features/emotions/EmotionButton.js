@@ -11,7 +11,7 @@ const WINDOW_HEIGHT = window.height;
 const EmotionButton = props => {
   const { buttonStyle, ...rest } = props;
   const combinedButtonStyle = EStyleSheet.flatten([styles.buttonStyle, buttonStyle]);
-  return <Button buttonStyle={combinedButtonStyle} type="outline" {...rest} />;
+  return <Button buttonStyle={combinedButtonStyle} {...rest} />;
 };
 
 const styles = EStyleSheet.create({
