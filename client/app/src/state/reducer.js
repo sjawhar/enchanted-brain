@@ -6,7 +6,7 @@ import {
   CHOICE_EMOTION_HAPPINESS,
 } from '../constants/Choices';
 
-const INITIAL_STATE = {
+const INITIAL_STATE = () => ({
   choices: {
     colors: [],
     emotions: [],
@@ -15,9 +15,12 @@ const INITIAL_STATE = {
   choiceType: CHOICE_COLOR,
   choiceInverted: false,
   uid: null,
-};
+});
 
-const reducer = (state = INITIAL_STATE, action) => {
+const reducer = (state, action) => {
+  if (!state) {
+    state = INITIAL_STATE();
+  }
   const { type, payload } = action;
   switch (type) {
     case SEND_CHOICE: {
@@ -32,7 +35,7 @@ const reducer = (state = INITIAL_STATE, action) => {
           break;
         case CHOICE_EMOTION_HAPPINESS:
         case CHOICE_EMOTION_ANGER:
-          choices.emotion.push(payload.choice);
+          choices.emotions.push(payload.choice);
           break;
         default:
           throw new Error(`Unknown choice type ${choiceType}`);
