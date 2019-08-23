@@ -17,10 +17,10 @@ from enchanted_brain.attributes import (
     ATTR_SONG_LIST_END_TIME,
     ATTR_SONG_LIST_SONGS,
     ATTR_SONG_LIST_START_TIME,
+    EVENT_STAGE_END,
     RECORD_ID_AGGREGATE,
     RECORD_ID_EVENT_STAGE,
     RECORD_ID_SONG_LIST,
-    STAGE_END,
 )
 
 CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
@@ -33,7 +33,7 @@ dynamodb = boto3.client("dynamodb")
 def handler(event, context):
     message = json.loads(event["body"])
 
-    if message["data"][ATTR_EVENT_STAGE_ID] == STAGE_END:
+    if message["data"][ATTR_EVENT_STAGE_ID] == EVENT_STAGE_END:
         song_list, aggregate_data = get_song_list_and_aggregate_data()
         songs_with_choices = get_songs_with_aggregate_choices(song_list, aggregate_data)
         message["data"][ATTR_SONG_LIST_SONGS] = songs_with_choices
@@ -149,7 +149,7 @@ def get_song_list_and_aggregate_data():
 
 
 def get_songs_with_aggregate_choices(song_list, aggregate_data):
-    songs = []
+    songs_with_aggregate_choices = []
     for song_metadata in song_list[ATTR_SONG_LIST_SONGS]:
         display_name = song_metadata[ATTR_SONG_LIST_DISPLAY_NAME]
         start_time = song_metadata[ATTR_SONG_LIST_START_TIME]
@@ -189,7 +189,7 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
                     )
                 choices.append(choices_at_timestamp)
 
-        songs.append(
+        songs_with_aggregate_choices.append(
             {
                 ATTR_SONG_LIST_DISPLAY_NAME: display_name,
                 ATTR_SONG_LIST_START_TIME: start_time,
@@ -199,7 +199,7 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
             }
         )
 
-    return songs
+    return songs_with_aggregate_choices
 
 
 def decimal_default(obj):
