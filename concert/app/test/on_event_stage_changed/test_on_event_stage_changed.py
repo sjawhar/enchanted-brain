@@ -366,13 +366,13 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "choices": [
                 {
                     "timestamp": "2019-05-14T21:15:03.000Z",
-                    "#ABABAB": 5.0,
-                    "#171717": 15.0,
+                    "#ABABAB": 5,
+                    "#171717": 15,
                 },
                 {
                     "timestamp": "2019-05-14T21:15:23.000Z",
-                    "#ABABAB": 10.0,
-                    "#CDCDCD": 7.0,
+                    "#ABABAB": 10,
+                    "#CDCDCD": 7,
                 },
             ],
         },
@@ -382,8 +382,8 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "endTime": "2019-05-14T21:21:33.000Z",
             "choiceType": "chills",
             "choices": [
-                {"timestamp": "2019-05-14T21:20:03.000Z", "sum": 2.5, "count": 2.0},
-                {"timestamp": "2019-05-14T21:20:03.200Z", "sum": 1.5, "count": 1.0},
+                {"timestamp": "2019-05-14T21:20:03.000Z", "sum": 2.5, "count": 2},
+                {"timestamp": "2019-05-14T21:20:03.200Z", "sum": 1.5, "count": 1},
             ],
         },
     ]

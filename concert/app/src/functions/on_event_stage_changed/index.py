@@ -204,5 +204,7 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
 
 def decimal_default(obj):
     if isinstance(obj, decimal.Decimal):
-        return float(obj)
+        if obj % 1 > 0:
+            return float(obj)
+        return int(obj)
     raise TypeError
