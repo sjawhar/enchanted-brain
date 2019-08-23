@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 import decimal
+from boto3.dynamodb import types
 from enchanted_brain.attributes import (
     ATTR_AGGREGATE_CHOICE_COUNT,
     ATTR_AGGREGATE_CHOICE_SUM,
