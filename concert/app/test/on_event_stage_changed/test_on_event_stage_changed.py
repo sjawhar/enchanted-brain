@@ -364,16 +364,8 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "endTime": "2019-05-14T21:16:33.000Z",
             "choiceType": "colors",
             "choices": [
-                {
-                    "timestamp": "2019-05-14T21:15:03.000Z",
-                    "#ABABAB": 5,
-                    "#171717": 15,
-                },
-                {
-                    "timestamp": "2019-05-14T21:15:23.000Z",
-                    "#ABABAB": 10,
-                    "#CDCDCD": 7,
-                },
+                {"timestamp": "2019-05-14T21:15:03.000Z", "#ABABAB": 5, "#171717": 15},
+                {"timestamp": "2019-05-14T21:15:23.000Z", "#ABABAB": 10, "#CDCDCD": 7},
             ],
         },
         {
