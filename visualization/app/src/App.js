@@ -139,25 +139,21 @@ class App extends Component {
           <div className="axis" style={styles.axisY} />
         </div>
         <div style={styles.beesContainer}>
-          {bees.map(({ x, y, color }, index) => {
-            const style = {
-              left: `${x}%`,
-              top: `${y}%`,
-              animationDelay: animationDelays[index],
-              ...styles.bee
-            };
-
-            return (
-              <Bee
-                key={index}
-                width={BEE_SIZE}
-                style={style}
-                fill="white"
-                stroke={color}
-                className="jitter"
-              />
-            );
-          })}
+          {bees.map(({ x, y, color }, index) => (
+            <Bee
+              key={index}
+              width={BEE_SIZE}
+              style={{
+                ...styles.bee,
+                animationDelay: animationDelays[index],
+                left: `${x}%`,
+                top: `${y}%`
+              }}
+              fill="white"
+              stroke={color}
+              className="jitter"
+            />
+          ))}
         </div>
       </div>
     );
