@@ -45,6 +45,7 @@ class ResultsScreen extends Component {
             xMax: new Date(endTime),
             xMin: new Date(startTime),
             xScale: scaleTime,
+            contentInset: { top: 10, left: 0, right: 0, bottom: 0 },
           },
           ...songInfo,
         };
