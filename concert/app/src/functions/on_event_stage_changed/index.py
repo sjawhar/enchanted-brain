@@ -38,8 +38,9 @@ def handler(event, context):
 
     if message["data"][ATTR_EVENT_STAGE_ID] == EVENT_STAGE_END:
         song_list, aggregate_data = get_song_list_and_aggregate_data()
-        message["data"][ATTR_SONG_LIST_SONGS] = get_songs_with_aggregate_choices(song_list, aggregate_data)
-        message["data"][ATTR_SONG_LIST_SONGS] = songs_with_choices
+        message["data"][ATTR_SONG_LIST_SONGS] = get_songs_with_aggregate_choices(
+            song_list, aggregate_data
+        )
 
     update_event_stage_and_song_list(message)
 
@@ -107,42 +108,30 @@ def get_song_list_update_transaction_item(message_data):
     return {"Update": song_list_update_args}
 
 
-def get_song_list_get_transaction_item():
-    song_list_get_args = {
-        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_SONG_LIST)},
+def get_get_transaction_item(record_id):
+    get_args = {
+        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(record_id)},
         "TableName": DYNAMODB_TABLE_NAME,
     }
 
-    return {"Get": song_list_get_args}
-
-
-def get_aggregate_data_get_transaction_item():
-    aggregate_data_get_args = {
-        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_AGGREGATE)},
-        "TableName": DYNAMODB_TABLE_NAME,
-    }
-
-    return {"Get": aggregate_data_get_args}
+    return {"Get": get_args}
 
 
 def get_song_list_and_aggregate_data():
-    song_list_get_transaction_item = get_song_list_get_transaction_item()
-    aggregate_data_get_transaction_item = get_aggregate_data_get_transaction_item()
-
-    transaction_items = [
-        song_list_get_transaction_item,
-        aggregate_data_get_transaction_item,
-    ]
-
-    responses = dynamodb.transact_get_items(TransactItems=transaction_items)[
-        "Responses"
-    ]
+    transact_get_items_responses = dynamodb.transact_get_items(
+        TransactItems=[
+            get_get_transaction_item(RECORD_ID_SONG_LIST),
+            get_get_transaction_item(RECORD_ID_AGGREGATE),
+        ]
+    )["Responses"]
 
     songs = {
-        k: dynamodb_deserializer.deserialize(v) for k, v in responses[0]["Item"].items()
+        k: dynamodb_deserializer.deserialize(v)
+        for k, v in transact_get_items_responses[0]["Item"].items()
     }
     aggregate_data = {
-        k: dynamodb_deserializer.deserialize(v) for k, v in responses[1]["Item"].items()
+        k: dynamodb_deserializer.deserialize(v)
+        for k, v in transact_get_items_responses[1]["Item"].items()
     }
 
     return songs, aggregate_data
