@@ -38,7 +38,7 @@ def handler(event, context):
 
     if message["data"][ATTR_EVENT_STAGE_ID] == EVENT_STAGE_END:
         song_list, aggregate_data = get_song_list_and_aggregate_data()
-        songs_with_choices = get_songs_with_aggregate_choices(song_list, aggregate_data)
+        message["data"][ATTR_SONG_LIST_SONGS] = get_songs_with_aggregate_choices(song_list, aggregate_data)
         message["data"][ATTR_SONG_LIST_SONGS] = songs_with_choices
 
     update_event_stage_and_song_list(message)
