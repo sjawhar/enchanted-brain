@@ -67,7 +67,7 @@ def create_map_for_record_if_none_exists(timestamp, choice_key):
 
 def add_record_to_aggregate(record):
     data = json.loads(b64decode(record["data"]).decode("utf-8"))
-    timestamp = data["CHOICE_TIME"]
+    timestamp = data["CHOICE_TIME"].replace(" ", "T") + "Z"
     choice_type = data["CHOICE_TYPE"]
     choice_sum = Decimal(data["CHOICE_SUM"])
     choice_count = data["CHOICE_COUNT"]
