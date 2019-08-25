@@ -125,14 +125,8 @@ def get_song_list_and_aggregate_data():
         ]
     )["Responses"]
 
-    songs = {
-        k: dynamodb_deserializer.deserialize(v)
-        for k, v in transact_get_items_responses[0]["Item"].items()
-    }
-    aggregate_data = {
-        k: dynamodb_deserializer.deserialize(v)
-        for k, v in transact_get_items_responses[1]["Item"].items()
-    }
+    songs = deserialize_db_item(transact_get_items_responses[0])
+    aggregate_data = deserialize_db_item(transact_get_items_responses[1])
 
     return songs, aggregate_data
 
@@ -189,6 +183,10 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
         )
 
     return songs_with_aggregate_choices
+
+
+def deserialize_db_item(item):
+    return {k: dynamodb_deserializer.deserialize(v) for k, v in item["Item"].items()}
 
 
 def decimal_default(obj):
