@@ -29,6 +29,9 @@ DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 sns = boto3.client("sns")
 dynamodb = boto3.client("dynamodb")
 
+dynamodb_serializer = boto3.dynamodb.types.TypeSerializer()
+dynamodb_deserializer = boto3.dynamodb.types.TypeDeserializer()
+
 
 def handler(event, context):
     message = json.loads(event["body"])
@@ -63,12 +66,11 @@ def update_event_stage_and_song_list(message):
 
 
 def get_event_stage_put_transaction_item(message_data):
-    serializer = boto3.dynamodb.types.TypeSerializer()
     event_stage_update_args = {
-        "Item": {k: serializer.serialize(v) for k, v in message_data.items()},
+        "Item": {k: dynamodb_serializer.serialize(v) for k, v in message_data.items()},
         "TableName": DYNAMODB_TABLE_NAME,
     }
-    event_stage_update_args["Item"][ATTR_RECORD_ID] = serializer.serialize(
+    event_stage_update_args["Item"][ATTR_RECORD_ID] = dynamodb_serializer.serialize(
         RECORD_ID_EVENT_STAGE
     )
 
@@ -91,14 +93,13 @@ def get_song_list_update_transaction_item(message_data):
         }
     ]
 
-    serializer = boto3.dynamodb.types.TypeSerializer()
     song_list_update_args = {
-        "Key": {ATTR_RECORD_ID: serializer.serialize(RECORD_ID_SONG_LIST)},
+        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_SONG_LIST)},
         "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
         "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
         "ExpressionAttributeValues": {
-            ":song": serializer.serialize(song),
-            ":empty_list": serializer.serialize([]),
+            ":song": dynamodb_serializer.serialize(song),
+            ":empty_list": dynamodb_serializer.serialize([]),
         },
         "TableName": DYNAMODB_TABLE_NAME,
     }
@@ -107,9 +108,8 @@ def get_song_list_update_transaction_item(message_data):
 
 
 def get_song_list_get_transaction_item():
-    serializer = boto3.dynamodb.types.TypeSerializer()
     song_list_get_args = {
-        "Key": {ATTR_RECORD_ID: serializer.serialize(RECORD_ID_SONG_LIST)},
+        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_SONG_LIST)},
         "TableName": DYNAMODB_TABLE_NAME,
     }
 
@@ -117,9 +117,8 @@ def get_song_list_get_transaction_item():
 
 
 def get_aggregate_data_get_transaction_item():
-    serializer = boto3.dynamodb.types.TypeSerializer()
     aggregate_data_get_args = {
-        "Key": {ATTR_RECORD_ID: serializer.serialize(RECORD_ID_AGGREGATE)},
+        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_AGGREGATE)},
         "TableName": DYNAMODB_TABLE_NAME,
     }
 
@@ -139,10 +138,11 @@ def get_song_list_and_aggregate_data():
         "Responses"
     ]
 
-    deserializer = boto3.dynamodb.types.TypeDeserializer()
-    songs = {k: deserializer.deserialize(v) for k, v in responses[0]["Item"].items()}
+    songs = {
+        k: dynamodb_deserializer.deserialize(v) for k, v in responses[0]["Item"].items()
+    }
     aggregate_data = {
-        k: deserializer.deserialize(v) for k, v in responses[1]["Item"].items()
+        k: dynamodb_deserializer.deserialize(v) for k, v in responses[1]["Item"].items()
     }
 
     return songs, aggregate_data
