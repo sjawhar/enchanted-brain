@@ -50,7 +50,8 @@
     "react-redux": "^6.0.1",
     "redux": "^4.0.4",
     "redux-persist": "^5.10.0",
-    "redux-thunk": "^2.3.0"
+    "redux-thunk": "^2.3.0",
+    "tcomb-form-native": "^0.6.20"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.2",

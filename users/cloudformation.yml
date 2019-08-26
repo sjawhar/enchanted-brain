@@ -52,11 +52,11 @@ Resources:
         - Name: age
           AttributeDataType: Number
           Mutable: true
-          Required: false
-        - Name: color-perception
-          AttributeDataType: String
+          Required: true
+        - Name: colorPerception
+          AttributeDataType: Number
           Mutable: true
-          Required: false
+          Required: true
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
@@ -80,17 +80,15 @@ Resources:
       ReadAttributes:
         - name
         - email
-        - phone_number
         - gender
         - custom:age
-        - custom:color-perception
+        - custom:colorPerception
       WriteAttributes:
         - name
         - email
-        - phone_number
         - gender
         - custom:age
-        - custom:color-perception
+        - custom:colorPerception
       RefreshTokenValidity: 30
       GenerateSecret: false
       ExplicitAuthFlows: !If

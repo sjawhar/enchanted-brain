@@ -15,9 +15,18 @@ export const VIBRATION_PATTERN = Platform.select({
   android: [0, 500, 1000, 500],
 });
 
+export const AMPLIFY_CONFIG = {
+  Auth: {
+    region: AMPLIFY_REGION,
+    userPoolId: AMPLIFY_USER_POOL_ID,
+    userPoolWebClientId: AMPLIFY_USER_POOL_WEB_CLIENT_ID,
+  },
+  Analytics: {
+    disabled: true,
+  },
+};
+
 export default {
-  AMPLIFY_REGION,
-  AMPLIFY_USER_POOL_ID,
-  AMPLIFY_USER_POOL_WEB_CLIENT_ID,
+  AMPLIFY_CONFIG,
   WEBSOCKET_API_URL,
 };
