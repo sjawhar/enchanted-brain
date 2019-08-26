@@ -3,7 +3,7 @@ export const MESSAGE_INSTRUCTION_COLOR =
 export const MESSAGE_INSTRUCTION_EMOTION =
   'Please evaluate the emotional intensity the last 20 seconds of the piece evoked in you.';
 
-export const MESSAGE_RESPONSE_MISSED_BODY = 'Please continue enjoying the music';
+export const MESSAGE_RESPONSE_MISSED_BODY = 'Please continue enjoying the music.';
 export const MESSAGE_RESPONSE_MISSED_HEADER = 'Response window timed out';
 export const MESSAGE_RESPONSE_RECORDED_BODY = 'Please continue enjoying the music.';
 export const MESSAGE_RESPONSE_RECORDED_HEADER = 'Response recorded';
