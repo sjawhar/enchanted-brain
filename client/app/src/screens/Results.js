@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, TouchableOpacity } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
 import { AreaChart, BarChart, LineChart, StackedAreaChart } from 'react-native-svg-charts';
@@ -45,6 +45,12 @@ class ResultsScreen extends Component {
             xMax: new Date(endTime),
             xMin: new Date(startTime),
             xScale: scaleTime,
+            contentInset: {
+              top: Platform.select({
+                ios: 0,
+                android: 0.1 * CHART_COLOR_AGGREGATE_HEIGHT,
+              }),
+            },
           },
           ...songInfo,
         };
@@ -117,7 +123,7 @@ class ResultsScreen extends Component {
 
   handleIndexChange = index => this.setState({ currentIndex: index });
 
-  renderColorCard = ({ choices, userChoices, chartProps }) => (
+  renderColorCard = ({ choices, userChoices, chartProps: { contentInset, ...chartProps } }) => (
     <React.Fragment>
       <Text style={styles.chartTitle}>Total Audience Choices</Text>
       <StackedAreaChart
@@ -126,6 +132,7 @@ class ResultsScreen extends Component {
         colors={COLOR_KEYS}
         style={styles.colorAggregateChart}
         curve={curveNatural}
+        contentInset={contentInset}
         {...chartProps}
       />
       {userChoices.length > 0 && (
@@ -284,6 +291,7 @@ const styles = EStyleSheet.create({
   colorAggregateChart: {
     height: CHART_COLOR_AGGREGATE_HEIGHT,
     width: CARD_WIDTH,
+    overflow: 'visible',
   },
   colorUserChart: {
     height: CHART_COLOR_USER_HEIGHT,
@@ -292,6 +300,7 @@ const styles = EStyleSheet.create({
   chillsChart: {
     height: CHART_CHILLS_HEIGHT,
     width: CARD_WIDTH,
+    overflow: 'visible',
   },
   chillsLegendGroup: {
     flexDirection: 'row',

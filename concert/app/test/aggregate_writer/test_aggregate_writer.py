@@ -31,7 +31,7 @@ def get_event(
                                 "CHOICE_SUM": choice_sum,
                                 "CHOICE_COUNT": choice_count,
                                 "CHOICE_TYPE": choice_type,
-                                "CHOICE_TIME": test_timestamp,
+                                "CHOICE_TIME": "2019-05-14 21:20:03.000",
                             }
                         )
                     )
