@@ -22,6 +22,7 @@ from enchanted_brain.attributes import (
     RECORD_ID_EVENT_STAGE,
     RECORD_ID_SONG_LIST,
 )
+from enchanted_brain.parser import DynamoDbEncoder
 
 CALLBACK_GLOBAL_SNS_TOPIC_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
@@ -29,6 +30,7 @@ DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 sns = boto3.client("sns")
 dynamodb = boto3.client("dynamodb")
 
+dynamodb_encoder = DynamoDbEncoder()
 dynamodb_serializer = boto3.dynamodb.types.TypeSerializer()
 dynamodb_deserializer = boto3.dynamodb.types.TypeDeserializer()
 
@@ -46,7 +48,7 @@ def handler(event, context):
 
     sns.publish(
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
-        Message=json.dumps(message, default=decimal_default),
+        Message=json.dumps(message, default=dynamodb_encoder.default),
         MessageStructure="string",
     )
 
@@ -187,11 +189,3 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
 
 def deserialize_db_item(item):
     return {k: dynamodb_deserializer.deserialize(v) for k, v in item["Item"].items()}
-
-
-def decimal_default(obj):
-    if isinstance(obj, decimal.Decimal):
-        if obj % 1 > 0:
-            return float(obj)
-        return int(obj)
-    raise TypeError
