@@ -29,7 +29,6 @@ DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 sns = boto3.client("sns")
 dynamodb = boto3.client("dynamodb")
 
-dynamodb_encoder = DynamoDbEncoder()
 dynamodb_serializer = boto3.dynamodb.types.TypeSerializer()
 dynamodb_deserializer = boto3.dynamodb.types.TypeDeserializer()
 
@@ -47,7 +46,7 @@ def handler(event, context):
 
     sns.publish(
         TopicArn=CALLBACK_GLOBAL_SNS_TOPIC_ARN,
-        Message=json.dumps(message, default=dynamodb_encoder.default),
+        Message=json.dumps(message, cls=DynamoDbEncoder),
         MessageStructure="string",
     )
 
