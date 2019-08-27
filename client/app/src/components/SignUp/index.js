@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, View, Text } from 'react-native';
+import { Button, View, KeyboardAvoidingView, ScrollView } from 'react-native';
 import t from 'tcomb-form-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
@@ -7,6 +7,7 @@ import Constants from 'expo-constants';
 
 import Terms from './Terms';
 import Layout from '../../constants/Layout';
+import COLORS from '../../constants/Colors';
 
 const { Form } = t.form;
 
@@ -104,17 +105,27 @@ export default class Signup extends Component {
         {isShowTerms ? (
           <Terms onAgree={this.handleSubmit} onCancel={this.handleBack} />
         ) : (
-          <React.Fragment>
-            <Form
-              onChange={this.handleChange}
-              options={options}
-              ref="form"
-              type={User}
-              value={formData}
-            />
-            <Button onPress={this.handleBack} title="Back" />
-            <Button onPress={this.handleSubmit} title="Sign Up" />
-          </React.Fragment>
+          <KeyboardAvoidingView
+            behavior="padding"
+            enabled
+            keyboardVerticalOffset={50}
+            style={styles.formWrapper}>
+            <ScrollView>
+              <Form
+                onChange={this.handleChange}
+                options={options}
+                ref="form"
+                type={User}
+                value={formData}
+              />
+              <View style={styles.buttonWrapper}>
+                <Button onPress={this.handleSubmit} title="Sign Up" color={COLORS.primaryOrange} />
+              </View>
+              <View style={styles.buttonWrapper}>
+                <Button onPress={this.handleBack} title="Back" color="gray" />
+              </View>
+            </ScrollView>
+          </KeyboardAvoidingView>
         )}
       </View>
     );
@@ -128,5 +139,13 @@ const styles = EStyleSheet.create({
     height: Layout.window.height - Constants.statusBarHeight,
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  buttonWrapper: {
+    marginTop: 24,
+  },
+  formWrapper: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
 });
