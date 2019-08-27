@@ -49,9 +49,13 @@ export default class Signup extends Component {
     formData: {},
   };
 
+  gotoSignIn = () => {
+    this.props.onStateChange('signIn', {});
+  };
+
   handleBack = () => {
     if (this.state.isShowTerms) {
-      this.props.onStateChange('signIn', {});
+      this.gotoSignIn();
       return;
     }
     this.setState({ isShowTerms: true });
@@ -72,27 +76,27 @@ export default class Signup extends Component {
       return;
     }
 
-    console.log('DATA', formData);
-    try {
-      const { email, password, gender, age, colorPerception } = formData;
+    const { age, colorPerception, email, gender, name, password } = formData;
 
-      const response = await Auth.signUp({
+    try {
+      const { userConfirmed } = await Auth.signUp({
         username: email,
         password,
         attributes: {
-          age: age.toString(),
-          colorPerception,
+          'custom:age': age.toString(),
+          'custom:colorPerception': colorPerception,
           gender,
+          name,
         },
       });
-      console.log('SIGN UP', response);
     } catch (error) {
-      console.error(error);
+      if (error.code !== 'UsernameExistsException') {
+        throw error;
+      }
+      // TODO: show user exists modal with options to sign in or confirm
     }
-  };
 
-  gotoSignIn = () => {
-    this.props.onStateChange('signIn', {});
+    this.props.onStateChange('confirmSignUp', email);
   };
 
   render() {
