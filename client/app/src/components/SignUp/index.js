@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { Button, KeyboardAvoidingView, Modal, ScrollView, View, Text } from 'react-native';
+import {
+  ActivityIndicator,
+  Button,
+  KeyboardAvoidingView,
+  Modal,
+  ScrollView,
+  View,
+  Text,
+} from 'react-native';
 import t from 'tcomb-form-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
@@ -36,9 +44,15 @@ const options = {
       label:
         'To what extent, if any, do you have difficulty in telling colors apart that other people are easily able to tell apart?',
     },
+    email: {
+      autoCompleteType: 'email',
+      keyboardType: 'email-address',
+      textContentType: 'emailAddress',
+    },
     password: {
       secureTextEntry: true,
       autoCompleteType: 'password',
+      textContentType: 'password',
     },
   },
 };
@@ -47,6 +61,8 @@ export default class Signup extends Component {
   state = {
     isShowTerms: true,
     isShowModal: false,
+    isLoading: false,
+    isError: false,
     formData: {},
   };
 
@@ -83,9 +99,10 @@ export default class Signup extends Component {
 
     const { age, colorPerception, email, gender, name, password } = formData;
 
+    this.setState({ isLoading: true, isError: false });
     try {
       const { userConfirmed } = await Auth.signUp({
-        username: email,
+        username: email.toLowerCase(),
         password,
         attributes: {
           'custom:age': age.toString(),
@@ -98,18 +115,17 @@ export default class Signup extends Component {
         this.gotoConfirm(email);
       }
     } catch (error) {
-      if (error.code === 'UsernameExistsException') {
-        this.setState({ isShowModal: true });
-      }
-      // TODO: showErrorModal
+      const isUserExists = error.code === 'UsernameExistsException';
+      this.setState({ isShowModal: isUserExists, isError: !isUserExists });
     }
+    this.setState({ isLoading: false });
   };
 
   render() {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { isShowTerms, isShowModal, formData } = this.state;
+    const { isError, isLoading, isShowTerms, isShowModal, formData } = this.state;
     return (
       <View style={styles.container}>
         <Modal animationType="slide" transparent={false} visible={isShowModal}>
@@ -121,7 +137,7 @@ export default class Signup extends Component {
             </Text>
             <View style={styles.buttonWrapper}>
               <Button
-                onPress={this.gotoConfirm}
+                onPress={() => this.gotoConfirm()}
                 title="Confirm User"
                 color={COLORS.primaryOrange}
               />
@@ -148,12 +164,27 @@ export default class Signup extends Component {
                 type={User}
                 value={formData}
               />
-              <View style={styles.buttonWrapper}>
-                <Button onPress={this.handleSubmit} title="Sign Up" color={COLORS.primaryOrange} />
-              </View>
-              <View style={styles.buttonWrapper}>
-                <Button onPress={this.handleBack} title="Back" color="gray" />
-              </View>
+              {isLoading ? (
+                <ActivityIndicator size="large" color={COLORS.primaryOrange} />
+              ) : (
+                <View>
+                  {isError && (
+                    <Text style={styles.error}>
+                      An unexpected error has occured. Please try again later.
+                    </Text>
+                  )}
+                  <View style={styles.buttonWrapper}>
+                    <Button
+                      onPress={this.handleSubmit}
+                      title="Sign Up"
+                      color={COLORS.primaryOrange}
+                    />
+                  </View>
+                  <View style={styles.buttonWrapper}>
+                    <Button onPress={this.handleBack} title="Back" color="gray" />
+                  </View>
+                </View>
+              )}
             </ScrollView>
           </KeyboardAvoidingView>
         )}
@@ -187,5 +218,10 @@ const styles = EStyleSheet.create({
   },
   modalText: {
     fontSize: 18,
+  },
+  error: {
+    color: 'firebrick',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
