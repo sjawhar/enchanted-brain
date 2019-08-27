@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, View, KeyboardAvoidingView, ScrollView } from 'react-native';
+import { Button, KeyboardAvoidingView, Modal, ScrollView, View, Text } from 'react-native';
 import t from 'tcomb-form-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
@@ -46,18 +46,22 @@ const options = {
 export default class Signup extends Component {
   state = {
     isShowTerms: true,
+    isShowModal: false,
     formData: {},
   };
 
   gotoSignIn = () => {
-    this.props.onStateChange('signIn', {});
+    this.setState({ value: {} }, () => this.props.onStateChange('signIn', {}));
+  };
+
+  gotoConfirm = email => {
+    if (!email) {
+      ({ email } = this.refs.form.getValue() || {});
+    }
+    this.setState({ value: {} }, () => this.props.onStateChange('confirmSignUp', email));
   };
 
   handleBack = () => {
-    if (this.state.isShowTerms) {
-      this.gotoSignIn();
-      return;
-    }
     this.setState({ isShowTerms: true });
   };
 
@@ -66,7 +70,8 @@ export default class Signup extends Component {
   };
 
   handleSubmit = async () => {
-    if (this.state.isShowTerms) {
+    const { isShowTerms } = this.state;
+    if (isShowTerms) {
       this.setState({ isShowTerms: false });
       return;
     }
@@ -89,25 +94,46 @@ export default class Signup extends Component {
           name,
         },
       });
-    } catch (error) {
-      if (error.code !== 'UsernameExistsException') {
-        throw error;
+      if (!userConfirmed) {
+        this.gotoConfirm(email);
       }
-      // TODO: show user exists modal with options to sign in or confirm
+    } catch (error) {
+      if (error.code === 'UsernameExistsException') {
+        this.setState({ isShowModal: true });
+      }
+      // TODO: showErrorModal
     }
-
-    this.props.onStateChange('confirmSignUp', email);
   };
 
   render() {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { isShowTerms, formData } = this.state;
+    const { isShowTerms, isShowModal, formData } = this.state;
     return (
       <View style={styles.container}>
+        <Modal animationType="slide" transparent={false} visible={isShowModal}>
+          <View style={styles.modal}>
+            <Text style={styles.modalHeader}>User already exists</Text>
+            <Text style={styles.modalText}>
+              Are you trying to complete the sign up process by entering a confirmation code? Or
+              would you like to sign in instead?
+            </Text>
+            <View style={styles.buttonWrapper}>
+              <Button
+                onPress={this.gotoConfirm}
+                title="Confirm User"
+                color={COLORS.primaryOrange}
+              />
+            </View>
+            <View style={styles.buttonWrapper}>
+              <Button onPress={this.gotoSignIn} title="Sign In" color={COLORS.primaryBlue} />
+            </View>
+          </View>
+        </Modal>
+
         {isShowTerms ? (
-          <Terms onAgree={this.handleSubmit} onCancel={this.handleBack} />
+          <Terms onAgree={this.handleSubmit} onCancel={this.gotoSignIn} />
         ) : (
           <KeyboardAvoidingView
             behavior="padding"
@@ -151,5 +177,15 @@ const styles = EStyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
+  },
+  modal: {
+    padding: 40,
+  },
+  modalHeader: {
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  modalText: {
+    fontSize: 18,
   },
 });
