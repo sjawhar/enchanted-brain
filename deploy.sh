@@ -14,7 +14,7 @@ then
   REGION_FLAG="--region ${REGION_FLAG}"
 fi
 
-S3_BUCKET="thecybermonk-cloudformation-artifacts"
+S3_BUCKET="thecybermonk-${ENVIRONMENT}-cloudformation-artifacts"
 OUTPUT_TEMPLATE="cloudformation-generated.yml"
 
 pushd concert
@@ -25,7 +25,7 @@ echo "Packaging..."
 aws cloudformation package \
   --template-file cloudformation.yml \
   --output-template-file $OUTPUT_TEMPLATE \
-  --s3-bucket $S3_BUCKET \
+  --s3-bucket "${S3_BUCKET}" \
   --s3-prefix "${ENVIRONMENT}/enchanted-brain" \
   $REGION_FLAG
 
