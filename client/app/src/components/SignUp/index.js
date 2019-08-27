@@ -5,7 +5,8 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
 
-import Layout from '../constants/Layout';
+import Terms from './Terms';
+import Layout from '../../constants/Layout';
 
 const { Form } = t.form;
 
@@ -45,6 +46,14 @@ export default class Signup extends Component {
   state = {
     isShowTerms: true,
     formData: {},
+  };
+
+  handleBack = () => {
+    if (this.state.isShowTerms) {
+      this.props.onStateChange('signIn', {});
+      return;
+    }
+    this.setState({ isShowTerms: true });
   };
 
   handleChange = formData => {
@@ -93,7 +102,7 @@ export default class Signup extends Component {
     return (
       <View style={styles.container}>
         {isShowTerms ? (
-          <Text>Terms</Text>
+          <Terms onAgree={this.handleSubmit} onCancel={this.handleBack} />
         ) : (
           <React.Fragment>
             <Form
@@ -103,9 +112,10 @@ export default class Signup extends Component {
               type={User}
               value={formData}
             />
+            <Button onPress={this.handleBack} title="Back" />
+            <Button onPress={this.handleSubmit} title="Sign Up" />
           </React.Fragment>
         )}
-        <Button onPress={this.handleSubmit} title={isShowTerms ? 'I Agree' : 'Sign Up'} />
       </View>
     );
   }

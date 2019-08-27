@@ -80,6 +80,7 @@ Resources:
       ReadAttributes:
         - name
         - email
+        - email_verified
         - gender
         - custom:age
         - custom:colorPerception
