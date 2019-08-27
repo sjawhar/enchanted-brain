@@ -79,7 +79,7 @@ jobs:
           command: pip install --user aws-sam-cli==0.17.0 awscli==1.16.192
       - run:
           name: CloudFormation Deploy
-          command: PATH="~/.local/bin:${PATH}" ./deploy.sh development us-east-1
+          command: PATH="~/.local/bin:${PATH}" ./deploy.sh production eu-central-1
 
 
 workflows:
