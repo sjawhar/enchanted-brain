@@ -55,6 +55,7 @@ Resources:
 
   Table:
     Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
     Properties:
       TableName: !Sub ${Environment}-enchanted-brain
       AttributeDefinitions:
@@ -249,7 +250,6 @@ Resources:
       Parameters:
         ApiId: !Ref Api
         AuthorizerId: !Ref ApiAuthorizer
-        CreateRouteResponse: 'yes'
         FunctionArn: !Ref OnConnectFunction.Alias
         RouteKey: !FindInMap [RouteKeys, Connect, Key]
 
