@@ -1,24 +1,38 @@
-import * as actionTypes from './actionTypes';
+import concertApi from '../api/concertApi';
+import { CHOICE_MADE } from '../constants/Events';
 
-const setChoiceType = choiceType => ({
-  type: actionTypes.SET_CHOICE_TYPE,
+export const SEND_CHOICE = 'SEND_CHOICE';
+export const sendChoice = choice => {
+  concertApi.send({
+    event: CHOICE_MADE,
+    data: choice,
+  });
+  return {
+    type: SEND_CHOICE,
+    payload: { choice },
+  };
+};
+
+export const SET_CHOICE_TYPE = 'SET_CHOICE_TYPE';
+export const setChoiceType = choiceType => ({
+  type: SET_CHOICE_TYPE,
   payload: {
     choiceType,
   },
 });
 
-const setChoiceInverted = choiceInverted => ({
-  type: actionTypes.SET_CHOICE_INVERTED,
+export const SET_CHOICE_INVERTED = 'SET_CHOICE_INVERTED';
+export const setChoiceInverted = choiceInverted => ({
+  type: SET_CHOICE_INVERTED,
   payload: {
     choiceInverted,
   },
 });
 
-const setUID = uid => ({
-  type: actionTypes.SET_UID,
+export const SET_UID = 'SET_UID';
+export const setUID = uid => ({
+  type: SET_UID,
   payload: {
     uid,
   },
 });
-
-export { setChoiceType, setChoiceInverted, setUID };

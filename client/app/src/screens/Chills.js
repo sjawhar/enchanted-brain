@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import { View, Text, Animated, PanResponder, PixelRatio } from 'react-native';
+import { View, Text, Animated, PanResponder } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
-
 import Constants from 'expo-constants';
-import concertApi from '../api/concertApi';
+
+import { store, actions } from '../state';
 import Layout from '../constants/Layout';
 import { CHOICE_CHILLS } from '../constants/Choices';
-import { CHOICE_MADE } from '../constants/Events';
 
 const INPUT_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const INPUT_BUFFER = 25;
@@ -84,14 +83,13 @@ class ChillsScreen extends Component {
 
   sendTouches = touches =>
     touches.forEach(({ timestamp, choice }) =>
-      concertApi.send({
-        event: CHOICE_MADE,
-        data: {
+      store.dispatch(
+        actions.sendChoice({
           choiceType: CHOICE_CHILLS,
           choice: parseFloat(choice.toFixed(2)),
           timestamp: new Date(timestamp).toISOString(),
-        },
-      })
+        })
+      )
     );
 
   render() {

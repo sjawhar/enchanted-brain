@@ -1,17 +1,27 @@
 import EventEmitter from 'events';
-import config from '../config';
+import { WEBSOCKET_API_URL, WEBSOCKET_API_STUB } from 'react-native-dotenv';
 
 let ws = null;
 let isConnect = false;
 const events = new EventEmitter();
 
+const isStub = WEBSOCKET_API_STUB !== 'false';
+
 const connect = idToken => {
-  if (ws) {
+  if (isStub) {
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB];
+    if (storeActions) {
+      const { store } = require('../state');
+      storeActions.forEach(store.dispatch);
+    }
+    events.emit('EVENT_STAGE_CHANGED', eventData);
+    return;
+  } else if (ws) {
     return;
   }
 
   isConnect = true;
-  ws = new WebSocket(`${config.WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
+  ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
 
@@ -53,7 +63,10 @@ const disconnect = () => {
 };
 
 const send = message => {
-  if (!ws) {
+  if (isStub) {
+    console.log('SEND', message);
+    return;
+  } else if (!ws) {
     return false;
   }
 
