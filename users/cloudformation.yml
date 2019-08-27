@@ -52,11 +52,11 @@ Resources:
         - Name: age
           AttributeDataType: Number
           Mutable: true
-          Required: true
+          Required: false
         - Name: colorPerception
           AttributeDataType: Number
           Mutable: true
-          Required: true
+          Required: false
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
