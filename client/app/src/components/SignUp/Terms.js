@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Button, ScrollView, Text, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
+import COLORS from '../../constants/Colors';
+
 export default class Terms extends Component {
   render() {
     return (
@@ -89,7 +91,11 @@ export default class Terms extends Component {
         <Text style={styles.articleText}>Publication Director :</Text>
         <Text style={styles.articleText}>The application is hosted by:</Text>
         <View style={styles.buttonWrapper}>
-          <Button title="I agree to the terms and conditions" onPress={this.props.onAgree} />
+          <Button
+            title="I agree to the terms and conditions"
+            onPress={this.props.onAgree}
+            color={COLORS.primaryOrange}
+          />
         </View>
         <View style={styles.buttonWrapper}>
           <Button title="Cancel" color="gray" onPress={this.props.onCancel} />
