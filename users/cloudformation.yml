@@ -63,7 +63,7 @@ Resources:
           NumberAttributeConstraints:
             MinValue: 0
             MaxValue: 4
-        - countryOfBirth:
+        - Name: countryOfBirth
           AttributeDataType: String
           Mutable: true
           Required: false
