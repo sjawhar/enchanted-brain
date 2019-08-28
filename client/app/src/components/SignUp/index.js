@@ -55,24 +55,26 @@ const options = {
   },
 };
 
+const initialState = {
+  isShowTerms: true,
+  isShowModal: false,
+  isLoading: false,
+  isError: false,
+  formData: {},
+};
+
 export default class Signup extends Component {
-  state = {
-    isShowTerms: true,
-    isShowModal: false,
-    isLoading: false,
-    isError: false,
-    formData: {},
-  };
+  state = { ...initialState };
 
   gotoSignIn = () => {
-    this.setState({ value: {} }, () => this.props.onStateChange('signIn', {}));
+    this.setState(initialState, () => this.props.onStateChange('signIn', {}));
   };
 
   gotoConfirm = email => {
     if (!email) {
       ({ email } = this.refs.form.getValue() || {});
     }
-    this.setState({ value: {} }, () => this.props.onStateChange('confirmSignUp', email));
+    this.setState(initialState, () => this.props.onStateChange('confirmSignUp', email));
   };
 
   handleBack = () => {
