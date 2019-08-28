@@ -109,27 +109,25 @@ Display the chills UI and send CHOICE_MADE events as the user makes their choice
       displayName: String,
       startTime: String,
       endTime: String,
-    },
-    ...
-  ],
-  colors: [
-    {
-      timestamp: String,
-      choices: {
-        '#AB0000': Number,
-        '#00AB00': Number,
-        '#0000AB': Number,
+      choiceType: String,    // CHOICE_COLOR || CHOICE_CHILLS
+      choices: [             // Includes elements of either the CHOICE_COLOR or CHOICE_CHILLS format, but not both.
+        // CHOICE_COLOR
+        {
+          timestamp: String,
+          '#AB0000': Number,
+          '#AB8000': Number,
+          ...
+        },
+        // CHOICE_CHILLS
+        {
+          timestamp: String,
+          sum: Number,
+          count: Number,
+        },
         ...
-      },
+      ]
     },
     ...
-  ],
-  chills: [
-   {
-     timestamp: String,
-     chills: Number,
-   },
-   ...
   ],
 }
 ```
