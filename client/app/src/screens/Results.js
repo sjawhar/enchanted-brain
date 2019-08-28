@@ -262,7 +262,7 @@ const styles = EStyleSheet.create({
     paddingVertical: 4,
   },
   pageHeaderText: {
-    fontSize: 21,
+    fontSize: '1.25rem',
     color: 'white',
     fontWeight: 'bold',
   },
@@ -281,12 +281,12 @@ const styles = EStyleSheet.create({
   },
   cardHeaderText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: '1rem',
     fontWeight: 'bold',
   },
   chartTitle: {
     color: 'white',
-    fontSize: 13,
+    fontSize: '0.8rem',
   },
   colorAggregateChart: {
     height: CHART_COLOR_AGGREGATE_HEIGHT,
