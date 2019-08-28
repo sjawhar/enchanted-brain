@@ -18,10 +18,17 @@ class WaitingScreen extends Component {
   };
 
   render() {
+    const { headerText, messageText } = this.props;
     return (
       <SafeAreaView style={styles.container}>
-        <Text style={styles.headerText}>{this.props.headerText}</Text>
-        <Text style={styles.messageText}>{this.props.messageText}</Text>
+        {!!headerText && <Text style={styles.headerText}>{headerText}</Text>}
+        <Text
+          style={[
+            styles.messageText,
+            headerText ? styles.messageTextSmall : styles.messageTextLarge,
+          ]}>
+          {messageText}
+        </Text>
       </SafeAreaView>
     );
   }
@@ -44,9 +51,14 @@ const styles = EStyleSheet.create({
     color: 'white',
   },
   messageText: {
-    fontSize: '1rem',
     textAlign: 'center',
     color: 'white',
+  },
+  messageTextSmall: {
+    fontSize: '1rem',
+  },
+  messageTextLarge: {
+    fontSize: '1.5rem',
   },
 });
 

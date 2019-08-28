@@ -75,7 +75,7 @@ const styles = EStyleSheet.create({
     color: 'white',
   },
   buttonStyle: {
-    backgroundColor: COLORS.primaryBlue,
+    backgroundColor: COLORS.primaryOrange,
     borderColor: 'white',
   },
 });
