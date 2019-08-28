@@ -1,23 +1,21 @@
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
-  Button,
   KeyboardAvoidingView,
   Modal,
   ScrollView,
   View,
   Text,
 } from 'react-native';
-import t from 'tcomb-form-native';
+import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
+import t from 'tcomb-form-native';
 
 import Terms from './Terms';
 import Layout from '../../constants/Layout';
 import COLORS from '../../constants/Colors';
-
-const { Form } = t.form;
 
 const User = t.struct({
   age: t.Number,
@@ -135,16 +133,16 @@ export default class Signup extends Component {
               Are you trying to complete the sign up process by entering a confirmation code? Or
               would you like to sign in instead?
             </Text>
-            <View style={styles.buttonWrapper}>
-              <Button
-                onPress={() => this.gotoConfirm()}
-                title="Confirm User"
-                color={COLORS.primaryOrange}
-              />
-            </View>
-            <View style={styles.buttonWrapper}>
-              <Button onPress={this.gotoSignIn} title="Sign In" color={COLORS.primaryBlue} />
-            </View>
+            <Button
+              onPress={() => this.gotoConfirm()}
+              title="CONFIRM USER"
+              buttonStyle={[styles.buttonPrimary, styles.button]}
+            />
+            <Button
+              onPress={this.gotoSignIn}
+              title="SIGN IN"
+              buttonStyle={[styles.buttonSecondary, styles.button]}
+            />
           </View>
         </Modal>
 
@@ -157,7 +155,7 @@ export default class Signup extends Component {
             keyboardVerticalOffset={50}
             style={styles.formWrapper}>
             <ScrollView>
-              <Form
+              <t.form.Form
                 onChange={this.handleChange}
                 options={options}
                 ref="form"
@@ -173,16 +171,16 @@ export default class Signup extends Component {
                       An unexpected error has occured. Please try again later.
                     </Text>
                   )}
-                  <View style={styles.buttonWrapper}>
-                    <Button
-                      onPress={this.handleSubmit}
-                      title="Sign Up"
-                      color={COLORS.primaryOrange}
-                    />
-                  </View>
-                  <View style={styles.buttonWrapper}>
-                    <Button onPress={this.handleBack} title="Back" color="gray" />
-                  </View>
+                  <Button
+                    onPress={this.handleSubmit}
+                    title="SIGN UP"
+                    buttonStyle={[styles.buttonPrimary, styles.button]}
+                  />
+                  <Button
+                    onPress={this.handleBack}
+                    title="BACK"
+                    buttonStyle={[styles.buttonCancel, styles.button]}
+                  />
                 </View>
               )}
             </ScrollView>
@@ -201,8 +199,17 @@ const styles = EStyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
-  buttonWrapper: {
+  button: {
     marginTop: 24,
+  },
+  buttonPrimary: {
+    backgroundColor: COLORS.primaryOrange,
+  },
+  buttonSecondary: {
+    backgroundColor: COLORS.primaryBlue,
+  },
+  buttonCancel: {
+    backgroundColor: 'gray',
   },
   formWrapper: {
     flex: 1,
@@ -213,11 +220,11 @@ const styles = EStyleSheet.create({
     padding: 40,
   },
   modalHeader: {
-    fontSize: 28,
+    fontSize: '1.5rem',
     fontWeight: 'bold',
   },
   modalText: {
-    fontSize: 18,
+    fontSize: '1rem',
   },
   error: {
     color: 'firebrick',
