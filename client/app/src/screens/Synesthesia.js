@@ -86,7 +86,6 @@ export default class SynesthsiaScreen extends Component {
   };
 
   showPrompt = () => {
-    Vibration.vibrate(VIBRATION_PATTERN);
     this.setState({
       isShowPrompt: true,
       timeoutId: setTimeout(this.handleChoice, this.props.navigation.state.params.timeout * 1000),
