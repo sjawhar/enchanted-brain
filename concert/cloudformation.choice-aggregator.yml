@@ -89,8 +89,8 @@ Resources:
                   - s3:ListBucketMultipartUploads
                   - s3:PutObject
                 Resource:
-                  - arn:aws:s3:::${S3Bucket}
-                  - arn:aws:s3:::${S3Bucket}/*
+                  - !Sub arn:aws:s3:::${S3Bucket}
+                  - !Sub arn:aws:s3:::${S3Bucket}/*
               - Effect: Allow
                 Action:
                   - kms:GenerateDataKey
