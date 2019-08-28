@@ -25,7 +25,7 @@ const User = t.struct({
     2: 'Moderate Difficulty',
     3: 'Definite or Frequent Difficulty',
   }),
-  email: t.String,
+  email: t.refinement(t.String, val => /^[^ ]+@[^ ]+\.[^ ]+$/.test(val)),
   gender: t.enums({
     male: 'Male',
     female: 'Female',
@@ -59,7 +59,7 @@ const initialState = {
   isShowTerms: true,
   isShowModal: false,
   isLoading: false,
-  isError: false,
+  errorMessage: null,
   formData: {},
 };
 
@@ -99,16 +99,16 @@ export default class Signup extends Component {
 
     const { age, colorPerception, email, gender, name, password } = formData;
 
-    this.setState({ isLoading: true, isError: false });
+    this.setState({ isLoading: true, errorMessage: null });
     try {
       const { userConfirmed } = await Auth.signUp({
-        username: email.toLowerCase(),
+        username: email.toLowerCase().trim(),
         password,
         attributes: {
           'custom:age': age.toString(),
           'custom:colorPerception': colorPerception,
           gender,
-          name,
+          name: name.trim(),
         },
       });
       if (!userConfirmed) {
@@ -116,7 +116,10 @@ export default class Signup extends Component {
       }
     } catch (error) {
       const isUserExists = error.code === 'UsernameExistsException';
-      this.setState({ isShowModal: isUserExists, isError: !isUserExists });
+      this.setState({
+        isShowModal: isUserExists,
+        errorMessage: isUserExists ? null : error.message,
+      });
     }
     this.setState({ isLoading: false });
   };
@@ -125,7 +128,7 @@ export default class Signup extends Component {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { isError, isLoading, isShowTerms, isShowModal, formData } = this.state;
+    const { errorMessage, isLoading, isShowTerms, isShowModal, formData } = this.state;
     return (
       <View style={styles.container}>
         <Modal animationType="slide" transparent={false} visible={isShowModal}>
@@ -168,11 +171,7 @@ export default class Signup extends Component {
                 <ActivityIndicator size="large" color={COLORS.primaryOrange} />
               ) : (
                 <View>
-                  {isError && (
-                    <Text style={styles.error}>
-                      An unexpected error has occured. Please try again later.
-                    </Text>
-                  )}
+                  {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
                   <Button
                     onPress={this.handleSubmit}
                     title="SIGN UP"
