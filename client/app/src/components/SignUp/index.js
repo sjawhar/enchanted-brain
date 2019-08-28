@@ -12,6 +12,7 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
 import t from 'tcomb-form-native';
+import { getCodeList } from 'country-list';
 
 import Terms from './Terms';
 import Layout from '../../constants/Layout';
@@ -33,11 +34,19 @@ const User = t.struct({
   }),
   name: t.String,
   password: t.String,
+  countryOfBirth: t.enums(
+    Object.entries(getCodeList())
+      .sort(([_, a], [__, b]) => a.localeCompare(b))
+      .reduce((countries, [code, name]) => Object.assign(countries, { [code]: name }), {})
+  ),
 });
 
 const options = {
-  order: ['name', 'gender', 'age', 'colorPerception', 'email', 'password'],
+  order: ['name', 'gender', 'age', 'countryOfBirth', 'colorPerception', 'email', 'password'],
   fields: {
+    countryOfBirth: {
+      label: 'Country of Birth',
+    },
     colorPerception: {
       label:
         'To what extent, if any, do you have difficulty in telling colors apart that other people are easily able to tell apart?',
@@ -97,7 +106,7 @@ export default class Signup extends Component {
       return;
     }
 
-    const { age, colorPerception, email, gender, name, password } = formData;
+    const { age, colorPerception, countryOfBirth, email, gender, name, password } = formData;
 
     this.setState({ isLoading: true, errorMessage: null });
     try {
@@ -107,6 +116,7 @@ export default class Signup extends Component {
         attributes: {
           'custom:age': age.toString(),
           'custom:colorPerception': colorPerception,
+          'custom:countryOfBirth': countryOfBirth.toUpperCase(),
           gender,
           name: name.trim(),
         },
