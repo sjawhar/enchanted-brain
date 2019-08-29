@@ -8,6 +8,8 @@ const events = new EventEmitter();
 const isStub = WEBSOCKET_API_STUB !== 'false';
 
 const connect = idToken => {
+  isConnect = true;
+
   if (isStub) {
     const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB]();
     if (storeActions) {
@@ -20,7 +22,6 @@ const connect = idToken => {
     return;
   }
 
-  isConnect = true;
   ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
@@ -73,4 +74,6 @@ const send = message => {
   ws.send(JSON.stringify(message));
 };
 
-export default Object.assign(events, { connect, disconnect, send });
+const isConnected = () => isConnect;
+
+export default Object.assign(events, { connect, disconnect, send, isConnected });

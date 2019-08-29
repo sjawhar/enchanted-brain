@@ -14,21 +14,25 @@ class WaitingScreen extends Component {
 
   static defaultProps = {
     headerText: MESSAGE_WELCOME_HEADER,
-    messageText: MESSAGE_WELCOME_BODY,
+    messageText: '',
   };
 
   render() {
-    const { headerText, messageText } = this.props;
+    const { children, headerText, messageText } = this.props;
+
     return (
       <SafeAreaView style={styles.container}>
         {!!headerText && <Text style={styles.headerText}>{headerText}</Text>}
-        <Text
-          style={[
-            styles.messageText,
-            headerText ? styles.messageTextSmall : styles.messageTextLarge,
-          ]}>
-          {messageText}
-        </Text>
+        {children}
+        {(!!messageText || !children) && (
+          <Text
+            style={[
+              styles.messageText,
+              headerText ? styles.messageTextSmall : styles.messageTextLarge,
+            ]}>
+            {messageText || MESSAGE_WELCOME_BODY}
+          </Text>
+        )}
       </SafeAreaView>
     );
   }
