@@ -168,12 +168,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withAuthenticator(App, false, [
-  <SignIn />,
-  <ConfirmSignIn />,
-  <VerifyContact />,
-  <SignUp />,
-  <ConfirmSignUp />,
-  <ForgotPassword />,
-  <RequireNewPassword />,
-]);
+export default withAuthenticator(App, {
+  authenticatorComponents: [
+    <SignIn />,
+    <ConfirmSignIn />,
+    <VerifyContact />,
+    <SignUp />,
+    <ConfirmSignUp />,
+    <ForgotPassword />,
+    <RequireNewPassword />,
+  ],
+  includeGreetings: false,
+  signUpConfig: {},
+  usernameAttributes: 'email',
+});
