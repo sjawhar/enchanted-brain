@@ -20,61 +20,17 @@ import SignUp from './components/SignUp';
 import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
+import { IS_IOS, AMPLIFY_CONFIG } from './config';
 import layout from './constants/Layout';
 import { CHOICE_COLOR } from './constants/Choices';
 import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
-import { IS_IOS, AMPLIFY_CONFIG } from './config';
-
-// ** Event listeners ** //
-const handleStageNavigation = ({
-  choiceInverted,
-  choiceType,
-  choiceTypes,
-  stageId,
-  ...stageData
-}) => {
-  if (choiceType) {
-    store.dispatch(actions.setChoiceType(choiceType));
-  }
-  if (choiceInverted !== undefined) {
-    store.dispatch(actions.setChoiceInverted(choiceInverted));
-  }
-
-  ({ choiceType, choiceInverted } = store.getState());
-
-  const screen = (() => {
-    switch (stageId) {
-      case 'STAGE_WAITING':
-        return 'Welcome';
-      case 'STAGE_CHOICE_IMAGERY':
-        return 'MentalImagery';
-      case 'STAGE_CHOICE_SYNESTHESIA':
-        return 'Synesthesia';
-      case 'STAGE_CHOICE_CHILLS':
-        return 'Chills';
-      case 'STAGE_END':
-        return 'Results';
-      default:
-        // something went wrong
-        // navigate to 'something went wrong screen'?
-        console.log('stub: something went wrong in handleStageNavigation');
-        return 'Welcome';
-    }
-  })();
-
-  console.debug('Screen chosen', screen);
-  if (!choiceTypes) {
-    choiceTypes = [CHOICE_COLOR];
-  }
-  NavigationService.navigate(screen, {
-    ...stageData,
-    choiceInverted,
-    choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
-  });
-};
-
-concertApi.on(CONNECTED, handleStageNavigation);
-concertApi.on(EVENT_STAGE_CHANGED, handleStageNavigation);
+import {
+  STAGE_CHOICE_CHILLS,
+  STAGE_CHOICE_IMAGERY,
+  STAGE_CHOICE_SYNESTHESIA,
+  STAGE_END,
+  STAGE_WAITING,
+} from './constants/Stages';
 
 // ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
@@ -131,9 +87,62 @@ const theme = {
 Amplify.configure(AMPLIFY_CONFIG);
 
 class App extends React.Component {
+  componentDidMount() {
+    concertApi.on(CONNECTED, this.handleStageNavigation);
+    concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
+  }
+
   componentWillUnmount() {
+    concertApi.removeListener(CONNECTED, this.handleStageNavigation);
+    concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageNavigation);
     concertApi.disconnect();
   }
+
+  handleStageNavigation = ({ choiceInverted, choiceType, choiceTypes, stageId, ...stageData }) => {
+    if (choiceType) {
+      store.dispatch(actions.setChoiceType(choiceType));
+    }
+    if (choiceInverted !== undefined) {
+      store.dispatch(actions.setChoiceInverted(choiceInverted));
+    }
+
+    ({ choiceType, choiceInverted } = store.getState());
+
+    const screen = (() => {
+      switch (stageId) {
+        case STAGE_CHOICE_CHILLS:
+          return 'Chills';
+        case STAGE_CHOICE_IMAGERY:
+          return 'MentalImagery';
+        case STAGE_CHOICE_SYNESTHESIA:
+          return 'Synesthesia';
+        case STAGE_END:
+          return 'Results';
+        case STAGE_WAITING:
+        default:
+          return 'Welcome';
+      }
+    })();
+
+    if (!choiceTypes) {
+      choiceTypes = [CHOICE_COLOR];
+    }
+    NavigationService.navigate(screen, {
+      ...stageData,
+      onStateChange: this.props.onStateChange,
+      stageId,
+      choiceInverted,
+      choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+    });
+  };
+
+  handleNavigatorRef = navigatorRef => {
+    if (!navigatorRef) {
+      return;
+    }
+    NavigationService.setTopLevelNavigator(navigatorRef);
+    this.handleStageNavigation({ stageId: STAGE_WAITING });
+  };
 
   render() {
     return (
@@ -142,11 +151,7 @@ class App extends React.Component {
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
               {IS_IOS && <StatusBar barStyle="default" />}
-              <AppNavigator
-                ref={navigatorRef => {
-                  NavigationService.setTopLevelNavigator(navigatorRef);
-                }}
-              />
+              <AppNavigator ref={this.handleNavigatorRef} />
             </View>
           </PersistGate>
         </Provider>
