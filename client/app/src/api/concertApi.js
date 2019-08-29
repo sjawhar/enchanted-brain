@@ -9,7 +9,7 @@ const isStub = WEBSOCKET_API_STUB !== 'false';
 
 const connect = idToken => {
   if (isStub) {
-    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB];
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB]();
     if (storeActions) {
       const { store } = require('../state');
       storeActions.forEach(store.dispatch);
