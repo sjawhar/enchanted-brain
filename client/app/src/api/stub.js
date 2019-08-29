@@ -3,9 +3,8 @@ import { swatchColors } from '../constants/Colors';
 import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 
 const colors = swatchColors.flat();
-const now = new Date();
 
-const STAGE_CHOICE_CHILLS = () => ({
+const STAGE_CHOICE_CHILLS = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_CHILLS',
     startTime: new Date(new Date().setSeconds(now.getSeconds() + 2)).toISOString(),
@@ -14,14 +13,14 @@ const STAGE_CHOICE_CHILLS = () => ({
   },
 });
 
-const STAGE_CHOICE_IMAGERY = () => ({
+const STAGE_CHOICE_IMAGERY = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_IMAGERY',
     formUrl: 'https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH',
   },
 });
 
-const STAGE_CHOICE_SYNESTHESIA = () => ({
+const STAGE_CHOICE_SYNESTHESIA = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
     startTime: now.toISOString(),
@@ -34,7 +33,7 @@ const STAGE_CHOICE_SYNESTHESIA = () => ({
   },
 });
 
-const STAGE_END = () => {
+const STAGE_END = now => {
   const eventData = {
     stageId: 'STAGE_END',
     songs: [
