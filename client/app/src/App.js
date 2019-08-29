@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import {
   ConfirmSignIn,
   ConfirmSignUp,
@@ -98,6 +98,18 @@ class App extends React.Component {
     concertApi.disconnect();
   }
 
+  handleConnect = async () => {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    concertApi.connect(idToken.getJwtToken());
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+  };
+
+  handleDisconnect = async () => {
+    concertApi.disconnect();
+    await Auth.signOut();
+    this.props.onStateChange('signIn');
+  };
+
   handleStageNavigation = ({ choiceInverted, choiceType, choiceTypes, stageId, ...stageData }) => {
     if (choiceType) {
       store.dispatch(actions.setChoiceType(choiceType));
@@ -129,10 +141,12 @@ class App extends React.Component {
     }
     NavigationService.navigate(screen, {
       ...stageData,
-      onStateChange: this.props.onStateChange,
       stageId,
       choiceInverted,
       choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+      isConnected: concertApi.isConnected(),
+      onConnect: this.handleConnect,
+      onDisconnect: this.handleDisconnect,
     });
   };
 
