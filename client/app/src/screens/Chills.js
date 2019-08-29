@@ -1,22 +1,28 @@
 import React, { Component } from 'react';
-import { View, Text, Animated, PanResponder } from 'react-native';
+import { View, Text, Animated, PanResponder, InteractionManager } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Constants from 'expo-constants';
 
 import { store, actions } from '../state';
-import Layout from '../constants/Layout';
+import WaitingScreen from './Waiting';
+import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
+import Layout from '../constants/Layout';
+import { MESSAGE_STAGE_COMPLETE_BODY, MESSAGE_STAGE_COMPLETE_HEADER } from '../constants/Messages';
 
 const INPUT_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const INPUT_BUFFER = 25;
 const WAVEFORM_WIDTH = Math.floor(0.67 * Layout.window.width);
 const WAVEFORM_SIZE = Math.floor(WAVEFORM_WIDTH / INPUT_BUFFER);
 
+const MAX_TIMER_DURATION_MS = 60 * 1000;
+
 class ChillsScreen extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      isShowPrompt: false,
       touches: [],
     };
 
@@ -31,6 +37,52 @@ class ChillsScreen extends Component {
       onPanResponderTerminate: this._onPanResponderRelease,
     });
   }
+
+  componentDidMount() {
+    this.scheduleRecording(this.props.navigation.state.params);
+  }
+
+  componentWillUnmount() {
+    const { timeoutId } = this.state;
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  scheduleRecording = ({ startTime, endTime }) => {
+    const startDelay = Date.parse(startTime) - Date.now();
+    this.setState({
+      timeoutId: setTimeout(() => this.setState({ isShowPrompt: true }), Math.max(startDelay, 0)),
+    });
+
+    this.scheduleEndRecording(this.props.navigation.navigate, Date.parse(endTime), {
+      routeName: 'Welcome',
+      params: {
+        headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+        messageText: MESSAGE_STAGE_COMPLETE_BODY,
+      },
+    });
+  };
+
+  // https://github.com/facebook/react-native/issues/12981#issuecomment-499827072
+  scheduleEndRecording = (fn, ttl, args) => {
+    const waitingTime = ttl - Date.now();
+    if (waitingTime <= 1) {
+      const { timeoutId } = this.state;
+      InteractionManager.runAfterInteractions(() => {
+        if (!timeoutId) {
+          return;
+        }
+        this.setState({ timeoutId: undefined });
+        fn(args);
+      });
+      return;
+    }
+    const afterTime = Math.min(waitingTime, MAX_TIMER_DURATION_MS);
+    this.setState({
+      timeoutId: setTimeout(() => this.scheduleEndRecording(fn, ttl, args), afterTime),
+    });
+  };
 
   _onPanResponderGrant = event => {
     this.setState({
@@ -93,7 +145,15 @@ class ChillsScreen extends Component {
     );
 
   render() {
-    const { touches, opacity, offset } = this.state;
+    const { isShowPrompt, touches, opacity, offset } = this.state;
+    if (!isShowPrompt) {
+      return (
+        <WaitingScreen
+          headerText={MESSAGE_STAGE_COMPLETE_HEADER}
+          messageText={MESSAGE_STAGE_COMPLETE_BODY}
+        />
+      );
+    }
     return (
       <View style={styles.container}>
         <View style={styles.waveformContainer}>
@@ -131,7 +191,7 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
-    backgroundColor: 'rgb(95, 95, 95)',
+    backgroundColor: COLOR_BACKGROUND_DARK,
   },
   waveformContainer: {
     overflow: 'hidden',
@@ -139,7 +199,7 @@ const styles = EStyleSheet.create({
   },
   waveform: {
     position: 'absolute',
-    backgroundColor: 'red',
+    backgroundColor: COLORS.primaryOrange,
     width: WAVEFORM_SIZE,
     height: WAVEFORM_SIZE,
     marginBottom: -WAVEFORM_SIZE / 2,
@@ -147,7 +207,7 @@ const styles = EStyleSheet.create({
   },
   inputContainer: {
     width: Layout.window.width - WAVEFORM_WIDTH,
-    backgroundColor: 'red',
+    backgroundColor: COLORS.primaryOrange,
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'stretch',

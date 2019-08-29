@@ -3,7 +3,6 @@ import {
   AMPLIFY_REGION,
   AMPLIFY_USER_POOL_ID,
   AMPLIFY_USER_POOL_WEB_CLIENT_ID,
-  WEBSOCKET_API_URL,
 } from 'react-native-dotenv';
 
 export const IS_ANDROID = Platform.OS === 'android';
@@ -26,7 +25,4 @@ export const AMPLIFY_CONFIG = {
   },
 };
 
-export default {
-  AMPLIFY_CONFIG,
-  WEBSOCKET_API_URL,
-};
+export default { AMPLIFY_CONFIG };
