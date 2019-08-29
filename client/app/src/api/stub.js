@@ -5,6 +5,35 @@ import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 const colors = swatchColors.flat();
 const now = new Date();
 
+const STAGE_CHOICE_CHILLS = () => ({
+  eventData: {
+    stageId: 'STAGE_CHOICE_CHILLS',
+    startTime: new Date(new Date().setSeconds(now.getSeconds() + 2)).toISOString(),
+    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
+    interval: 0.2,
+  },
+});
+
+const STAGE_CHOICE_IMAGERY = () => ({
+  eventData: {
+    stageId: 'STAGE_CHOICE_IMAGERY',
+    formUrl: 'https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH',
+  },
+});
+
+const STAGE_CHOICE_SYNESTHESIA = () => ({
+  eventData: {
+    stageId: 'STAGE_CHOICE_SYNESTHESIA',
+    startTime: now.toISOString(),
+    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
+    interval: 20,
+    timeout: 5,
+    choiceTypes: ['CHOICE_EMOTION_ANGER', 'CHOICE_COLOR'],
+    choiceType: 'CHOICE_EMOTION_ANGER',
+    choiceInverted: Math.random() < 0.5,
+  },
+});
+
 const STAGE_END = () => {
   const eventData = {
     stageId: 'STAGE_END',
@@ -146,33 +175,14 @@ const STAGE_END = () => {
   return { eventData, storeActions };
 };
 
-const STAGE_CHOICE_IMAGERY = () => ({
-  eventData: {
-    stageId: 'STAGE_CHOICE_IMAGERY',
-    formUrl: 'https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH',
-  },
+const STAGE_WAITING = () => ({
+  eventData: { stageId: 'STAGE_WAITING' },
 });
 
-const STAGE_CHOICE_SYNESTHESIA = () => ({
-  eventData: {
-    stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    startTime: now.toISOString(),
-    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
-    interval: 20,
-    timeout: 5,
-    choiceTypes: ['CHOICE_EMOTION_ANGER', 'CHOICE_COLOR'],
-    choiceType: 'CHOICE_EMOTION_ANGER',
-    choiceInverted: Math.random() < 0.5,
-  },
-});
-
-const STAGE_CHOICE_CHILLS = () => ({
-  eventData: {
-    stageId: 'STAGE_CHOICE_CHILLS',
-    startTime: new Date(new Date().setSeconds(now.getSeconds() + 2)).toISOString(),
-    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
-    interval: 0.2,
-  },
-});
-
-export default { STAGE_END, STAGE_CHOICE_CHILLS, STAGE_CHOICE_IMAGERY, STAGE_CHOICE_SYNESTHESIA };
+export default {
+  STAGE_CHOICE_CHILLS,
+  STAGE_CHOICE_IMAGERY,
+  STAGE_CHOICE_SYNESTHESIA,
+  STAGE_END,
+  STAGE_WAITING,
+};

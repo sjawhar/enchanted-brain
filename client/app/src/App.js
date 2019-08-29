@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify from 'aws-amplify';
 import {
   ConfirmSignIn,
   ConfirmSignUp,
@@ -131,12 +131,6 @@ const theme = {
 Amplify.configure(AMPLIFY_CONFIG);
 
 class App extends React.Component {
-  async componentDidMount() {
-    const idToken = (await Auth.currentSession()).getIdToken();
-    concertApi.connect(idToken.getJwtToken());
-    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
-  }
-
   componentWillUnmount() {
     concertApi.disconnect();
   }
