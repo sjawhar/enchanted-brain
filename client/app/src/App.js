@@ -3,17 +3,27 @@ import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import Amplify, { Auth } from 'aws-amplify';
-import { withAuthenticator } from 'aws-amplify-react-native';
+import {
+  ConfirmSignIn,
+  ConfirmSignUp,
+  ForgotPassword,
+  RequireNewPassword,
+  SignIn,
+  VerifyContact,
+  withAuthenticator,
+} from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+
 import { persistor, store, actions } from './state';
+import SignUp from './components/SignUp';
 import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
 import layout from './constants/Layout';
 import { CHOICE_COLOR } from './constants/Choices';
 import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
-import config, { IS_IOS } from './config';
+import { IS_IOS, AMPLIFY_CONFIG } from './config';
 
 // ** Event listeners ** //
 const handleStageNavigation = ({
@@ -65,79 +75,6 @@ const handleStageNavigation = ({
 
 concertApi.on(CONNECTED, handleStageNavigation);
 concertApi.on(EVENT_STAGE_CHANGED, handleStageNavigation);
-
-// ** AWS Amplify config ** //
-Amplify.configure({
-  Auth: {
-    region: config.AMPLIFY_REGION,
-    userPoolId: config.AMPLIFY_USER_POOL_ID,
-    userPoolWebClientId: config.AMPLIFY_USER_POOL_WEB_CLIENT_ID,
-  },
-  Analytics: {
-    disabled: true,
-  },
-});
-
-const signUpConfig = {
-  header: 'Sign Up',
-  hideAllDefaults: true,
-  defaultCountryCode: '41',
-  usernameAttributes: 'email',
-  signUpFields: [
-    {
-      label: 'Name',
-      key: 'name',
-      required: true,
-      displayOrder: 1,
-      type: 'string',
-    },
-    {
-      label: 'Email',
-      key: 'email',
-      required: true,
-      displayOrder: 3,
-      type: 'string',
-    },
-    {
-      label: 'Password',
-      key: 'password',
-      required: true,
-      displayOrder: 3,
-      type: 'password',
-    },
-    {
-      label: 'Phone',
-      key: 'phone_number',
-      required: true,
-      displayOrder: 4,
-      type: 'string',
-    },
-    {
-      label: 'gender',
-      key: 'gender',
-      required: true,
-      displayOrder: 5,
-      type: 'string',
-      custom: true,
-    },
-    {
-      label: 'Age',
-      key: 'age',
-      required: true,
-      displayOrder: 6,
-      type: 'number',
-      custom: true,
-    },
-    {
-      label: 'Color-perception',
-      key: 'color-perception',
-      required: true,
-      displayOrder: 7,
-      type: 'string',
-      custom: true,
-    },
-  ],
-};
 
 // ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
@@ -191,6 +128,8 @@ const theme = {
   },
 };
 
+Amplify.configure(AMPLIFY_CONFIG);
+
 class App extends React.Component {
   async componentDidMount() {
     const idToken = (await Auth.currentSession()).getIdToken();
@@ -229,4 +168,12 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withAuthenticator(App, { signUpConfig });
+export default withAuthenticator(App, false, [
+  <SignIn />,
+  <ConfirmSignIn />,
+  <VerifyContact />,
+  <SignUp />,
+  <ConfirmSignUp />,
+  <ForgotPassword />,
+  <RequireNewPassword />,
+]);

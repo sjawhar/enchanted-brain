@@ -26,7 +26,7 @@ aws cloudformation package \
   --template-file cloudformation.yml \
   --output-template-file $OUTPUT_TEMPLATE \
   --s3-bucket "${S3_BUCKET}" \
-  --s3-prefix "${ENVIRONMENT}/enchanted-brain" \
+  --s3-prefix enchanted-brain \
   $REGION_FLAG
 
 pushd concert

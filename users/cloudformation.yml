@@ -53,10 +53,23 @@ Resources:
           AttributeDataType: Number
           Mutable: true
           Required: false
-        - Name: color-perception
+          NumberAttributeConstraints:
+            MinValue: 0
+            MaxValue: 200
+        - Name: colorPerception
+          AttributeDataType: Number
+          Mutable: true
+          Required: false
+          NumberAttributeConstraints:
+            MinValue: 0
+            MaxValue: 4
+        - Name: countryOfBirth
           AttributeDataType: String
           Mutable: true
           Required: false
+          StringAttributeConstraints:
+            MinLength: 2
+            MaxLength: 3
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
@@ -80,17 +93,18 @@ Resources:
       ReadAttributes:
         - name
         - email
-        - phone_number
+        - email_verified
         - gender
         - custom:age
-        - custom:color-perception
+        - custom:colorPerception
+        - custom:countryOfBirth
       WriteAttributes:
         - name
         - email
-        - phone_number
         - gender
         - custom:age
-        - custom:color-perception
+        - custom:colorPerception
+        - custom:countryOfBirth
       RefreshTokenValidity: 30
       GenerateSecret: false
       ExplicitAuthFlows: !If
