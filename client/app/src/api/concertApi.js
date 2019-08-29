@@ -11,7 +11,7 @@ const connect = idToken => {
   isConnect = true;
 
   if (isStub) {
-    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB]();
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB](new Date());
     if (storeActions) {
       const { store } = require('../state');
       storeActions.forEach(store.dispatch);
