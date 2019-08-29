@@ -141,6 +141,7 @@ export default class Terms extends Component {
           representative. The user can exercise these rights, by sending an e-mail to the address
           info@neurotech.healthcare or by sending a letter to the following address:
         </Text>
+        <Text style={styles.indented}></Text>
         <Text style={styles.indented}>NeuroTech</Text>
         <Text style={styles.indented}>Biopôle</Text>
         <Text style={styles.indented}>Route de la Corniche 9A</Text>
