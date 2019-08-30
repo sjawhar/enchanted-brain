@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import { WEBSOCKET_API_URL, WEBSOCKET_API_STUB } from 'react-native-dotenv';
+import { Auth } from 'aws-amplify';
 
 let ws = null;
 let isConnect = false;
@@ -7,7 +8,7 @@ const events = new EventEmitter();
 
 const isStub = WEBSOCKET_API_STUB !== 'false';
 
-const connect = idToken => {
+const connect = async () => {
   isConnect = true;
 
   if (isStub) {
@@ -22,6 +23,7 @@ const connect = idToken => {
     return;
   }
 
+  const idToken = (await Auth.currentSession()).getIdToken().getJwtToken();
   ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
@@ -50,7 +52,7 @@ const connect = idToken => {
     ws = null;
     console.debug('CLOSED', e.code, e.reason);
     if (isConnect) {
-      connect(idToken);
+      connect();
     }
   };
 };
