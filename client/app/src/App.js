@@ -110,7 +110,14 @@ class App extends React.Component {
     this.props.onStateChange('signIn');
   };
 
-  handleStageNavigation = ({ choiceInverted, choiceType, choiceTypes, stageId, ...stageData }) => {
+  handleStageNavigation = ({
+    choiceInverted,
+    choiceType,
+    choiceTypes,
+    stageId,
+    isShowConnect,
+    ...stageData
+  }) => {
     if (choiceType) {
       store.dispatch(actions.setChoiceType(choiceType));
     }
@@ -139,14 +146,19 @@ class App extends React.Component {
     if (!choiceTypes) {
       choiceTypes = [CHOICE_COLOR];
     }
+    if (isShowConnect || stageId === STAGE_END) {
+      Object.assign(stageData, {
+        isConnected: concertApi.isConnected(),
+        onConnect: this.handleConnect,
+        onDisconnect: this.handleDisconnect,
+      });
+    }
+
     NavigationService.navigate(screen, {
       ...stageData,
       stageId,
       choiceInverted,
       choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
-      isConnected: concertApi.isConnected(),
-      onConnect: this.handleConnect,
-      onDisconnect: this.handleDisconnect,
     });
   };
 
@@ -155,7 +167,7 @@ class App extends React.Component {
       return;
     }
     NavigationService.setTopLevelNavigator(navigatorRef);
-    this.handleStageNavigation({ stageId: STAGE_WAITING });
+    this.handleStageNavigation({ stageId: STAGE_WAITING, isShowConnect: true });
   };
 
   render() {

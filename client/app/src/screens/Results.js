@@ -209,15 +209,14 @@ class ResultsScreen extends Component {
   );
 
   render() {
+    const { isConnected, onDisconnect } = this.props.navigation.state.params || {};
     return (
       <View style={styles.container}>
         <View style={styles.pageHeader}>
           <Text style={styles.pageHeaderText}>Results</Text>
-          <Button
-            title="SIGN OUT"
-            onPress={this.props.navigation.state.params.onDisconnect}
-            buttonStyle={styles.buttonDisconnect}
-          />
+          {isConnected && !!onDisconnect && (
+            <Button title="SIGN OUT" onPress={onDisconnect} buttonStyle={styles.buttonDisconnect} />
+          )}
         </View>
         <SideSwipe
           data={this.songs}
