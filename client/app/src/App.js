@@ -100,8 +100,8 @@ class App extends React.Component {
 
   handleConnect = async () => {
     const idToken = (await Auth.currentSession()).getIdToken();
-    concertApi.connect(idToken.getJwtToken());
     store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+    concertApi.connect();
   };
 
   handleDisconnect = async () => {
