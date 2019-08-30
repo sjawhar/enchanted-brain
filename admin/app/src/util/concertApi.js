@@ -32,6 +32,7 @@ const connect = async () => {
     if (!data) {
       return;
     }
+    console.log('MESSAGE', data);
     try {
       let { event, eventData } = JSON.parse(data);
       emitter.emit(event, eventData);
