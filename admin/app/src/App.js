@@ -40,7 +40,7 @@ class App extends Component {
 
   handleNextStage = () => {
     const { stage, data } = this.getNextStage();
-    concertApi.send(data);
+    concertApi.send({ event: 'EVENT_STAGE_CHANGED', data });
     this.setState({ stage: stage + 1 });
   };
 
