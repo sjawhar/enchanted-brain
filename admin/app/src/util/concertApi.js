@@ -28,14 +28,13 @@ const connect = async () => {
   };
 
   ws.onmessage = message => {
-    const { data } = message || {};
-    if (!data) {
+    const { data: messageData } = message || {};
+    if (!messageData) {
       return;
     }
-    console.log('MESSAGE', data);
     try {
-      let { event, eventData } = JSON.parse(data);
-      emitter.emit(event, eventData);
+      const { event, data } = JSON.parse(messageData);
+      emitter.emit(event, data);
     } catch (error) {
       console.error(error);
     }
