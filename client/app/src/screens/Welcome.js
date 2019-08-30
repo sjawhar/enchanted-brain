@@ -32,10 +32,13 @@ export default class WelcomeScreen extends Component {
   render() {
     const { headerText, messageText, stageId, isConnected, onConnect, onDisconnect } =
       this.props.navigation.state.params || {};
-    const isCountdown = !!CONCERT_START_TIME && !isConnected && !!onConnect;
+
+    const canConnect = !!onConnect && !isConnected;
+    const isConnecting = canConnect && this.state.isConnecting;
+
+    const isCountdown = canConnect && !!CONCERT_START_TIME;
     const until = (Date.parse(START_TIME) - Date.now()) / 1000;
     const isCountdownComplete = isCountdown && until <= 0;
-    const { isConnecting } = this.state;
 
     return (
       <WaitingScreen
