@@ -146,19 +146,16 @@ class App extends React.Component {
     if (!choiceTypes) {
       choiceTypes = [CHOICE_COLOR];
     }
-    if (isShowConnect || stageId === STAGE_END) {
-      Object.assign(stageData, {
-        isConnected: concertApi.isConnected(),
-        onConnect: this.handleConnect,
-        onDisconnect: this.handleDisconnect,
-      });
-    }
 
+    const canConnect = !!isShowConnect || stageId === STAGE_END ? true : null;
     NavigationService.navigate(screen, {
-      ...stageData,
-      stageId,
       choiceInverted,
       choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+      isConnected: canConnect && concertApi.isConnected(),
+      onConnect: canConnect && this.handleConnect,
+      onDisconnect: canConnect && this.handleDisconnect,
+      stageId,
+      ...stageData,
     });
   };
 
