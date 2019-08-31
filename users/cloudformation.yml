@@ -37,10 +37,6 @@ Resources:
           RequireSymbols: yes
           RequireUppercase: yes
       Schema:
-        - Name: name
-          AttributeDataType: String
-          Mutable: true
-          Required: true
         - Name: email
           AttributeDataType: String
           Mutable: true
@@ -56,6 +52,13 @@ Resources:
           NumberAttributeConstraints:
             MinValue: 0
             MaxValue: 200
+        - Name: acceptResearch
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+          StringAttributeConstraints:
+            MinLength: 1
+            MaxLength: 1
         - Name: colorPerception
           AttributeDataType: Number
           Mutable: true
@@ -64,6 +67,13 @@ Resources:
             MinValue: 0
             MaxValue: 4
         - Name: countryOfBirth
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+          StringAttributeConstraints:
+            MinLength: 2
+            MaxLength: 3
+        - Name: countryOfResidence
           AttributeDataType: String
           Mutable: true
           Required: false
@@ -91,20 +101,22 @@ Resources:
       ClientName: !Sub ${Environment}.enchanted-brain.app
       UserPoolId: !Ref CognitoUserPool
       ReadAttributes:
-        - name
         - email
         - email_verified
         - gender
         - custom:age
+        - custom:acceptResearch
         - custom:colorPerception
         - custom:countryOfBirth
+        - custom:countryOfResidence
       WriteAttributes:
-        - name
         - email
         - gender
         - custom:age
+        - custom:acceptResearch
         - custom:colorPerception
         - custom:countryOfBirth
+        - custom:countryOfResidence
       RefreshTokenValidity: 30
       GenerateSecret: false
       ExplicitAuthFlows: !If

@@ -6,7 +6,7 @@ import t from 'tcomb-form-native';
 
 import COLORS from '../../constants/Colors';
 
-const AcceptTerms = t.struct({
+const TermsType = t.struct({
   terms: t.Boolean,
   research: t.Boolean,
 });
@@ -23,29 +23,26 @@ const options = {
   },
 };
 
+const INITIAL_STATE = {
+  formData: {},
+  isSubmitDisabled: true,
+};
+
 export default class Terms extends Component {
-  state = {
-    formData: {},
-    isSubmitDisabled: true,
-  };
+  state = { ...INITIAL_STATE };
 
   handleChange = formData => {
-    const { terms = false, research = false } = formData || {};
+    const { terms = false } = formData || {};
     this.setState({
       formData,
-      isSubmitDisabled: !terms || !research,
+      isSubmitDisabled: !terms,
     });
   };
 
-  handlePress = cb => {
-    this.setState(
-      {
-        formData: {},
-        isSubmitDisabled: true,
-      },
-      cb
-    );
-  };
+  handleCancel = () => this.setState(INITIAL_STATE, this.props.onCancel);
+
+  handleSubmit = () =>
+    this.setState(INITIAL_STATE, () => this.props.onSubmit(this.state.formData.research));
 
   render() {
     const { formData, isSubmitDisabled } = this.state;
@@ -141,7 +138,7 @@ export default class Terms extends Component {
           representative. The user can exercise these rights, by sending an e-mail to the address
           info@neurotech.healthcare or by sending a letter to the following address:
         </Text>
-        <Text style={styles.indented}></Text>
+        <Text style={styles.indented} />
         <Text style={styles.indented}>NeuroTech</Text>
         <Text style={styles.indented}>Biopôle</Text>
         <Text style={styles.indented}>Route de la Corniche 9A</Text>
@@ -174,7 +171,7 @@ export default class Terms extends Component {
           <t.form.Form
             onChange={this.handleChange}
             options={options}
-            type={AcceptTerms}
+            type={TermsType}
             value={formData}
           />
 
@@ -182,12 +179,12 @@ export default class Terms extends Component {
             buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
             title="NEXT"
             disabled={isSubmitDisabled}
-            onPress={() => this.handlePress(this.props.onAgree)}
+            onPress={this.handleSubmit}
           />
           <Button
             buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
             title="CANCEL"
-            onPress={() => this.handlePress(this.props.onCancel)}
+            onPress={this.handleCancel}
           />
         </View>
       </ScrollView>
