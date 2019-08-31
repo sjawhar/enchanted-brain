@@ -169,7 +169,7 @@ const STAGE_CHOICE_SYNESTHESIA = () => ({
 const STAGE_CHOICE_CHILLS = () => ({
   eventData: {
     stageId: 'STAGE_CHOICE_CHILLS',
-    startTime: new Date(new Date().setSeconds(now.getSeconds() + 2)).toISOString(),
+    startTime: new Date(new Date().setSeconds(now.getSeconds() + 5)).toISOString(),
     endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
     interval: 0.2,
   },

@@ -8,7 +8,11 @@ import WaitingScreen from './Waiting';
 import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
-import { MESSAGE_STAGE_COMPLETE_BODY, MESSAGE_STAGE_COMPLETE_HEADER } from '../constants/Messages';
+import {
+  MESSAGE_INSTRUCTION_CHILLS,
+  MESSAGE_STAGE_COMPLETE_BODY,
+  MESSAGE_STAGE_COMPLETE_HEADER,
+} from '../constants/Messages';
 
 const VIEW_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const INPUT_HEIGHT = 0.8 * VIEW_HEIGHT;
@@ -195,12 +199,7 @@ class ChillsScreen extends Component {
   render() {
     const { isShowPrompt, touches, opacity, offset } = this.state;
     if (!isShowPrompt) {
-      return (
-        <WaitingScreen
-          headerText={MESSAGE_STAGE_COMPLETE_HEADER}
-          messageText={MESSAGE_STAGE_COMPLETE_BODY}
-        />
-      );
+      return <WaitingScreen headerText={''} messageText={MESSAGE_INSTRUCTION_CHILLS} />;
     }
     return (
       <View style={styles.container}>
