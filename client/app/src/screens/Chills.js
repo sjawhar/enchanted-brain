@@ -222,7 +222,7 @@ class ChillsScreen extends Component {
         </View>
         <View style={styles.rightBar}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
-          <View style={styles.scaleContianer}>
+          <View style={styles.scaleContainer}>
             <Text style={{ marginTop: 10, ...styles.instruction }}>High</Text>
             <Text style={styles.instruction}>Touch and drag to indicate chills</Text>
             <Text style={{ marginBottom: 10, ...styles.instruction }}>Low</Text>
@@ -263,7 +263,7 @@ const styles = EStyleSheet.create({
     backgroundColor: COLORS.primaryOrange,
     flexDirection: 'column',
   },
-  scaleContianer: {
+  scaleContainer: {
     height: INPUT_HEIGHT,
     width: '100%',
     flexDirection: 'column',
