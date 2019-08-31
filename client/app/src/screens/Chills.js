@@ -255,7 +255,7 @@ const styles = EStyleSheet.create({
     backgroundColor: COLORS.primaryOrange,
     width: WAVEFORM_SIZE,
     height: WAVEFORM_SIZE,
-    marginBottom: -WAVEFORM_SIZE / 2,
+    marginTop: -WAVEFORM_SIZE / 2,
     borderRadius: WAVEFORM_SIZE,
   },
   rightBar: {
