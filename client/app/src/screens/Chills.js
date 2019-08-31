@@ -223,9 +223,9 @@ class ChillsScreen extends Component {
         <View style={styles.rightBar}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
           <View style={styles.scaleContianer}>
-            <Text style={styles.instruction}>High</Text>
+            <Text style={{ marginTop: 10, ...styles.instruction }}>High</Text>
             <Text style={styles.instruction}>Touch and drag to indicate chills</Text>
-            <Text style={styles.instruction}>Low</Text>
+            <Text style={{ marginBottom: 10, ...styles.instruction }}>Low</Text>
           </View>
           <View style={styles.noneZone}>
             <Text style={styles.instruction}>None</Text>
