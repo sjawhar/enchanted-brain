@@ -100,9 +100,9 @@ class ChillsScreen extends Component {
     this._onPanResponderMove(event);
   };
 
-  _onPanResponderMove = ({ timeStamp, nativeEvent: { locationY } }) => {
+  _onPanResponderMove = ({ timeStamp, nativeEvent: { pageY } }) => {
     this.registerChoice({
-      choice: Math.min(Math.max(1 - locationY / INPUT_HEIGHT, 0), 1),
+      choice: Math.min(Math.max(1 - (pageY - Constants.statusBarHeight) / INPUT_HEIGHT, 0), 1),
       timestamp: this.roundTime(timeStamp),
       source: 'touch',
     });
