@@ -91,8 +91,7 @@ const styles = {
   },
   codeContainer: {
     flex: 1,
-    paddingLeft: 20,
-    paddingRight: 20
+    padding: '0 20px'
   },
   code: {
     wordWrap: 'break-word'
