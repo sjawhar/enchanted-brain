@@ -9,6 +9,19 @@ if (process.env.REACT_APP_WEBSOCKET_EMITTER_EXPOSE === 'true') {
   window.emitter = emitter;
 }
 
+const handleMessage = message => {
+  const { data: messageData } = message || {};
+  if (!messageData) {
+    return;
+  }
+  try {
+    const { event, data } = JSON.parse(messageData);
+    emitter.emit(event, data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 const connect = async () => {
   isConnect = true;
 
@@ -27,18 +40,7 @@ const connect = async () => {
     console.log('CONNECTED');
   };
 
-  ws.onmessage = message => {
-    const { data: messageData } = message || {};
-    if (!messageData) {
-      return;
-    }
-    try {
-      const { event, data } = JSON.parse(messageData);
-      emitter.emit(event, data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  ws.onmessage = handleMessage;
 
   ws.onerror = e => {
     console.error('ERROR', e.message);
@@ -64,6 +66,7 @@ const disconnect = () => {
 const send = message => {
   if (process.env.REACT_APP_WEBSOCKET_API_STUB === 'true') {
     console.log('SEND', message);
+    handleMessage({ data: JSON.stringify(message) });
   }
   if (!ws) {
     return false;

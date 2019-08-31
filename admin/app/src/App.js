@@ -6,6 +6,8 @@ import concertApi from './util/concertApi';
 import { getStageData } from './util/stages';
 import amplifyConfig from './config/amplify';
 
+import './App.css';
+
 Amplify.configure(amplifyConfig);
 
 class App extends Component {
@@ -48,21 +50,27 @@ class App extends Component {
 
   render() {
     const { isConnected, lastReceived } = this.state;
-
-    if (!isConnected) {
-      return <div>Not connected</div>;
-    }
     return (
       <div style={styles.container}>
-        <div style={styles.inputContainer}>
-          <h1>Next Stage</h1>
-          <pre>{JSON.stringify(this.getNextStage().data, null, 2)}</pre>
-          <button onClick={this.handleNextStage}>Send Next Stage</button>
-        </div>
-        <div style={styles.outputContainer}>
-          <h1>Last Received</h1>
-          <pre>{JSON.stringify(lastReceived, null, 2)}</pre>
-        </div>
+        {!isConnected ? (
+          <div style={styles.notConnected}>Not connected</div>
+        ) : (
+          <React.Fragment>
+            <div style={styles.codeContainer}>
+              <h1>Next Stage</h1>
+              <pre style={styles.code}>
+                {JSON.stringify(this.getNextStage().data, null, 2)}
+              </pre>
+              <button onClick={this.handleNextStage}>Send Next Stage</button>
+            </div>
+            <div style={styles.codeContainer}>
+              <h1>Last Received</h1>
+              <pre style={styles.code}>
+                {JSON.stringify(lastReceived, null, 2)}
+              </pre>
+            </div>
+          </React.Fragment>
+        )}
       </div>
     );
   }
@@ -71,15 +79,23 @@ class App extends Component {
 const styles = {
   container: {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    height: '100%'
   },
-  inputContainer: {
-    flex: 1,
-    width: '50%'
+  notConnected: {
+    textAlign: 'center',
+    fontSize: 35,
+    fontWeight: 'bold'
   },
-  outputContainer: {
+  codeContainer: {
     flex: 1,
-    width: '50%'
+    paddingLeft: 20,
+    paddingRight: 20
+  },
+  code: {
+    wordWrap: 'break-word'
   }
 };
 
