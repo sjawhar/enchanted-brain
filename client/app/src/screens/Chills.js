@@ -48,7 +48,10 @@ class ChillsScreen extends Component {
   }
 
   componentWillUnmount() {
-    const { songTimeoutId } = this.state;
+    const { panTimeoutId, songTimeoutId } = this.state;
+    if (panTimeoutId) {
+      clearTimeout(panTimeoutId);
+    }
     if (songTimeoutId) {
       clearTimeout(songTimeoutId);
     }
