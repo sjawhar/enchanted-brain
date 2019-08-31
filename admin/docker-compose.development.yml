@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+  client:
+    image: node:10
+    container_name: enchanted-brain-admin
+    volumes:
+      - ./app:/app
+    ports:
+      - 3001:3000
+    working_dir: /app
+    command: [npm, start]

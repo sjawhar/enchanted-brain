@@ -20,61 +20,17 @@ import SignUp from './components/SignUp';
 import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
 import AppNavigator from './navigation/AppNavigator';
+import { IS_IOS, AMPLIFY_CONFIG } from './config';
 import layout from './constants/Layout';
 import { CHOICE_COLOR } from './constants/Choices';
 import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
-import { IS_IOS, AMPLIFY_CONFIG } from './config';
-
-// ** Event listeners ** //
-const handleStageNavigation = ({
-  choiceInverted,
-  choiceType,
-  choiceTypes,
-  stageId,
-  ...stageData
-}) => {
-  if (choiceType) {
-    store.dispatch(actions.setChoiceType(choiceType));
-  }
-  if (choiceInverted !== undefined) {
-    store.dispatch(actions.setChoiceInverted(choiceInverted));
-  }
-
-  ({ choiceType, choiceInverted } = store.getState());
-
-  const screen = (() => {
-    switch (stageId) {
-      case 'STAGE_WAITING':
-        return 'Welcome';
-      case 'STAGE_CHOICE_IMAGERY':
-        return 'MentalImagery';
-      case 'STAGE_CHOICE_SYNESTHESIA':
-        return 'Synesthesia';
-      case 'STAGE_CHOICE_CHILLS':
-        return 'Chills';
-      case 'STAGE_END':
-        return 'Results';
-      default:
-        // something went wrong
-        // navigate to 'something went wrong screen'?
-        console.log('stub: something went wrong in handleStageNavigation');
-        return 'Welcome';
-    }
-  })();
-
-  console.debug('Screen chosen', screen);
-  if (!choiceTypes) {
-    choiceTypes = [CHOICE_COLOR];
-  }
-  NavigationService.navigate(screen, {
-    ...stageData,
-    choiceInverted,
-    choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
-  });
-};
-
-concertApi.on(CONNECTED, handleStageNavigation);
-concertApi.on(EVENT_STAGE_CHANGED, handleStageNavigation);
+import {
+  STAGE_CHOICE_CHILLS,
+  STAGE_CHOICE_IMAGERY,
+  STAGE_CHOICE_SYNESTHESIA,
+  STAGE_END,
+  STAGE_WAITING,
+} from './constants/Stages';
 
 // ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
@@ -131,15 +87,85 @@ const theme = {
 Amplify.configure(AMPLIFY_CONFIG);
 
 class App extends React.Component {
-  async componentDidMount() {
-    const idToken = (await Auth.currentSession()).getIdToken();
-    concertApi.connect(idToken.getJwtToken());
-    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+  componentDidMount() {
+    concertApi.on(CONNECTED, this.handleStageNavigation);
+    concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
   }
 
   componentWillUnmount() {
+    concertApi.removeListener(CONNECTED, this.handleStageNavigation);
+    concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageNavigation);
     concertApi.disconnect();
   }
+
+  handleConnect = async () => {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+    concertApi.connect();
+  };
+
+  handleDisconnect = async () => {
+    concertApi.disconnect();
+    await Auth.signOut();
+    this.props.onStateChange('signIn');
+  };
+
+  handleStageNavigation = ({
+    choiceInverted,
+    choiceType,
+    choiceTypes,
+    stageId,
+    isShowConnect,
+    ...stageData
+  }) => {
+    if (choiceType) {
+      store.dispatch(actions.setChoiceType(choiceType));
+    }
+    if (choiceInverted !== undefined) {
+      store.dispatch(actions.setChoiceInverted(choiceInverted));
+    }
+
+    ({ choiceType, choiceInverted } = store.getState());
+
+    const screen = (() => {
+      switch (stageId) {
+        case STAGE_CHOICE_CHILLS:
+          return 'Chills';
+        case STAGE_CHOICE_IMAGERY:
+          return 'MentalImagery';
+        case STAGE_CHOICE_SYNESTHESIA:
+          return 'Synesthesia';
+        case STAGE_END:
+          return 'Results';
+        case STAGE_WAITING:
+        default:
+          return 'Welcome';
+      }
+    })();
+
+    if (!choiceTypes) {
+      choiceTypes = [CHOICE_COLOR];
+    }
+
+    const canConnect = !!isShowConnect || stageId === STAGE_END ? true : null;
+    NavigationService.navigate(screen, {
+      choiceInverted,
+      choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+      isConnected: canConnect && concertApi.isConnected(),
+      onConnect: canConnect && this.handleConnect,
+      onDisconnect: canConnect && this.handleDisconnect,
+      stageId,
+      ...stageData,
+    });
+  };
+
+  handleNavigatorRef = navigatorRef => {
+    if (!navigatorRef) {
+      return;
+    }
+    NavigationService.setTopLevelNavigator(navigatorRef);
+    this.handleStageNavigation({ stageId: STAGE_WAITING, isShowConnect: true });
+  };
 
   render() {
     return (
@@ -148,11 +174,7 @@ class App extends React.Component {
           <PersistGate loading={null} persistor={persistor}>
             <View style={styles.container}>
               {IS_IOS && <StatusBar barStyle="default" />}
-              <AppNavigator
-                ref={navigatorRef => {
-                  NavigationService.setTopLevelNavigator(navigatorRef);
-                }}
-              />
+              <AppNavigator ref={this.handleNavigatorRef} />
             </View>
           </PersistGate>
         </Provider>
@@ -168,12 +190,17 @@ const styles = StyleSheet.create({
   },
 });
 
-export default withAuthenticator(App, false, [
-  <SignIn />,
-  <ConfirmSignIn />,
-  <VerifyContact />,
-  <SignUp />,
-  <ConfirmSignUp />,
-  <ForgotPassword />,
-  <RequireNewPassword />,
-]);
+export default withAuthenticator(App, {
+  authenticatorComponents: [
+    <SignIn />,
+    <ConfirmSignIn />,
+    <VerifyContact />,
+    <SignUp />,
+    <ConfirmSignUp />,
+    <ForgotPassword />,
+    <RequireNewPassword />,
+  ],
+  includeGreetings: false,
+  signUpConfig: {},
+  usernameAttributes: 'email',
+});
