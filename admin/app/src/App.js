@@ -82,7 +82,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'stretch',
-    height: '100%'
+    height: 'calc(100vh - 67px)'
   },
   notConnected: {
     textAlign: 'center',
