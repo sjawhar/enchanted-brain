@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import SideSwipe from 'react-native-sideswipe';
 import { AreaChart, BarChart, LineChart, StackedAreaChart } from 'react-native-svg-charts';
@@ -208,10 +209,14 @@ class ResultsScreen extends Component {
   );
 
   render() {
+    const { isConnected, onDisconnect } = this.props.navigation.state.params || {};
     return (
       <View style={styles.container}>
         <View style={styles.pageHeader}>
           <Text style={styles.pageHeaderText}>Results</Text>
+          {isConnected && !!onDisconnect && (
+            <Button title="SIGN OUT" onPress={onDisconnect} buttonStyle={styles.buttonDisconnect} />
+          )}
         </View>
         <SideSwipe
           data={this.songs}
@@ -257,7 +262,7 @@ const styles = EStyleSheet.create({
   pageHeader: {
     backgroundColor: COLORS.primaryBlue,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     alignItems: 'center',
     paddingVertical: 4,
   },
@@ -265,6 +270,9 @@ const styles = EStyleSheet.create({
     fontSize: '1.25rem',
     color: 'white',
     fontWeight: 'bold',
+  },
+  buttonDisconnect: {
+    backgroundColor: COLORS.primaryOrange,
   },
   carousel: {
     height: CARD_HEIGHT,
