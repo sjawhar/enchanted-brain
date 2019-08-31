@@ -40,7 +40,7 @@ export default class Terms extends Component {
   handleSubmit = () => this.props.onSubmit(this.state.formData);
 
   render() {
-    const { onSubmit, onCancel } = this.props;
+    const { onCancel } = this.props;
     const { formData, isSubmitDisabled } = this.state;
     return (
       <ScrollView style={{ flex: 1 }}>

@@ -45,7 +45,7 @@ export default class User extends Component {
 
   render() {
     const { password } = this.state;
-    const { error, formData, isLoading, onCancel, onChange } = this.props;
+    const { error, formData, isLoading, onCancel } = this.props;
     return (
       <View style={styles.container}>
         <t.form.Form
