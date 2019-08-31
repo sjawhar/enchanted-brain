@@ -7,44 +7,40 @@ import t from 'tcomb-form-native';
 import COLORS from '../../constants/Colors';
 
 const TermsType = t.struct({
-  terms: t.Boolean,
-  research: t.Boolean,
+  acceptTerms: t.Boolean,
+  acceptResearch: t.Boolean,
 });
 
 const options = {
-  order: ['terms', 'research'],
+  order: ['acceptTerms', 'acceptResearch'],
   fields: {
-    terms: {
+    acceptTerms: {
       label: 'I agree with these terms and conditions',
     },
-    research: {
+    acceptResearch: {
       label: 'I agree that my anonymized data will be used for research (cf. Article 5)',
     },
   },
 };
 
-const INITIAL_STATE = {
-  formData: {},
-  isSubmitDisabled: true,
-};
-
 export default class Terms extends Component {
-  state = { ...INITIAL_STATE };
+  state = {
+    formData: {},
+    isSubmitDisabled: true,
+  };
 
   handleChange = formData => {
-    const { terms = false } = formData || {};
+    const { acceptTerms = false } = formData || {};
     this.setState({
       formData,
-      isSubmitDisabled: !terms,
+      isSubmitDisabled: !acceptTerms,
     });
   };
 
-  handleCancel = () => this.setState(INITIAL_STATE, this.props.onCancel);
-
-  handleSubmit = () =>
-    this.setState(INITIAL_STATE, () => this.props.onSubmit(this.state.formData.research));
+  handleSubmit = () => this.props.onSubmit(this.state.formData);
 
   render() {
+    const { onSubmit, onCancel } = this.props;
     const { formData, isSubmitDisabled } = this.state;
     return (
       <ScrollView style={{ flex: 1 }}>
@@ -184,7 +180,7 @@ export default class Terms extends Component {
           <Button
             buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
             title="CANCEL"
-            onPress={this.handleCancel}
+            onPress={onCancel}
           />
         </View>
       </ScrollView>

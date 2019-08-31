@@ -27,10 +27,8 @@ export default class Signup extends Component {
     this.setState(INITIAL_STATE, () => this.props.onStateChange('signIn', {}));
   };
 
-  gotoConfirm = email => {
-    if (!email) {
-      ({ email } = this.refs.form.getValue() || {});
-    }
+  gotoConfirm = () => {
+    const { email } = this.state.user;
     this.setState(INITIAL_STATE, () => this.props.onStateChange('confirmSignUp', email));
   };
 
@@ -45,7 +43,7 @@ export default class Signup extends Component {
       step: step - 1,
     }));
 
-  handleSubmitTerms = acceptResearch => this.gotoNextStep({ acceptResearch });
+  handleSubmitTerms = ({ acceptResearch }) => this.gotoNextStep({ acceptResearch });
 
   handleSubmitDemographics = demographics => this.gotoNextStep({ demographics });
 
@@ -71,7 +69,7 @@ export default class Signup extends Component {
         },
       });
       if (!userConfirmed) {
-        this.gotoConfirm(email);
+        this.gotoConfirm();
       }
     } catch (error) {
       const isUserExists = error.code === 'UsernameExistsException';
@@ -91,7 +89,7 @@ export default class Signup extends Component {
     return (
       <View style={styles.container}>
         <UserExistsModal
-          onConfirm={() => this.gotoConfirm()}
+          onConfirm={this.gotoConfirm}
           onSignIn={this.gotoSignIn}
           visible={isShowModal}
         />
@@ -132,6 +130,8 @@ const styles = EStyleSheet.create({
     marginTop: Constants.statusBarHeight,
     width: '100%',
     height: Layout.window.height - Constants.statusBarHeight,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 20,
   },
 });

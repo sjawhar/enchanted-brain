@@ -28,6 +28,13 @@ const options = {
 };
 
 export default class User extends Component {
+  state = {
+    password: '',
+  };
+
+  handleChange = ({ password, ...formData }) =>
+    this.setState({ password }, () => this.props.onChange(formData));
+
   handleSubmit = () => {
     const formData = this.refs.form.getValue();
     if (!formData) {
@@ -37,15 +44,16 @@ export default class User extends Component {
   };
 
   render() {
+    const { password } = this.state;
     const { error, formData, isLoading, onCancel, onChange } = this.props;
     return (
       <View style={styles.container}>
         <t.form.Form
-          onChange={onChange}
+          onChange={this.handleChange}
           options={options}
           ref="form"
           type={UserType}
-          value={formData}
+          value={{ password, ...formData }}
         />
         {isLoading ? (
           <ActivityIndicator size="large" color={COLORS.primaryOrange} />
