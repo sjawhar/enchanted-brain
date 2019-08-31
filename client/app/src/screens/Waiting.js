@@ -18,7 +18,8 @@ class WaitingScreen extends Component {
   };
 
   render() {
-    const { headerText, messageText } = this.props;
+    const { children, headerText, messageText } = this.props;
+
     return (
       <SafeAreaView style={styles.container}>
         {!!headerText && <Text style={styles.headerText}>{headerText}</Text>}
@@ -29,6 +30,7 @@ class WaitingScreen extends Component {
           ]}>
           {messageText}
         </Text>
+        {children}
       </SafeAreaView>
     );
   }
