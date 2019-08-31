@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import { WEBSOCKET_API_URL, WEBSOCKET_API_STUB } from 'react-native-dotenv';
+import { Auth } from 'aws-amplify';
 
 let ws = null;
 let isConnect = false;
@@ -7,9 +8,11 @@ const events = new EventEmitter();
 
 const isStub = WEBSOCKET_API_STUB !== 'false';
 
-const connect = idToken => {
+const connect = async () => {
+  isConnect = true;
+
   if (isStub) {
-    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB]();
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB](new Date());
     if (storeActions) {
       const { store } = require('../state');
       storeActions.forEach(store.dispatch);
@@ -20,7 +23,7 @@ const connect = idToken => {
     return;
   }
 
-  isConnect = true;
+  const idToken = (await Auth.currentSession()).getIdToken().getJwtToken();
   ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
@@ -49,7 +52,7 @@ const connect = idToken => {
     ws = null;
     console.debug('CLOSED', e.code, e.reason);
     if (isConnect) {
-      connect(idToken);
+      connect();
     }
   };
 };
@@ -73,4 +76,6 @@ const send = message => {
   ws.send(JSON.stringify(message));
 };
 
-export default Object.assign(events, { connect, disconnect, send });
+const isConnected = () => isConnect;
+
+export default Object.assign(events, { connect, disconnect, send, isConnected });

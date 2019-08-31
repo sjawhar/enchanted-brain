@@ -20,10 +20,6 @@ import {
 
 const TIME_INSTRUCTIONS = 3000;
 
-const SCREEN_INSTRUCTION = 'instruction';
-const SCREEN_PROMPT = 'prompt';
-const SCREEN_WAITING = 'waiting';
-
 export default class SynesthsiaScreen extends Component {
   state = {
     isShowPrompt: false,
