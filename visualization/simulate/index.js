@@ -2,7 +2,7 @@ const aws = require('aws-sdk');
 const program = require('commander');
 
 program
-  .version('0.0.1')
+  .version('1.0.0')
   .option('-u, --queue-url <queueUrl>')
   .option('-p, --prompts <prompts>', 'Number of response prompts to simulate', 5)
   .option('-i, --interval <interval>', 'Seconds between prompts', 20)
