@@ -1,4 +1,5 @@
 import EventEmitter from 'events';
+import { Auth } from 'aws-amplify';
 
 let ws = null;
 let isConnect = false;
@@ -8,7 +9,9 @@ if (process.env.REACT_APP_WEBSOCKET_EMITTER_EXPOSE === 'true') {
   window.emitter = emitter;
 }
 
-const connect = idToken => {
+const connect = async () => {
+  isConnect = true;
+
   if (process.env.REACT_APP_WEBSOCKET_API_STUB === 'true') {
     return;
   }
@@ -17,10 +20,8 @@ const connect = idToken => {
     return;
   }
 
-  isConnect = true;
-  ws = new WebSocket(
-    `${process.env.REACT_APP_WEBSOCKET_API_URL}?token=${idToken}`
-  );
+  const idToken = (await Auth.currentSession()).getIdToken().getJwtToken();
+  ws = new WebSocket(`${process.env.REACT_APP_WEBSOCKET_API_URL}?token=${idToken}`);
 
   ws.onopen = () => {
     console.log('CONNECTED');
@@ -50,7 +51,7 @@ const connect = idToken => {
     ws = null;
     console.log('CLOSED', e.code, e.reason);
     if (isConnect) {
-      connect(idToken);
+      connect();
     }
   };
 };
@@ -63,12 +64,4 @@ const disconnect = () => {
   ws.close();
 };
 
-const send = message => {
-  if (!ws) {
-    return false;
-  }
-
-  ws.send(message);
-};
-
-export default Object.assign(emitter, { connect, disconnect, send });
+export default Object.assign(emitter, { connect, disconnect });
