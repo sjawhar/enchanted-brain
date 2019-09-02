@@ -88,20 +88,12 @@ export default class Synesthesia extends Component {
     return (
       <div>
         <div style={styles.axesContainer}>
-          <span className="axis-label" style={styles.happy}>
-            Happy
-          </span>
-          <span className="axis-label" style={styles.sad}>
-            Sad
-          </span>
-          <span className="axis-label" style={styles.angry}>
-            Angry
-          </span>
-          <span className="axis-label" style={styles.calm}>
-            Calm
-          </span>
-          <div className="axis" style={styles.axisX} />
-          <div className="axis" style={styles.axisY} />
+          <span style={[styles.axisLabel, styles.happy]}>Happy</span>
+          <span style={[styles.axisLabel, styles.sad]}>Sad</span>
+          <span style={[styles.axisLabel, styles.angry]}>Angry</span>
+          <span style={[styles.axisLabel, styles.calm]}>Calm</span>
+          <div style={[styles.axis, styles.axisX]} />
+          <div style={[styles.axis, styles.axisY]} />
         </div>
         <div style={styles.beesContainer}>
           {bees.map(({ x, y, color }, index) => (
@@ -159,6 +151,10 @@ const styles = {
     bottom: 0,
     marginBottom: '10px',
   },
+  axis: {
+    background: '#999',
+    position: 'absolute',
+  },
   axisX: {
     top: '50%',
     left: '7%',
@@ -170,6 +166,14 @@ const styles = {
     left: '50%',
     height: '86%',
     width: '2px',
+  },
+  axisLabel: {
+    color: 'white',
+    fontSize: '35px',
+    fontWeight: 'bold',
+    padding: 0,
+    position: 'absolute',
+    textAlign: 'center',
   },
   beesContainer: {
     position: 'fixed',
