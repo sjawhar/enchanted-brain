@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+from enchanted_brain.attributes import CHOICE_CHILLS
 
 """
 Processes websocket API messages from API Gateway
@@ -28,11 +29,12 @@ def handler(event, context):
         Message=json.dumps(message),
         MessageStructure="string",
     )
-    visualization_sns_response = sns.publish(
-        TopicArn=CALLBACK_VISUALIZATION_SNS_TOPIC_ARN,
-        Message=json.dumps(message),
-        MessageStructure="string",
-    )
+    if message["choiceType"] != CHOICE_CHILLS:
+        visualization_sns_response = sns.publish(
+            TopicArn=CALLBACK_VISUALIZATION_SNS_TOPIC_ARN,
+            Message=json.dumps(message),
+            MessageStructure="string",
+        )
     firehose_response = firehose.put_record(
         DeliveryStreamName=AGGREGATE_CHOICE_DELIVERY_STREAM_NAME,
         Record={"Data": json.dumps(message)},
