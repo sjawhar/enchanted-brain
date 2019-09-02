@@ -5,6 +5,7 @@ import { withAuthenticator } from 'aws-amplify-react';
 import concertApi from './util/concertApi';
 import { Chills, Colors, Synesthesia } from './components';
 import amplifyConfig from './config/amplify';
+import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
 
 Amplify.configure(amplifyConfig);
 
@@ -14,8 +15,8 @@ class App extends Component {
     this.state = {
       Component: null,
     };
-    concertApi.on('CONNECTED', this.handleStageChanged);
-    concertApi.on('EVENT_STAGE_CHANGED', this.handleStageChanged);
+    concertApi.on(CONNECTED, this.handleStageChanged);
+    concertApi.on(EVENT_STAGE_CHANGED, this.handleStageChanged);
   }
 
   async componentDidMount() {

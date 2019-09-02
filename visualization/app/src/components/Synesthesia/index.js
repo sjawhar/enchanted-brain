@@ -8,6 +8,7 @@ import {
   CHOICE_EMOTION_ANGER,
   CHOICE_EMOTION_HAPPINESS,
 } from '../../constants/ChoiceTypes';
+import { CHOICE_MADE } from '../../constants/Events';
 
 const BUFFER_RING_SIZE = parseInt(process.env.REACT_APP_BUFFER_RING_SIZE, 10);
 const OFFSET_SIZE = 15;
@@ -36,11 +37,14 @@ export default class Synesthesia extends Component {
       };
       this.state.buffers.push(buffer);
     });
-    concertApi.on('CHOICE_MADE', this.handleChoiceMade);
+  }
+
+  componentDidMount() {
+    concertApi.on(CHOICE_MADE, this.handleChoiceMade);
   }
 
   componentWillUnmount() {
-    concertApi.removeListener('CHOICE_MADE', this.handleChoiceMade);
+    concertApi.removeListener(CHOICE_MADE, this.handleChoiceMade);
   }
 
   shouldComponentUpdate(props, { choiceCount }) {
