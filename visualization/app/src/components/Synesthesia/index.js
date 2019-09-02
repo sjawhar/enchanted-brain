@@ -54,7 +54,9 @@ export default class Synesthesia extends Component {
   perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
 
   handleChoiceMade = ({ choiceType, choice, timestamp }) => {
-    if (Date.parse(timestamp) < this.state.minTimestamp || !this.state[choiceType]) {
+    if (!this.state[choiceType]) {
+      return;
+    } else if (Date.parse(timestamp) < this.state.minTimestamp || !this.state[choiceType]) {
       return;
     }
     this.setState(({ choiceCount, timeout, [choiceType]: { buffer, index } }) => {
