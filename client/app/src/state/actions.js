@@ -3,10 +3,12 @@ import { CHOICE_MADE } from '../constants/Events';
 
 export const SEND_CHOICE = 'SEND_CHOICE';
 export const sendChoice = choice => {
-  concertApi.send({
-    event: CHOICE_MADE,
-    data: choice,
-  });
+  if (choice.choice > 0) {
+    concertApi.send({
+      event: CHOICE_MADE,
+      data: choice,
+    });
+  }
   return {
     type: SEND_CHOICE,
     payload: { choice },
