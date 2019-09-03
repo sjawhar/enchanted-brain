@@ -166,38 +166,16 @@ class ChillsScreen extends Component {
 
   roundTime = time => time - (time % this.interval);
 
-  sendTouches = touches => {
-    const maxIndex = touches.length - 1;
-    const filtered = touches
-      .map(({ choice, ...touch }) => ({
-        choice: parseFloat(choice).toFixed(2),
-        ...touch,
-      }))
-      .filter(({ choice }, index) => {
-        // Remove zeros that aren't bordering a non-zero value
-        // So that we don't send a long string of zeros
-        if (choice > 0) {
-          return true;
-        } else if (maxIndex === 0) {
-          return true;
-        } else if (index > 0 && touches[index - 1].choice > 0) {
-          return true;
-        } else if (index < maxIndex && touches[index + 1].choice > 0) {
-          return true;
-        }
-        return false;
-      });
-
-    filtered.forEach(({ timestamp, choice }) =>
-      store.dispatch(
+  sendTouches = touches =>
+    touches
+      .map(({ timestamp, choice }) =>
         actions.sendChoice({
-          choice,
+          choice: parseFloat(parseFloat(choice).toFixed(2)),
           choiceType: CHOICE_CHILLS,
           timestamp: new Date(timestamp).toISOString(),
         })
       )
-    );
-  };
+      .forEach(action => store.dispatch(action));
 
   render() {
     const { isShowPrompt, touches, opacity, offset } = this.state;
