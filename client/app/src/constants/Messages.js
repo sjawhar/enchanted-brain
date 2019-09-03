@@ -2,6 +2,8 @@ export const MESSAGE_INSTRUCTION_COLOR =
   'Please indicate the color that you would primarily associate to the last 20 seconds of the piece.';
 export const MESSAGE_INSTRUCTION_EMOTION =
   'Please evaluate the emotional intensity the last 20 seconds of the piece evoked in you.';
+export const MESSAGE_INSTRUCTION_CHILLS =
+  'Please keep a finger pressed on the bar on the right side of the screen to indicate your chills or goose bumps.';
 
 export const MESSAGE_RESPONSE_MISSED_BODY = 'Please continue enjoying the music.';
 export const MESSAGE_RESPONSE_MISSED_HEADER = 'Response window timed out';
