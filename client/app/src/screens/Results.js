@@ -72,7 +72,7 @@ class ResultsScreen extends Component {
                 yMax: 1,
                 yMin: 0,
               },
-              modifier: ({ sum, count }) => ({ value: sum / count }),
+              modifier: ({ sum }) => ({ value: sum }),
               leftPad: { value: 0 },
               userChoices: userChoices.chills,
               userChoiceModifier: choice => ({ value: choice }),
