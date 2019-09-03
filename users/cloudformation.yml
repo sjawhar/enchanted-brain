@@ -14,6 +14,14 @@ Parameters:
     Type: String
 
 
+Mappings:
+
+  SsmParameters:
+    SmsExternalId:
+      Name: enchanted-brain/sms-external-id
+      Version: 1
+
+
 Conditions:
 
   IsProduction: !Equals [!Ref Environment, production]
@@ -21,14 +29,48 @@ Conditions:
 
 Resources:
 
+  SmsIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-sms-v1
+      Path: !Sub /${AWS::Region}/${Environment}/
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: sts:AssumeRole
+            Principal:
+              Service: cognito-idp.amazonaws.com
+            Effect: Allow
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Sub
+                  - '{{resolve:ssm:/${Environment}/${Parameter}:${Version}}}'
+                  - Parameter: !FindInMap [SsmParameters, SmsExternalId, Name]
+                    Version: !FindInMap [SsmParameters, SmsExternalId, Version]
+      Policies:
+        - PolicyName: !Sub ${AWS::Region}-${Environment}-enchanted-brain-sms
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action: sns:Publish
+                Effect: Allow
+                Resource: '*'
+
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub ${Environment}-enchanted-brain
       UsernameAttributes:
-        - email
+        - phone_number
       AutoVerifiedAttributes:
-        - email
+        - phone_number
+      SmsConfiguration:
+        ExternalId: !Sub
+          - '{{resolve:ssm:/${Environment}/${Parameter}:${Version}}}'
+          - Parameter: !FindInMap [SsmParameters, SmsExternalId, Name]
+            Version: !FindInMap [SsmParameters, SmsExternalId, Version]
+        SnsCallerArn: !GetAtt SmsIamRole.Arn
+      SmsVerificationMessage: Your Enchanted Brain verification code is {####}
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -37,7 +79,7 @@ Resources:
           RequireSymbols: yes
           RequireUppercase: yes
       Schema:
-        - Name: email
+        - Name: phone_number
           AttributeDataType: String
           Mutable: true
           Required: true
@@ -101,8 +143,8 @@ Resources:
       ClientName: !Sub ${Environment}.enchanted-brain.app
       UserPoolId: !Ref CognitoUserPool
       ReadAttributes:
-        - email
-        - email_verified
+        - phone_number
+        - phone_number_verified
         - gender
         - custom:age
         - custom:acceptResearch
@@ -110,7 +152,7 @@ Resources:
         - custom:countryOfBirth
         - custom:countryOfResidence
       WriteAttributes:
-        - email
+        - phone_number
         - gender
         - custom:age
         - custom:acceptResearch
