@@ -5,7 +5,10 @@
   "dependencies": {
     "aws-amplify": "^1.1.32",
     "aws-amplify-react": "^2.3.11",
+    "chart.js": "^2.8.0",
+    "chartjs-plugin-annotation": "^0.5.7",
     "react": "^16.8.6",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1"
   },

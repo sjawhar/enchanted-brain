@@ -10,20 +10,19 @@ import { CONNECTED, EVENT_STAGE_CHANGED } from './constants/Events';
 Amplify.configure(amplifyConfig);
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      Component: null,
-    };
+  state = {
+    Component: null,
+  };
+
+  componentDidMount() {
+    concertApi.connect();
     concertApi.on(CONNECTED, this.handleStageChanged);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageChanged);
   }
 
-  async componentDidMount() {
-    concertApi.connect();
-  }
-
   componentWillUnmount() {
+    concertApi.removeListener(CONNECTED, this.handleStageChanged);
+    concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageChanged);
     concertApi.disconnect();
   }
 
@@ -50,11 +49,24 @@ class App extends Component {
   render() {
     const { Component, eventData } = this.state;
     if (!Component) {
-      return <div>Coming soon...</div>;
+      return <div style={styles.notConnected}>Collecting data...</div>;
     }
     return <Component {...eventData} />;
   }
 }
+
+const styles = {
+  notConnected: {
+    height: '100vh',
+    widht: '100vw',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: 34,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+};
 
 export default withAuthenticator(App, {
   includeGreetings: process.env.REACT_APP_AMPLIFY_INCLUDE_GREETING === 'true',
