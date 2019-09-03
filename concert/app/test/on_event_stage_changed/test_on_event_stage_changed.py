@@ -3,6 +3,7 @@ import os
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
+from decimal import Decimal
 from src.functions.on_event_stage_changed.index import handler, sns, dynamodb
 
 CALLBACK_SNS_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
@@ -77,7 +78,7 @@ def get_event(
     display_name=None,
     start_time=None,
     end_time=None,
-    frequency=None,
+    interval=None,
     form_url=None,
 ):
     data = {"stageId": stage_id}
@@ -87,15 +88,15 @@ def get_event(
         data["startTime"] = start_time
     if end_time:
         data["endTime"] = end_time
-    if frequency:
-        data["frequency"] = frequency
+    if interval:
+        data["interval"] = interval
     if form_url:
         data["formUrl"] = form_url
     return {"body": json.dumps({"event": "EVENT_STAGE_CHANGED", "data": data})}
 
 
 @pytest.mark.parametrize(
-    "stage_id, display_name, start_time, end_time, frequency, form_url, expected_message",
+    "stage_id, display_name, start_time, end_time, interval, form_url, expected_message",
     [
         (
             "STAGE_CHOICE_SYNESTHESIA",
@@ -112,7 +113,7 @@ def get_event(
                         "displayName": "Canon in D",
                         "startTime": "2019-05-14T21:20:03.000Z",
                         "endTime": "2019-05-14T21:21:33.000Z",
-                        "frequency": 20,
+                        "interval": 20,
                     },
                 }
             ),
@@ -122,7 +123,7 @@ def get_event(
             "Canon in E",
             "2019-05-14T21:20:03.000Z",
             "2019-05-14T21:21:33.000Z",
-            None,
+            0.2,
             None,
             json.dumps(
                 {
@@ -132,6 +133,7 @@ def get_event(
                         "displayName": "Canon in E",
                         "startTime": "2019-05-14T21:20:03.000Z",
                         "endTime": "2019-05-14T21:21:33.000Z",
+                        "interval": 0.2,
                     },
                 }
             ),
@@ -156,9 +158,9 @@ def get_event(
     ],
 )
 def test_callback_message_published_on_event_stage_change(
-    stage_id, display_name, start_time, end_time, frequency, form_url, expected_message
+    stage_id, display_name, start_time, end_time, interval, form_url, expected_message
 ):
-    event = get_event(stage_id, display_name, start_time, end_time, frequency, form_url)
+    event = get_event(stage_id, display_name, start_time, end_time, interval, form_url)
 
     sns_expected_params = {
         "TopicArn": CALLBACK_SNS_ARN,
@@ -179,7 +181,7 @@ def test_callback_message_published_on_event_stage_change(
 
 
 @pytest.mark.parametrize(
-    "stage_id, display_name, start_time, end_time, frequency, form_url, expected_transaction_items",
+    "stage_id, display_name, start_time, end_time, interval, form_url, expected_transaction_items",
     [
         (
             "STAGE_CHOICE_SYNESTHESIA",
@@ -197,7 +199,7 @@ def test_callback_message_published_on_event_stage_change(
                             "displayName": {"S": "Canon in D"},
                             "startTime": {"S": "2019-05-14T21:20:03.000Z"},
                             "endTime": {"S": "2019-05-14T21:21:33.000Z"},
-                            "frequency": {"N": "20"},
+                            "interval": {"N": "20"},
                         },
                         "TableName": TABLE_NAME,
                     }
@@ -235,7 +237,7 @@ def test_callback_message_published_on_event_stage_change(
             "Canon in E",
             "2019-05-14T21:20:03.000Z",
             "2019-05-14T21:21:33.000Z",
-            None,
+            0.2,
             None,
             [
                 {
@@ -246,6 +248,7 @@ def test_callback_message_published_on_event_stage_change(
                             "displayName": {"S": "Canon in E"},
                             "startTime": {"S": "2019-05-14T21:20:03.000Z"},
                             "endTime": {"S": "2019-05-14T21:21:33.000Z"},
+                            "interval": {"N": "0.2"},
                         },
                         "TableName": TABLE_NAME,
                     }
@@ -305,11 +308,11 @@ def test_event_stage_and_song_list_updated_on_event_stage_change(
     display_name,
     start_time,
     end_time,
-    frequency,
+    interval,
     form_url,
     expected_transaction_items,
 ):
-    event = get_event(stage_id, display_name, start_time, end_time, frequency, form_url)
+    event = get_event(stage_id, display_name, start_time, end_time, interval, form_url)
 
     dynamo_expected_params = {"TransactItems": expected_transaction_items}
 
