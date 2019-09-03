@@ -17,7 +17,7 @@ const INITIAL_STATE = {
   isLoading: false,
   isShowModal: false,
   step: 0,
-  user: {},
+  user: { phoneNumber: '+' },
 };
 
 export default class Signup extends Component {
@@ -28,8 +28,8 @@ export default class Signup extends Component {
   };
 
   gotoConfirm = () => {
-    const { email } = this.state.user;
-    this.setState(INITIAL_STATE, () => this.props.onStateChange('confirmSignUp', email));
+    const { phoneNumber } = this.state.user;
+    this.setState(INITIAL_STATE, () => this.props.onStateChange('confirmSignUp', phoneNumber));
   };
 
   gotoNextStep = (state = {}) =>
@@ -48,7 +48,7 @@ export default class Signup extends Component {
   handleSubmitDemographics = demographics => this.gotoNextStep({ demographics });
 
   handleSubmitUser = async user => {
-    const { email, password } = user;
+    const { phoneNumber, password } = user;
     const {
       demographics: { age, colorPerception, countryOfBirth, countryOfResidence, gender },
       acceptResearch,
@@ -57,7 +57,7 @@ export default class Signup extends Component {
     this.setState({ isLoading: true, error: null });
     try {
       const { userConfirmed } = await Auth.signUp({
-        username: email.toLowerCase().trim(),
+        username: phoneNumber.toLowerCase().trim(),
         password,
         attributes: {
           'custom:acceptResearch': acceptResearch ? 'Y' : 'N',

@@ -7,17 +7,18 @@ import t from 'tcomb-form-native';
 import COLORS from '../../constants/Colors';
 
 const UserType = t.struct({
-  email: t.refinement(t.String, val => /^[^ ]+@[^ ]+\.[^ ]+$/.test(val)),
+  phoneNumber: t.refinement(t.String, val => /^\+[0-9]+$/.test(val)),
   password: t.String,
 });
 
 const options = {
-  order: ['email', 'password'],
+  order: ['phoneNumber', 'password'],
   fields: {
-    email: {
-      autoCompleteType: 'email',
-      keyboardType: 'email-address',
-      textContentType: 'emailAddress',
+    phoneNumber: {
+      label: 'Phone Number (with country code)',
+      autoCompleteType: 'tel',
+      keyboardType: 'phone-pad',
+      textContentType: 'telephoneNumber',
     },
     password: {
       secureTextEntry: true,
@@ -32,8 +33,12 @@ export default class User extends Component {
     password: '',
   };
 
-  handleChange = ({ password, ...formData }) =>
-    this.setState({ password }, () => this.props.onChange(formData));
+  handleChange = ({ phoneNumber, password, ...formData }) => {
+    if (!phoneNumber.startsWith('+')) {
+      phoneNumber = `+${phoneNumber}`;
+    }
+    this.setState({ password }, () => this.props.onChange({ phoneNumber, ...formData }));
+  };
 
   handleSubmit = () => {
     const formData = this.refs.form.getValue();
