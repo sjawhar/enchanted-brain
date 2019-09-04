@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 
 import { store, actions } from '../state';
 import WaitingScreen from './Waiting';
+import { getClockOffset } from '../config';
 import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
@@ -38,7 +39,8 @@ class ChillsScreen extends Component {
     });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.clockOffset = await getClockOffset();
     this.scheduleRecording(this.props.navigation.state.params);
   }
 
@@ -50,7 +52,7 @@ class ChillsScreen extends Component {
   }
 
   scheduleRecording = ({ startTime, endTime }) => {
-    const startDelay = Date.parse(startTime) - Date.now();
+    const startDelay = Date.parse(startTime) - (Date.now() + this.clockOffset);
     this.setState({
       timeoutId: setTimeout(() => this.setState({ isShowPrompt: true }), Math.max(startDelay, 0)),
     });
@@ -66,7 +68,7 @@ class ChillsScreen extends Component {
 
   // https://github.com/facebook/react-native/issues/12981#issuecomment-499827072
   scheduleEndRecording = (fn, ttl, args) => {
-    const waitingTime = ttl - Date.now();
+    const waitingTime = ttl - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
       const { timeoutId } = this.state;
       InteractionManager.runAfterInteractions(() => {
@@ -99,7 +101,7 @@ class ChillsScreen extends Component {
     }
 
     let nextPollTime = pollTime;
-    const now = Date.now();
+    const now = Date.now() + this.clockOffset;
     while (nextPollTime <= now) {
       nextPollTime += this.interval;
     }
