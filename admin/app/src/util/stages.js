@@ -55,14 +55,14 @@ const STAGE_DATA = [
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
     displayName: 'Adagio for Strings',
-    startTime: startTime.toISOString(),
+    startTime: new Date(startTime.valueOf() + 5000).toISOString(),
     endTime: new Date(startTime.valueOf() + 120000).toISOString(),
     interval: 0.2
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
     displayName: 'The Four Seasons - Summer',
-    startTime: startTime.toISOString(),
+    startTime: new Date(startTime.valueOf() + 5000).toISOString(),
     endTime: new Date(startTime.valueOf() + 120000).toISOString(),
     interval: 0.2
   }),
