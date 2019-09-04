@@ -3,6 +3,7 @@ import os
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
+from decimal import Decimal
 from src.functions.choice_writer.index import handler, dynamodb
 
 dynamo_update_item_success_response = {"ResponseMetadata": {"HTTPStatusCode": 200}}
@@ -36,7 +37,7 @@ def get_event(choice="#AB0000", choice_type="CHOICE_COLOR", user_id="userId"):
         ("CHOICE_COLOR", "#00AB00", "colors", None, "colorUser"),
         ("CHOICE_EMOTION_HAPPINESS", 1, "emotions", "EMOTION_HAPPINESS", "happyUser"),
         ("CHOICE_EMOTION_ANGER", 1, "emotions", "EMOTION_ANGER", "angryUser"),
-        ("CHOICE_CHILLS", 1, "chills", None, "chillyUser"),
+        ("CHOICE_CHILLS", 0.54, "chills", None, "chillyUser"),
     ],
 )
 def test_choices(choice_type, choice, choice_key, emotion_type, user_id):
@@ -50,7 +51,9 @@ def test_choices(choice_type, choice, choice_key, emotion_type, user_id):
             "#choice_key": choice_key,
             "#timestamp": test_timestamp,
         },
-        "ExpressionAttributeValues": {":choice_value": choice},
+        "ExpressionAttributeValues": {
+            ":choice_value": Decimal(str(choice)) if type(choice) == float else choice
+        },
         "ReturnValues": "NONE",
     }
     if emotion_type is not None:

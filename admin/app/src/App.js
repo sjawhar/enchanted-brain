@@ -38,6 +38,8 @@ class App extends Component {
     return { stage, data: getStageData(stage) };
   };
 
+  handleBack = () => this.setState(({ stage }) => ({ stage: stage - 1 }));
+
   handleConnected = () => this.setState({ isConnected: true });
 
   handleNextStage = () => {
@@ -45,6 +47,8 @@ class App extends Component {
     concertApi.send({ event: 'EVENT_STAGE_CHANGED', data });
     this.setState({ stage: stage + 1 });
   };
+
+  handleSkipNext = () => this.setState(({ stage }) => ({ stage: stage + 1 }));
 
   handleStageChanged = lastReceived => this.setState({ lastReceived });
 
@@ -62,6 +66,8 @@ class App extends Component {
                 {JSON.stringify(this.getNextStage().data, null, 2)}
               </pre>
               <button onClick={this.handleNextStage}>Send Next Stage</button>
+              <button onClick={this.handleBack}>Back</button>
+              <button onClick={this.handleSkipNext}>Skip</button>
             </div>
             <div style={styles.codeContainer}>
               <h1>Last Received</h1>
