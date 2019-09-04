@@ -17,7 +17,7 @@ const INITIAL_STATE = {
   isLoading: false,
   isShowModal: false,
   step: 0,
-  user: { phoneNumber: '+' },
+  user: { phoneNumber: '+41' },
 };
 
 export default class Signup extends Component {
