@@ -1,6 +1,7 @@
 import boto3
 import json
 import os
+from decimal import Decimal
 from enchanted_brain.attributes import (
     ATTR_CHOICE_TIMESTAMP,
     ATTR_CHOICE_TYPE,
@@ -45,7 +46,7 @@ def handler(event, context):
 
 
 def get_update_args(event):
-    choice_data = json.loads(event["Records"][0]["Sns"]["Message"])
+    choice_data = json.loads(event["Records"][0]["Sns"]["Message"], parse_float=Decimal)
     record_id = choice_data["userId"]
     choice_type = choice_data["choiceType"]
     choice = choice_data["choice"]
