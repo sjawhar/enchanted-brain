@@ -2,6 +2,7 @@ import boto3
 import json
 import os
 from boto3.dynamodb import types
+from decimal import Decimal
 from enchanted_brain.attributes import (
     ATTR_AGGREGATE_CHOICE_COUNT,
     ATTR_AGGREGATE_CHOICE_SUM,
@@ -67,8 +68,13 @@ def update_event_stage_and_song_list(message):
 
 
 def get_event_stage_put_transaction_item(message_data):
+    serialized_data = json.loads(
+        json.dumps(message_data, cls=DynamoDbEncoder), parse_float=Decimal
+    )
     event_stage_update_args = {
-        "Item": {k: dynamodb_serializer.serialize(v) for k, v in message_data.items()},
+        "Item": {
+            k: dynamodb_serializer.serialize(v) for k, v in serialized_data.items()
+        },
         "TableName": DYNAMODB_TABLE_NAME,
     }
     event_stage_update_args["Item"][ATTR_RECORD_ID] = dynamodb_serializer.serialize(
