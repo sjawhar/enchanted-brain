@@ -6,18 +6,18 @@ import t from 'tcomb-form-native';
 
 import COLORS from '../../constants/Colors';
 
-const AcceptTerms = t.struct({
-  terms: t.Boolean,
-  research: t.Boolean,
+const TermsType = t.struct({
+  acceptTerms: t.Boolean,
+  acceptResearch: t.Boolean,
 });
 
 const options = {
-  order: ['terms', 'research'],
+  order: ['acceptTerms', 'acceptResearch'],
   fields: {
-    terms: {
+    acceptTerms: {
       label: 'I agree with these terms and conditions',
     },
-    research: {
+    acceptResearch: {
       label: 'I agree that my anonymized data will be used for research (cf. Article 5)',
     },
   },
@@ -30,24 +30,17 @@ export default class Terms extends Component {
   };
 
   handleChange = formData => {
-    const { terms = false, research = false } = formData || {};
+    const { acceptTerms = false } = formData || {};
     this.setState({
       formData,
-      isSubmitDisabled: !terms || !research,
+      isSubmitDisabled: !acceptTerms,
     });
   };
 
-  handlePress = cb => {
-    this.setState(
-      {
-        formData: {},
-        isSubmitDisabled: true,
-      },
-      cb
-    );
-  };
+  handleSubmit = () => this.props.onSubmit(this.state.formData);
 
   render() {
+    const { onCancel } = this.props;
     const { formData, isSubmitDisabled } = this.state;
     return (
       <ScrollView style={{ flex: 1 }}>
@@ -174,7 +167,7 @@ export default class Terms extends Component {
           <t.form.Form
             onChange={this.handleChange}
             options={options}
-            type={AcceptTerms}
+            type={TermsType}
             value={formData}
           />
 
@@ -182,12 +175,12 @@ export default class Terms extends Component {
             buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
             title="NEXT"
             disabled={isSubmitDisabled}
-            onPress={() => this.handlePress(this.props.onAgree)}
+            onPress={this.handleSubmit}
           />
           <Button
             buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
             title="CANCEL"
-            onPress={() => this.handlePress(this.props.onCancel)}
+            onPress={onCancel}
           />
         </View>
       </ScrollView>
