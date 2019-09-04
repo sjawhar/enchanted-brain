@@ -24,3 +24,18 @@ export const VIBRATION_PATTERN = Platform.select({
   ios: [0, 1000],
   android: [0, 500, 1000, 500],
 });
+
+let clockOffsetPromise = null;
+
+export const getClockOffset = () => {
+  if (!clockOffsetPromise) {
+    clockOffsetPromise = new Promise(async resolve => {
+      const start = Date.now();
+      const response = await fetch('https://worldtimeapi.org/api/timezone/UTC');
+      const end = Date.now();
+      const { datetime } = await response.json();
+      resolve(Date.parse(datetime) - 0.5 * (start + end));
+    });
+  }
+  return clockOffsetPromise;
+};
