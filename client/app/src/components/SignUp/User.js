@@ -16,6 +16,8 @@ const options = {
   fields: {
     phoneNumber: {
       label: 'Phone Number (with country code)',
+      help:
+        'This will be your username. Do not include leading zeros after the country code. A confirmation code will be sent by SMS.',
       autoCompleteType: 'tel',
       keyboardType: 'phone-pad',
       textContentType: 'telephoneNumber',
