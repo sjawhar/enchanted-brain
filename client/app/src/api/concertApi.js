@@ -8,6 +8,8 @@ const events = new EventEmitter();
 
 const isStub = WEBSOCKET_API_STUB !== 'false';
 
+const retryQueue = [];
+
 const connect = async () => {
   isConnect = true;
 
@@ -24,14 +26,18 @@ const connect = async () => {
   }
 
   const idToken = (await Auth.currentSession()).getIdToken().getJwtToken();
-  ws = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
+  const websocket = new WebSocket(`${WEBSOCKET_API_URL}?token=${idToken.split('.').pop()}`, null, {
     headers: { Authorization: idToken },
   });
 
-  ws.onopen = () => {
+  websocket.onopen = () => {
     console.debug('CONNECTED');
+    ws = websocket;
+    while (ws && retryQueue.length > 0) {
+      ws.send(retryQueue.shift());
+    }
   };
-  ws.onmessage = message => {
+  websocket.onmessage = message => {
     if (!message || !message.data) {
       return;
     }
@@ -44,11 +50,11 @@ const connect = async () => {
     }
   };
 
-  ws.onerror = e => {
+  websocket.onerror = e => {
     console.error('ERROR', e.message);
   };
 
-  ws.onclose = e => {
+  websocket.onclose = e => {
     ws = null;
     console.debug('CLOSED', e.code, e.reason);
     if (isConnect) {
@@ -69,11 +75,15 @@ const send = message => {
   if (isStub) {
     console.log('SEND', message);
     return;
-  } else if (!ws) {
+  }
+
+  const data = JSON.stringify(message);
+  if (!ws) {
+    retryQueue.push(data);
     return false;
   }
 
-  ws.send(JSON.stringify(message));
+  ws.send(data);
 };
 
 const isConnected = () => isConnect;
