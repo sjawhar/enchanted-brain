@@ -3,7 +3,6 @@ import os
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
-from decimal import Decimal
 from src.functions.on_event_stage_changed.index import handler, sns, dynamodb
 
 CALLBACK_SNS_ARN = os.environ["CALLBACK_GLOBAL_SNS_TOPIC_ARN"]
