@@ -3,28 +3,27 @@ import { Modal, View, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
+import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
 
 export default class UserExistsModal extends Component {
   render() {
-    const { visible, onConfirm, onSignIn } = this.props;
+    const { locale, onConfirm, onSignIn, visible } = this.props;
+    const { modal, buttons } = LOCALES[locale];
     return (
       <Modal animationType="slide" transparent={false} visible={visible}>
         <View style={styles.modal}>
-          <Text style={styles.modalHeader}>User already exists</Text>
-          <Text style={styles.modalText}>
-            Are you trying to complete the sign up process by entering a confirmation code? Or would
-            you like to sign in instead?
-          </Text>
+          <Text style={styles.modalHeader}>{modal.header}</Text>
+          <Text style={styles.modalText}>{modal.body}</Text>
           <Button
-            onPress={onConfirm}
-            title="CONFIRM USER"
             buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
+            onPress={onConfirm}
+            title={buttons.confirmUser}
           />
           <Button
-            onPress={onSignIn}
-            title="SIGN IN"
             buttonStyle={{ backgroundColor: COLORS.primaryBlue, ...styles.button }}
+            onPress={onSignIn}
+            title={buttons.signIn}
           />
         </View>
       </Modal>
