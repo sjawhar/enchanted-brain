@@ -18,6 +18,7 @@ const INITIAL_STATE = {
   isShowModal: false,
   step: 0,
   user: { phoneNumber: '+41' },
+  locale: 'fr',
 };
 
 export default class Signup extends Component {
@@ -42,6 +43,8 @@ export default class Signup extends Component {
     this.setState(({ step }) => ({
       step: step - 1,
     }));
+
+  handleLocaleChange = locale => this.setState({ locale });
 
   handleSubmitTerms = ({ acceptResearch }) => this.gotoNextStep({ acceptResearch });
 
@@ -85,10 +88,11 @@ export default class Signup extends Component {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { error, step, isLoading, isShowModal, demographics, user } = this.state;
+    const { error, step, isLoading, isShowModal, demographics, user, locale } = this.state;
     return (
       <View style={styles.container}>
         <UserExistsModal
+          locale={locale}
           onConfirm={this.gotoConfirm}
           onSignIn={this.gotoSignIn}
           visible={isShowModal}
@@ -101,6 +105,7 @@ export default class Signup extends Component {
                   error={error}
                   formData={user}
                   isLoading={isLoading}
+                  locale={locale}
                   onCancel={this.handleBack}
                   onChange={formData => this.setState({ user: formData })}
                   onSubmit={this.handleSubmitUser}
@@ -110,6 +115,7 @@ export default class Signup extends Component {
               return (
                 <Demographics
                   formData={demographics}
+                  locale={locale}
                   onCancel={this.handleBack}
                   onChange={formData => this.setState({ demographics: formData })}
                   onSubmit={this.handleSubmitDemographics}
@@ -117,7 +123,14 @@ export default class Signup extends Component {
               );
             case 0:
             default:
-              return <Terms onCancel={this.gotoSignIn} onSubmit={this.handleSubmitTerms} />;
+              return (
+                <Terms
+                  locale={locale}
+                  onCancel={this.gotoSignIn}
+                  onLocaleChange={this.handleLocaleChange}
+                  onSubmit={this.handleSubmitTerms}
+                />
+              );
           }
         })()}
       </View>

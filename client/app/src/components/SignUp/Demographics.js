@@ -5,46 +5,35 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import t from 'tcomb-form-native';
 import { getCodeList } from 'country-list';
 
+import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
 
 const COUNTRIES = Object.entries(getCodeList())
   .sort(([_, a], [__, b]) => a.localeCompare(b))
   .reduce((countries, [code, name]) => Object.assign(countries, { [code]: name }), {});
 
-const DemographicsType = t.struct({
-  age: t.Number,
-  colorPerception: t.enums({
-    0: 'No Difficulty at all',
-    1: 'Slight or Infrequent Difficulty',
-    2: 'Moderate Difficulty',
-    3: 'Definite or Frequent Difficulty',
-  }),
-  gender: t.enums({
-    male: 'Male',
-    female: 'Female',
-    other: 'Other',
-  }),
-  countryOfBirth: t.enums(COUNTRIES),
-  countryOfResidence: t.enums(COUNTRIES),
-});
-
-const options = {
-  order: ['age', 'gender', 'countryOfBirth', 'countryOfResidence', 'colorPerception'],
-  fields: {
-    countryOfBirth: {
-      label: 'Country of Birth',
-    },
-    countryOfResidence: {
-      label: 'Country of Residence',
-    },
-    colorPerception: {
-      label:
-        'To what extent, if any, do you have difficulty in telling colors apart that other people are easily able to tell apart?',
-    },
-  },
-};
-
 export default class Demographics extends Component {
+  getFormProps = () => {
+    const { fields, enums } = LOCALES[this.props.locale];
+    const order = ['age', 'gender', 'countryOfBirth', 'countryOfResidence', 'colorPerception'];
+    return {
+      type: t.struct({
+        age: t.Number,
+        colorPerception: t.enums(enums.colorPerception),
+        gender: t.enums(enums.gender),
+        countryOfBirth: t.enums(COUNTRIES),
+        countryOfResidence: t.enums(COUNTRIES),
+      }),
+      options: {
+        order,
+        fields: order.reduce(
+          (fieldLabels, field) => ({ ...fieldLabels, [field]: { label: fields[field] } }),
+          {}
+        ),
+      },
+    };
+  };
+
   handleSubmit = () => {
     const formData = this.refs.form.getValue();
     if (!formData) {
@@ -54,7 +43,8 @@ export default class Demographics extends Component {
   };
 
   render() {
-    const { formData, onCancel, onChange } = this.props;
+    const { formData, locale, onCancel, onChange } = this.props;
+    const { buttons } = LOCALES[locale];
     return (
       <KeyboardAvoidingView
         behavior="padding"
@@ -62,21 +52,15 @@ export default class Demographics extends Component {
         keyboardVerticalOffset={50}
         style={styles.container}>
         <ScrollView>
-          <t.form.Form
-            onChange={onChange}
-            options={options}
-            ref="form"
-            type={DemographicsType}
-            value={formData}
-          />
+          <t.form.Form {...this.getFormProps()} onChange={onChange} ref="form" value={formData} />
           <Button
             buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
-            title="NEXT"
+            title={buttons.next}
             onPress={this.handleSubmit}
           />
           <Button
             buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
-            title="BACK"
+            title={buttons.back}
             onPress={onCancel}
           />
         </ScrollView>

@@ -1,0 +1,98 @@
+{
+  "buttons": {
+    "back": "RETOUR",
+    "cancel": "ANNULER",
+    "confirmUser": "CONFIRM USER",
+    "next": "SUIVANT",
+    "signIn": "SIGN IN",
+    "signUp": "S’ENREGISTRER"
+  },
+  "enums": {
+    "colorPerception": {
+      "0": "Aucune difficulté",
+      "1": "Difficulté peu fréquente ou légère",
+      "2": "Difficulté modéré",
+      "3": "Difficulté fréquente ou définitive"
+    },
+    "gender": {
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    }
+  },
+  "fields": {
+    "acceptResearch": "Je consens à ce que mes données anonymisées soient utilisées pour la recherche (cf Article 5)",
+    "acceptTerms": "Je consens à ces termes et conditions",
+    "age": "Age",
+    "colorPerception": "Dans quelle mesure avez-vous des difficultés à discriminer des couleurs que d’autres personnes discriminent sans problème?",
+    "countryOfBirth": "Pays de naissance",
+    "countryOfResidence": "Pays de résidence",
+    "gender": "Sexe",
+    "password": "Mot de passe",
+    "phoneNumber": "Numéro de téléphone (avec le code du pays)",
+    "phoneNumberHelp": "Ceci sera votre identifiant. Ne mettez pas de zéros après le code du pays. Un code de confirmation vous sera envoyé par SMS."
+  },
+  "modal": {
+    "header": "User already exists",
+    "body": "Are you trying to complete the sign up process by entering a confirmation code? Or would you like to sign in instead?"
+  },
+  "terms": {
+    "title": "Application Mobile Conditions Générales d’Utilisation",
+    "purpose": "Les présentes conditions générales d’utilisation ont pour objet de définir les modalités et conditions dans lesquelles NeuroTech met à disposition son application mobile, et les services disponibles au bénéfice de l’utilisateur. En utilisant l’application mobile de NeuroTech, l’utilisateur accepte sans réserve les présentes dispositions et conditions générales d’utilisation.",
+    "articleOneTitle": "Article 1 - Description de l’application",
+    "articleOneBody": [
+      "L’application mobile a pour objectif de permettre aux spectateurs du concert « Le Cerveau Enchanté » d’interagir en temps réel sur différentes activités proposées en lien avec le programme musical du concert. Cette application est éditée et distribuée par NeuroTech."
+    ],
+    "articleTwoTitle": "Article 2 - Responsabilité de l’éditeur",
+    "articleTwoBody": [
+      "L’utilisation des informations et documents disponibles sur cette application sont sous l’unique responsabilité de l’utilisateur, qui assume l’ensemble des conséquences."
+    ],
+    "articleTwoSectionOneTitle": "2.1. Contraintes techniques",
+    "articleTwoSectionOneBody": [
+      "L’application mobile fonctionne avec les appareils mobiles utilisant les systèmes d’exploitation Apple iOS et Android. NeuroTech ne garantit pas l’absence de bogues, d’inexactitudes, d’erreurs, ou d’autres éléments nuisibles. L’application mobile est dépendante du réseau mobile et internet pour pouvoir fonctionner. Par conséquent, le système d’alerte ne peut fonctionner que sous réserve de la disponibilité du réseau. NeuroTech décline toute responsabilité en cas d’indisponibilité du réseau."
+    ],
+    "articleThreeTitle": "Article 3 - Droits de propriété intellectuelle",
+    "articleThreeBody": [
+      "L’application et chacun des éléments qui la composent sont la propriété exclusive du Neuroscape Center de l’Université de Californie à San Francisco conformément aux dispositions du code de la propriété intellectuelle (droits d’auteur, droits relatifs aux brevets, marques, dessins et modèles, logos).",
+      "La mise à disposition de l’application ne saurait être analysée comme un transfert de propriété aux bénéfices de l’utilisateur.",
+      "L’utilisateur n’est pas autorisé à décompiler ou désassembler l’application, reproduire, représenter, modifier, traduire, adapter, partiellement ou totalement sans l’accord préalable écrit du Neuroscape Center de l’Université de Californie à San Francisco."
+    ],
+    "articleFourTitle": "Article 4 - Traitement et publication des données personnelles anonymisées",
+    "articleFourBody": [
+      "Les données collectées via l’application sont anonymisées et hébergées sur un serveur du Centre Hospitalier Universitaire Vaudois.",
+      "Les données récoltées sont les données démographiques telles que demandées sur le formulaire d’inscription, ainsi que les réponses aux questions et activités diverses proposées dans l’application. Il n’y a pas de récolte de données médicales.",
+      "Les données récoltées et anonymisées pourront être incorporées dans leur intégralité dans des futures versions de cette application et autres applications, de même que dans des émissions de télévision et radio, publications en ligne et scénarios de réalité virtuelle – dans des domaines académiques, commerciaux et à but non-lucratif."
+    ],
+    "articleFiveTitle": "Article 5 – Utilisation scientifique des données personnelles anonymisées",
+    "articleFiveBody": [
+      "L’utilisateur consent à ce que ses données anonymisées décrites plus haut soient utilisées dans le cadre de la recherche et dans les publications, et mises à disposition à d’autres chercheurs sur un serveur en ligne."
+    ],
+    "articleSixTitle": "Article 6 – Droit d’accès, modification et suppression de données collectées",
+    "articleSixBody": [
+      "En application de la Loi fédérale 235.1 sur la protection des données (LPD) du 19 juin 1992 (Etat le 1er mars 2019), l’utilisateur dispose d’un droit d’accès, de modification, de rectification, d’opposition et de suppression sur les données le concernant collectées sur cette application.",
+      "Ces droits sont strictement personnels et ne peuvent être exercés que par l’utilisateur pour les données le concernant, ou concernant un autre utilisateur dont il est le représentant légal. L’utilisateur peut exercer ces droits, en adressant un e-mail à l’adresse info@neurotech.healthcare ou en envoyant un courrier à l’adresse suivante :",
+      [
+        "NeuroTech",
+        "Biopôle",
+        "Route de la Corniche 9A",
+        "Secteur Croisette/Bâtiment SC-A",
+        "1066 Epalinges",
+        "Switzerland"
+      ],
+      "L’utilisateur devra préciser ses nom, prénom, adresse électronique, et son identifiant d’utilisateur. L’utilisateur devra joindre à sa demande tout élément permettant de l’identifier avec certitude. La réponse lui sera adressée dans un délai maximal de deux (2) mois suivant la réception de la demande. "
+    ],
+    "articleSevenTitle": "Article 7 - Droit applicable",
+    "articleSevenBody": [
+      "La législation suisse s'applique au présent contrat. En cas d'absence de résolution à l’amiable d'un litige né entre les parties, les tribunaux suisses seront les seuls compétents.",
+      "Pour toute question relative à l’application des présentes CGU, vous pouvez joindre l’éditeur aux coordonnées inscrites à l’Article 8."
+    ],
+    "articleEightTitle": "Article 8 - Mentions légales",
+    "articleEightBody": [
+      [
+        "L’application est éditée par : NeuroTech",
+        "Président : Professor Philippe Ryvlin",
+        "Directeur de la publication : Dr Arseny Sokolov"
+      ]
+    ]
+  }
+}
