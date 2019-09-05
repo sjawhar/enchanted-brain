@@ -1,10 +1,17 @@
-import { SEND_CHOICE, SET_CHOICE_TYPE, SET_CHOICE_INVERTED, SET_UID } from './actions';
+import {
+  SEND_CHOICE,
+  SET_CHOICE_TYPE,
+  SET_CHOICE_INVERTED,
+  SET_LANGUAGE,
+  SET_UID,
+} from './actions';
 import {
   CHOICE_CHILLS,
   CHOICE_COLOR,
   CHOICE_EMOTION_ANGER,
   CHOICE_EMOTION_HAPPINESS,
 } from '../constants/Choices';
+import { LANGUAGE_FR } from '../languages';
 
 const INITIAL_STATE = () => ({
   choices: {
@@ -12,8 +19,9 @@ const INITIAL_STATE = () => ({
     emotions: [],
     chills: [],
   },
-  choiceType: CHOICE_COLOR,
   choiceInverted: false,
+  choiceType: CHOICE_COLOR,
+  language: LANGUAGE_FR,
   uid: null,
 });
 
@@ -47,6 +55,9 @@ const reducer = (state, action) => {
     }
     case SET_CHOICE_INVERTED: {
       return { ...state, choiceInverted: payload.choiceInverted };
+    }
+    case SET_LANGUAGE: {
+      return { ...state, language: payload.language };
     }
     case SET_UID: {
       return { ...state, uid: payload.uid };

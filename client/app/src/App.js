@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify, { Auth, I18n } from 'aws-amplify';
 import {
   ConfirmSignIn,
   ConfirmSignUp,
@@ -85,6 +85,7 @@ const theme = {
 };
 
 Amplify.configure(AMPLIFY_CONFIG);
+I18n.setLanguage(store.getState().language);
 
 class App extends React.Component {
   componentDidMount() {
