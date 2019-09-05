@@ -3,13 +3,13 @@ import { Modal, View, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
-import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
+import LANGUAGES from '../../languages';
 
 export default class UserExistsModal extends Component {
   render() {
-    const { locale, onConfirm, onSignIn, visible } = this.props;
-    const { modal, buttons } = LOCALES[locale];
+    const { language, onConfirm, onSignIn, visible } = this.props;
+    const { modal, buttons } = LANGUAGES[language];
     return (
       <Modal animationType="slide" transparent={false} visible={visible}>
         <View style={styles.modal}>
