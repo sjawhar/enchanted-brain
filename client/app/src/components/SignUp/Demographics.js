@@ -5,8 +5,8 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import t from 'tcomb-form-native';
 import { getCodeList } from 'country-list';
 
-import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
+import LANGUAGES from '../../languages';
 
 const COUNTRIES = Object.entries(getCodeList())
   .sort(([_, a], [__, b]) => a.localeCompare(b))
@@ -14,7 +14,7 @@ const COUNTRIES = Object.entries(getCodeList())
 
 export default class Demographics extends Component {
   getFormProps = () => {
-    const { fields, enums } = LOCALES[this.props.locale];
+    const { fields, enums } = LANGUAGES[this.props.language];
     const order = ['age', 'gender', 'countryOfBirth', 'countryOfResidence', 'colorPerception'];
     return {
       type: t.struct({
@@ -43,8 +43,8 @@ export default class Demographics extends Component {
   };
 
   render() {
-    const { formData, locale, onCancel, onChange } = this.props;
-    const { buttons } = LOCALES[locale];
+    const { formData, language, onCancel, onChange } = this.props;
+    const { buttons } = LANGUAGES[language];
     return (
       <KeyboardAvoidingView
         behavior="padding"
