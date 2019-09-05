@@ -2,9 +2,9 @@
   "buttons": {
     "back": "RETOUR",
     "cancel": "ANNULER",
-    "confirmUser": "CONFIRM USER",
+    "confirmUser": "CONFIRMER COMPTE UTILISATEUR",
     "next": "SUIVANT",
-    "signIn": "SIGN IN",
+    "signIn": "SE CONNECTER",
     "signUp": "S’ENREGISTRER"
   },
   "enums": {
@@ -33,8 +33,8 @@
     "phoneNumberHelp": "Ceci sera votre identifiant. Ne mettez pas de zéros après le code du pays. Un code de confirmation vous sera envoyé par SMS."
   },
   "modal": {
-    "header": "User already exists",
-    "body": "Are you trying to complete the sign up process by entering a confirmation code? Or would you like to sign in instead?"
+    "header": "Le compte utilisateur existe déjà.",
+    "body": "Essayez-vous de finaliser le processus d'inscription en entrant un code de confirmation? Ou souhaitez-vous vous connecter?"
   },
   "terms": {
     "title": "Application Mobile Conditions Générales d’Utilisation",

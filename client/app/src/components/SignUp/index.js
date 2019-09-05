@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { Auth } from 'aws-amplify';
+import { Auth, I18n } from 'aws-amplify';
 import Constants from 'expo-constants';
 
 import Terms from './Terms';
 import Demographics from './Demographics';
 import User from './User';
 import UserExistsModal from './UserExistsModal';
+import { store, actions } from '../../state';
 import Layout from '../../constants/Layout';
 
 const INITIAL_STATE = {
@@ -18,11 +19,13 @@ const INITIAL_STATE = {
   isShowModal: false,
   step: 0,
   user: { phoneNumber: '+41' },
-  locale: 'fr',
 };
 
 export default class Signup extends Component {
-  state = { ...INITIAL_STATE };
+  state = {
+    ...INITIAL_STATE,
+    language: store.getState().language,
+  };
 
   gotoSignIn = () => {
     this.setState(INITIAL_STATE, () => this.props.onStateChange('signIn', {}));
@@ -44,7 +47,11 @@ export default class Signup extends Component {
       step: step - 1,
     }));
 
-  handleLocaleChange = locale => this.setState({ locale });
+  handleLanguageChange = language => {
+    I18n.setLanguage(language);
+    store.dispatch(actions.setLanguage(language));
+    this.setState({ language });
+  };
 
   handleSubmitTerms = ({ acceptResearch }) => this.gotoNextStep({ acceptResearch });
 
@@ -88,11 +95,11 @@ export default class Signup extends Component {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { error, step, isLoading, isShowModal, demographics, user, locale } = this.state;
+    const { demographics, error, language, isLoading, isShowModal, step, user } = this.state;
     return (
       <View style={styles.container}>
         <UserExistsModal
-          locale={locale}
+          language={language}
           onConfirm={this.gotoConfirm}
           onSignIn={this.gotoSignIn}
           visible={isShowModal}
@@ -105,7 +112,7 @@ export default class Signup extends Component {
                   error={error}
                   formData={user}
                   isLoading={isLoading}
-                  locale={locale}
+                  language={language}
                   onCancel={this.handleBack}
                   onChange={formData => this.setState({ user: formData })}
                   onSubmit={this.handleSubmitUser}
@@ -115,7 +122,7 @@ export default class Signup extends Component {
               return (
                 <Demographics
                   formData={demographics}
-                  locale={locale}
+                  language={language}
                   onCancel={this.handleBack}
                   onChange={formData => this.setState({ demographics: formData })}
                   onSubmit={this.handleSubmitDemographics}
@@ -125,9 +132,9 @@ export default class Signup extends Component {
             default:
               return (
                 <Terms
-                  locale={locale}
+                  language={language}
                   onCancel={this.gotoSignIn}
-                  onLocaleChange={this.handleLocaleChange}
+                  onLanguageChange={this.handleLanguageChange}
                   onSubmit={this.handleSubmitTerms}
                 />
               );

@@ -4,9 +4,9 @@ import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import t from 'tcomb-form-native';
 
-import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
 import Layout from '../../constants/Layout';
+import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../../languages';
 
 const TermsType = t.struct({
   acceptTerms: t.Boolean,
@@ -20,7 +20,7 @@ export default class Terms extends Component {
   };
 
   getFormOptions = () => {
-    const { acceptTerms, acceptResearch } = LOCALES[this.props.locale].fields;
+    const { acceptTerms, acceptResearch } = LANGUAGES[this.props.language].fields;
     return {
       order: ['acceptTerms', 'acceptResearch'],
       fields: {
@@ -45,20 +45,22 @@ export default class Terms extends Component {
   handleSubmit = () => this.props.onSubmit(this.state.formData);
 
   render() {
-    const { locale, onCancel, onLocaleChange } = this.props;
+    const { language, onCancel, onLanguageChange } = this.props;
     const { formData, isSubmitDisabled } = this.state;
-    const { terms, buttons } = LOCALES[locale];
+    const { terms, buttons } = LANGUAGES[language];
     return (
       <ScrollView style={{ flex: 1 }}>
-        <View style={styles.localeButtonContainer}>
+        <View style={styles.languageButtonContainer}>
           <Button
-            buttonStyle={styles.localeButton}
-            onPress={() => onLocaleChange('fr')}
+            buttonStyle={styles.languageButton}
+            disabled={language === LANGUAGE_FR}
+            onPress={() => onLanguageChange(LANGUAGE_FR)}
             title="Français"
           />
           <Button
-            buttonStyle={styles.localeButton}
-            onPress={() => onLocaleChange('en')}
+            buttonStyle={styles.languageButton}
+            disabled={language === LANGUAGE_EN}
+            onPress={() => onLanguageChange(LANGUAGE_EN)}
             title="English"
           />
         </View>
@@ -112,13 +114,13 @@ export default class Terms extends Component {
 }
 
 const styles = EStyleSheet.create({
-  localeButtonContainer: {
+  languageButtonContainer: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 13,
   },
-  localeButton: {
+  languageButton: {
     width: Layout.window.width * 0.4,
   },
   header: {

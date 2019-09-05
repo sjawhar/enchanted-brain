@@ -4,8 +4,8 @@ import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import t from 'tcomb-form-native';
 
-import LOCALES from './locales';
 import COLORS from '../../constants/Colors';
+import LANGUAGES from '../../languages';
 
 const UserType = t.struct({
   phoneNumber: t.refinement(t.String, val => /^\+[0-9]+$/.test(val)),
@@ -18,7 +18,7 @@ export default class User extends Component {
   };
 
   getFormOptions = () => {
-    const { password, phoneNumber, phoneNumberHelp } = LOCALES[this.props.locale].fields;
+    const { password, phoneNumber, phoneNumberHelp } = LANGUAGES[this.props.language].fields;
     return {
       order: ['phoneNumber', 'password'],
       fields: {
@@ -56,8 +56,8 @@ export default class User extends Component {
 
   render() {
     const { password } = this.state;
-    const { error, formData, locale, isLoading, onCancel } = this.props;
-    const { buttons } = LOCALES[locale];
+    const { error, formData, language, isLoading, onCancel } = this.props;
+    const { buttons } = LANGUAGES[language];
     return (
       <View style={styles.container}>
         <t.form.Form
