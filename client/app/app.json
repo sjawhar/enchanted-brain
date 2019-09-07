@@ -19,7 +19,11 @@
     },
     "assetBundlePatterns": ["src/**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "healthcare.neurotech.enchantedbrain"
+    },
+    "android": {
+      "package": "healthcare.neurotech.enchantedbrain"
     }
   }
 }

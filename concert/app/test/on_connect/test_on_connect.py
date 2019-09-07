@@ -17,13 +17,14 @@ CALLBACK_VISUALIZATION_SNS_TOPIC_ARN = os.environ.get(
     "CALLBACK_VISUALIZATION_SNS_TOPIC_ARN"
 )
 CALLBACK_SQS_QUEUE_ARN_PREFIX = os.environ.get("CALLBACK_SQS_QUEUE_ARN_PREFIX")
+DEAD_LETTER_QUEUE_ARN = os.environ.get("DEAD_LETTER_QUEUE_ARN")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
 
 @pytest.fixture
 def get_event():
     def _get_event(
-        choice_inverted=False,
+        choice_inverted="false",
         choice_type="CHOICE_COLOR",
         connection_id="test-connection=",
         group=None,
@@ -40,7 +41,7 @@ def get_event():
             }
         }
         if group is not None:
-            event["requestContext"]["authorizer"][group] = True
+            event["requestContext"]["authorizer"][group] = "true"
         return event
 
     return _get_event
@@ -151,6 +152,9 @@ def test_sqs_queue_is_created_with_connection_id(get_event):
                         ],
                     }
                 ),
+                "RedrivePolicy": json.dumps(
+                    {"deadLetterTargetArn": DEAD_LETTER_QUEUE_ARN, "maxReceiveCount": 5}
+                ),
             },
         },
     )
@@ -187,6 +191,9 @@ def test_visualization_sqs_queue_permission_includes_visualization_topic(get_eve
                             }
                         ],
                     }
+                ),
+                "RedrivePolicy": json.dumps(
+                    {"deadLetterTargetArn": DEAD_LETTER_QUEUE_ARN, "maxReceiveCount": 5}
                 ),
             },
         },
@@ -320,7 +327,7 @@ def test_event_stage_record_is_retrieved(get_event):
 
 
 def test_response_includes_connected_event_and_choice_data(get_event):
-    event = get_event(choice_type="CHOICE_AWESOME", choice_inverted=True)
+    event = get_event(choice_type="CHOICE_AWESOME", choice_inverted="true")
     queue_url = "https://queue.com/event"
     response = run_handler(
         event,
@@ -351,7 +358,7 @@ def test_response_includes_connected_event_and_choice_data(get_event):
 
 def test_if_not_event_stage_record_stage_id_is_waiting(get_event):
     queue_url = "https://queue.com/missing-stage"
-    event = get_event(choice_type="CHOICE_MISSING", choice_inverted=False)
+    event = get_event(choice_type="CHOICE_MISSING", choice_inverted="false")
     response = run_handler(
         event,
         sqs_message_params={
