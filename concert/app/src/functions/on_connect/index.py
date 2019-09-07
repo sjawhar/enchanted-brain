@@ -28,6 +28,7 @@ CALLBACK_VISUALIZATION_SNS_TOPIC_ARN = os.environ.get(
 )
 CALLBACK_SQS_QUEUE_ARN_PREFIX = os.environ.get("CALLBACK_SQS_QUEUE_ARN_PREFIX")
 CALLBACK_TIMEOUT_SECONDS = os.environ.get("CALLBACK_TIMEOUT_SECONDS")
+DEAD_LETTER_QUEUE_ARN = os.environ.get("DEAD_LETTER_QUEUE_ARN")
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 
 client_lambda = boto3.client("lambda")
@@ -74,6 +75,9 @@ def handler(event, context):
                     ],
                 }
             ),
+            "RedrivePolicy": json.dumps(
+                {"deadLetterTargetArn": DEAD_LETTER_QUEUE_ARN, "maxReceiveCount": 5}
+            ),
         },
     )["QueueUrl"]
     mapping_uuid = client_lambda.create_event_source_mapping(
@@ -115,14 +119,16 @@ def handler(event, context):
         "Item"
     )
     if stage_record:
-        for key, value in stage_record.items():
-            if key == ATTR_RECORD_ID:
-                continue
-            response_data[key] = value
+        stage_record.pop(ATTR_RECORD_ID)
+        response_data.update(stage_record)
 
     for key, value in authorizer_context.items():
         if key == "principalId" or key == "integrationLatency":
             continue
+        elif value == "true":
+            value = True
+        elif value == "false":
+            value = False
         response_data[key] = value
 
     client_sqs.send_message(
