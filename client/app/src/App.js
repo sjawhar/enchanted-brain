@@ -88,7 +88,9 @@ Amplify.configure(AMPLIFY_CONFIG);
 I18n.setLanguage(store.getState().language);
 
 class App extends React.Component {
-  componentDidMount() {
+  async componentDidMount() {
+    const idToken = (await Auth.currentSession()).getIdToken();
+    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
     concertApi.on(CONNECTED, this.handleStageNavigation);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
   }
@@ -99,11 +101,7 @@ class App extends React.Component {
     concertApi.disconnect();
   }
 
-  handleConnect = async () => {
-    const idToken = (await Auth.currentSession()).getIdToken();
-    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
-    concertApi.connect();
-  };
+  handleConnect = concertApi.connect;
 
   handleDisconnect = async () => {
     concertApi.disconnect();

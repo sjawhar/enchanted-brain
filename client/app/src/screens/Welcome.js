@@ -15,12 +15,17 @@ const START_TIME = isNaN(Number(CONCERT_START_TIME))
 
 export default class WelcomeScreen extends Component {
   state = {
+    isError: false,
     isConnecting: false,
   };
 
-  handleConnect = () => {
-    this.setState({ isConnecting: true });
-    this.props.navigation.state.params.onConnect();
+  handleConnect = async () => {
+    this.setState({ isError: false, isConnecting: true });
+    try {
+      await this.props.navigation.state.params.onConnect();
+    } catch (error) {
+      this.setState({ isError: true, isConnecting: false });
+    }
   };
 
   handleFinish = async () => {
@@ -70,6 +75,9 @@ export default class WelcomeScreen extends Component {
             />
           ))
         )}
+        {this.state.isError && (
+          <Text style={styles.errorText}>An error has occurred. Please try again.</Text>
+        )}
         {!isConnecting && !!onDisconnect && (isCountdown || stageId === STAGE_WAITING) && (
           <Button title="SIGN OUT" onPress={onDisconnect} buttonStyle={styles.buttonDisconnect} />
         )}
@@ -94,6 +102,13 @@ const styles = EStyleSheet.create({
   },
   countdownLabel: {
     color: 'white',
+  },
+  errorText: {
+    color: 'white',
+    fontSize: 21,
+    fontWeight: 'bold',
+    marginTop: 18,
+    marginBottom: 6,
   },
   loadingText: {
     color: 'white',
