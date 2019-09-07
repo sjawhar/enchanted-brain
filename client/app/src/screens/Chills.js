@@ -9,9 +9,14 @@ import { getClockOffset } from '../config';
 import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
-import { MESSAGE_STAGE_COMPLETE_BODY, MESSAGE_STAGE_COMPLETE_HEADER } from '../constants/Messages';
+import {
+  MESSAGE_INSTRUCTION_CHILLS,
+  MESSAGE_STAGE_COMPLETE_BODY,
+  MESSAGE_STAGE_COMPLETE_HEADER,
+} from '../constants/Messages';
 
-const INPUT_HEIGHT = Layout.window.height - Constants.statusBarHeight;
+const VIEW_HEIGHT = Layout.window.height - Constants.statusBarHeight;
+const INPUT_HEIGHT = 0.8 * VIEW_HEIGHT;
 const INPUT_BUFFER = 25;
 const WAVEFORM_WIDTH = Math.floor(0.67 * Layout.window.width);
 const WAVEFORM_SIZE = Math.floor(WAVEFORM_WIDTH / INPUT_BUFFER);
@@ -46,9 +51,12 @@ class ChillsScreen extends Component {
   }
 
   componentWillUnmount() {
-    const { timeoutId } = this.state;
-    if (timeoutId) {
-      clearTimeout(timeoutId);
+    const { panTimeoutId, songTimeoutId } = this.state;
+    if (panTimeoutId) {
+      clearTimeout(panTimeoutId);
+    }
+    if (songTimeoutId) {
+      clearTimeout(songTimeoutId);
     }
   }
 
@@ -129,12 +137,16 @@ class ChillsScreen extends Component {
     if (isEnded || timestamp < pollTime) {
       return;
     }
+    if (panTimeoutId) {
+      clearTimeout(panTimeoutId);
+    }
 
     let nextPollTime = pollTime;
     const now = Date.now() + this.clockOffset;
     while (nextPollTime <= now) {
       nextPollTime += this.interval;
     }
+    nextPollTime = this.roundTime(nextPollTime);
 
     this.setState(
       ({ touches }) => ({
@@ -146,10 +158,11 @@ class ChillsScreen extends Component {
         ),
         touches: [
           ...touches,
-          { choice: Math.max(0, 1 - locationY / INPUT_HEIGHT), timestamp: pollTime },
+          {
+            choice,
+            timestamp: pollTime,
+          },
         ],
-        offset: new Animated.Value(-WAVEFORM_SIZE),
-        nextPollTime: this.roundTime(nextPollTime),
       }),
       () =>
         Animated.timing(this.state.offset, {
@@ -159,38 +172,23 @@ class ChillsScreen extends Component {
     );
   };
 
-  _onPanResponderRelease = () => {
-    const { touches } = this.state;
-    this.setState({ nextPollTime: undefined });
-    this.sendTouches(touches);
-    Animated.timing(this.state.opacity, {
-      toValue: 0,
-      duration: 500,
-    }).start();
-  };
-
   roundTime = time => time - (time % this.interval);
 
   sendTouches = touches =>
-    touches.forEach(({ timestamp, choice }) =>
-      store.dispatch(
+    touches
+      .map(({ timestamp, choice }) =>
         actions.sendChoice({
+          choice: parseFloat(parseFloat(choice).toFixed(2)),
           choiceType: CHOICE_CHILLS,
-          choice: parseFloat(choice.toFixed(2)),
           timestamp: new Date(timestamp).toISOString(),
         })
       )
-    );
+      .forEach(action => store.dispatch(action));
 
   render() {
     const { isEnded, isShowPrompt, touches, opacity, offset } = this.state;
     if (!isShowPrompt) {
-      return (
-        <WaitingScreen
-          headerText={MESSAGE_STAGE_COMPLETE_HEADER}
-          messageText={MESSAGE_STAGE_COMPLETE_BODY}
-        />
-      );
+      return <WaitingScreen headerText={''} messageText={MESSAGE_INSTRUCTION_CHILLS} />;
     }
     return (
       <View style={styles.container}>
@@ -214,11 +212,16 @@ class ChillsScreen extends Component {
               ))
           )}
         </View>
-        <View style={styles.inputContainer}>
+        <View style={styles.rightBar}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
-          <Text style={styles.instruction}>High</Text>
-          <Text style={styles.instruction}>Touch and drag to indicate chills</Text>
-          <Text style={styles.instruction}>Low</Text>
+          <View style={styles.scaleContainer}>
+            <Text style={{ marginTop: 10, ...styles.instruction }}>High</Text>
+            <Text style={styles.instruction}>Touch and drag to indicate chills</Text>
+            <Text style={{ marginBottom: 10, ...styles.instruction }}>Low</Text>
+          </View>
+          <View style={styles.noneZone}>
+            <Text style={styles.instruction}>None</Text>
+          </View>
         </View>
       </View>
     );
@@ -229,7 +232,7 @@ const styles = EStyleSheet.create({
   container: {
     marginTop: Constants.statusBarHeight,
     width: '100%',
-    height: INPUT_HEIGHT,
+    height: VIEW_HEIGHT,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
@@ -248,7 +251,7 @@ const styles = EStyleSheet.create({
     backgroundColor: COLORS.primaryOrange,
     width: WAVEFORM_SIZE,
     height: WAVEFORM_SIZE,
-    marginBottom: -WAVEFORM_SIZE / 2,
+    marginTop: -WAVEFORM_SIZE / 2,
     borderRadius: WAVEFORM_SIZE,
   },
   endText: {
@@ -260,6 +263,11 @@ const styles = EStyleSheet.create({
     width: Layout.window.width - WAVEFORM_WIDTH,
     backgroundColor: COLORS.primaryOrange,
     flexDirection: 'column',
+  },
+  scaleContainer: {
+    height: INPUT_HEIGHT,
+    width: '100%',
+    flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'stretch',
   },
@@ -267,9 +275,15 @@ const styles = EStyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    height: '100%',
+    height: VIEW_HEIGHT,
     width: '100%',
     zIndex: 999,
+  },
+  noneZone: {
+    backgroundColor: COLORS.primaryBlue,
+    height: VIEW_HEIGHT - INPUT_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   instruction: {
     textAlign: 'center',
