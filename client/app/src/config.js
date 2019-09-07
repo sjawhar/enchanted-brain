@@ -5,15 +5,6 @@ import {
   AMPLIFY_USER_POOL_WEB_CLIENT_ID,
 } from 'react-native-dotenv';
 
-export const IS_ANDROID = Platform.OS === 'android';
-export const IS_IOS = !IS_ANDROID;
-
-// Vibrate immediately for 500ms, wait 1s, vibrate again for 500ms`
-export const VIBRATION_PATTERN = Platform.select({
-  ios: [0, 1000],
-  android: [0, 500, 1000, 500],
-});
-
 export const AMPLIFY_CONFIG = {
   Auth: {
     region: AMPLIFY_REGION,
@@ -25,4 +16,11 @@ export const AMPLIFY_CONFIG = {
   },
 };
 
-export default { AMPLIFY_CONFIG };
+export const IS_ANDROID = Platform.OS === 'android';
+export const IS_IOS = !IS_ANDROID;
+
+// Vibrate immediately for 500ms, wait 1s, vibrate again for 500ms`
+export const VIBRATION_PATTERN = Platform.select({
+  ios: [0, 1000],
+  android: [0, 500, 1000, 500],
+});
