@@ -202,5 +202,5 @@ export default withAuthenticator(App, {
   ],
   includeGreetings: false,
   signUpConfig: {},
-  usernameAttributes: 'email',
+  usernameAttributes: 'phone_number',
 });

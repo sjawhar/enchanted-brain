@@ -7,7 +7,7 @@ const colors = swatchColors.flat();
 const STAGE_CHOICE_CHILLS = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_CHILLS',
-    startTime: new Date(Date.now() + 200).toISOString(),
+    startTime: new Date(Date.now() + 5 * 1000).toISOString(),
     endTime: new Date(Date.now() + 2 * 60 * 1000).toISOString(),
     interval: 0.2,
   },
