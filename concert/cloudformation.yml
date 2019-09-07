@@ -73,6 +73,12 @@ Resources:
       SSESpecification:
         SSEEnabled: True
 
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${Environment}-enchanted-brain-dlq
+      KmsMasterKeyId: alias/aws/sqs
+
   Api:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -218,6 +224,7 @@ Resources:
           CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
           CALLBACK_TIMEOUT_SECONDS: !FindInMap [CallbackParams, Timeout, Value]
           CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
+          DEAD_LETTER_QUEUE_ARN: !GetAtt DeadLetterQueue.Arn
           DYNAMODB_TABLE_NAME: !Ref Table
       Policies:
         - DynamoDBCrudPolicy:
@@ -387,6 +394,7 @@ Resources:
       DeploymentId: !Ref ApiDeployment
       StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       DefaultRouteSettings:
+        DataTraceEnabled: true
         LoggingLevel: !If [IsProduction, ERROR, INFO]
 
   ChoiceWriterFunction:
@@ -407,6 +415,9 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
+      DeadLetterQueue:
+        Type: SQS
+        TargetArn: !GetAtt DeadLetterQueue.Arn
 
 Outputs:
 
