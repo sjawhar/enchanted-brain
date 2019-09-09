@@ -16,6 +16,14 @@ export const sendChoice = choice => {
   };
 };
 
+export const SET_CHOICE_INVERTED = 'SET_CHOICE_INVERTED';
+export const setChoiceInverted = choiceInverted => ({
+  type: SET_CHOICE_INVERTED,
+  payload: {
+    choiceInverted,
+  },
+});
+
 export const SET_CHOICE_TYPE = 'SET_CHOICE_TYPE';
 export const setChoiceType = choiceType => ({
   type: SET_CHOICE_TYPE,
@@ -24,12 +32,10 @@ export const setChoiceType = choiceType => ({
   },
 });
 
-export const SET_CHOICE_INVERTED = 'SET_CHOICE_INVERTED';
-export const setChoiceInverted = choiceInverted => ({
-  type: SET_CHOICE_INVERTED,
-  payload: {
-    choiceInverted,
-  },
+export const SET_LANGUAGE = 'SET_LANGUAGE';
+export const setLanguage = language => ({
+  type: SET_LANGUAGE,
+  payload: { language },
 });
 
 export const SET_UID = 'SET_UID';
