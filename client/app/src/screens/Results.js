@@ -33,13 +33,21 @@ class ResultsScreen extends Component {
     this.songs = songs
       .sort((a, b) => a.startTime.localeCompare(b.startTime))
       .map(({ startTime, endTime, choices, choiceType, ...songInfo }) => {
+        if (!choices || !choices.length) {
+          return null;
+        }
         const song = {
           startTime,
           endTime,
-          choices: choices.map(({ timestamp, ...choice }) => ({
-            timestamp: new Date(timestamp),
-            ...choice,
-          })),
+          choices: choices.map(({ timestamp, ...choice }) =>
+            Object.assign(
+              {
+                timestamp: new Date(timestamp),
+                ...COLOR_EMPTY,
+              },
+              choice
+            )
+          ),
           choiceType,
           chartProps: {
             xAccessor: ({ item }) => item.timestamp,
@@ -82,7 +90,7 @@ class ResultsScreen extends Component {
             return null;
         }
       })
-      .filter(song => !!song);
+      .filter(song => song && song.choices.length);
 
     this.state = {
       currentIndex: 0,
