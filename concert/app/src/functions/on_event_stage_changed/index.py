@@ -17,6 +17,8 @@ from enchanted_brain.attributes import (
     ATTR_SONG_LIST_END_TIME,
     ATTR_SONG_LIST_SONGS,
     ATTR_SONG_LIST_START_TIME,
+    CHOICE_CHILLS,
+    CHOICE_COLOR,
     EVENT_STAGE_END,
     RECORD_ID_AGGREGATE,
     RECORD_ID_EVENT_STAGE,
@@ -144,20 +146,19 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
         start_time = song_metadata[ATTR_SONG_LIST_START_TIME]
         end_time = song_metadata[ATTR_SONG_LIST_END_TIME]
 
-        choice_type = None
-
+        choice_type = CHOICE_CHILLS
+        choice_key = ATTR_CHOICE_VALUE_CHILLS
         for timestamp in aggregate_data[ATTR_CHOICE_VALUE_COLOR].keys():
             if start_time <= timestamp < end_time:
-                choice_type = ATTR_CHOICE_VALUE_COLOR
+                choice_type = CHOICE_COLOR
+                choice_key = ATTR_CHOICE_VALUE_COLOR
                 break
-        if not choice_type:
-            choice_type = ATTR_CHOICE_VALUE_CHILLS
 
         choices = []
-        for timestamp, aggregate_choice_data in aggregate_data[choice_type].items():
+        for timestamp, aggregate_choice_data in aggregate_data[choice_key].items():
             if start_time <= timestamp < end_time:
                 choices_at_timestamp = {ATTR_CHOICE_TIMESTAMP: timestamp}
-                if choice_type == ATTR_CHOICE_VALUE_COLOR:
+                if choice_type == CHOICE_COLOR:
                     choices_at_timestamp.update(
                         {
                             k[4:]: v
