@@ -8,7 +8,9 @@ export default class Chills extends Component {
   getChillsSongs = () => {
     const yMax = {};
     return this.props.songs
-      .filter(({ choiceType }) => choiceType === CHOICE_CHILLS)
+      .filter(
+        ({ choiceType, choices }) => choiceType === CHOICE_CHILLS && choices && choices.length
+      )
       .map(({ startTime, endTime, choices, ...songInfo }) => {
         if (choices[0].timestamp > startTime) {
           choices.unshift({ timestamp: startTime, sum: 0, count: 0 });
