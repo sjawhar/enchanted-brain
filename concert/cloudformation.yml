@@ -371,18 +371,6 @@ Resources:
         FunctionArn: !Ref OnEventStageChangedFunction.Alias
         RouteKey: !FindInMap [RouteKeys, EventStageChanged, Key]
 
-  OnStackChange:
-    Type: Custom::InvokeLambda
-    Properties:
-      ServiceToken:
-        !Ref PrepareStackFunction.Alias
-      StackName:
-        !Sub ${Environment}-enchanted-brain
-      DependsOn:
-        - ChoiceAggregator
-        - Table
-        - PrepareStackFunction
-
   PrepareStackFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -404,6 +392,18 @@ Resources:
               Resource: !Sub
                 - arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${KinesisAnalyticsApplicationName}
                 - { KinesisAnalyticsApplicationName: !GetAtt ChoiceAggregator.Outputs.KinesisAnalyticsApplicationName }
+
+  OnStackChange:
+    Type: Custom::InvokeLambda
+    Properties:
+      ServiceToken:
+        !Ref PrepareStackFunction.Alias
+      StackName:
+        !Sub ${Environment}-enchanted-brain
+      DependsOn:
+        - ChoiceAggregator
+        - Table
+        - PrepareStackFunction
 
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
