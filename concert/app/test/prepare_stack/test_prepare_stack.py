@@ -1,7 +1,7 @@
 import json
 import os
 import pytest
-import mock
+import unittest.mock as mock
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 from src.functions.prepare_stack.index import handler, dynamodb, kinesis_analytics
