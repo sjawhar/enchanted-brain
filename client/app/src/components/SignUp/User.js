@@ -5,34 +5,38 @@ import EStyleSheet from 'react-native-extended-stylesheet';
 import t from 'tcomb-form-native';
 
 import COLORS from '../../constants/Colors';
+import LANGUAGES from '../../languages';
 
 const UserType = t.struct({
   phoneNumber: t.refinement(t.String, val => /^\+[0-9]+$/.test(val)),
   password: t.String,
 });
 
-const options = {
-  order: ['phoneNumber', 'password'],
-  fields: {
-    phoneNumber: {
-      label: 'Phone Number (with country code)',
-      help:
-        'This will be your username. Do not include leading zeros after the country code. A confirmation code will be sent by SMS.',
-      autoCompleteType: 'tel',
-      keyboardType: 'phone-pad',
-      textContentType: 'telephoneNumber',
-    },
-    password: {
-      secureTextEntry: true,
-      autoCompleteType: 'password',
-      textContentType: 'password',
-    },
-  },
-};
-
 export default class User extends Component {
   state = {
     password: '',
+  };
+
+  getFormOptions = () => {
+    const { password, phoneNumber, phoneNumberHelp } = LANGUAGES[this.props.language].fields;
+    return {
+      order: ['phoneNumber', 'password'],
+      fields: {
+        phoneNumber: {
+          label: phoneNumber,
+          help: phoneNumberHelp,
+          autoCompleteType: 'tel',
+          keyboardType: 'phone-pad',
+          textContentType: 'telephoneNumber',
+        },
+        password: {
+          label: password,
+          secureTextEntry: true,
+          autoCompleteType: 'password',
+          textContentType: 'password',
+        },
+      },
+    };
   };
 
   handleChange = ({ phoneNumber, password, ...formData }) => {
@@ -52,12 +56,13 @@ export default class User extends Component {
 
   render() {
     const { password } = this.state;
-    const { error, formData, isLoading, onCancel } = this.props;
+    const { error, formData, language, isLoading, onCancel } = this.props;
+    const { buttons } = LANGUAGES[language];
     return (
       <View style={styles.container}>
         <t.form.Form
           onChange={this.handleChange}
-          options={options}
+          options={this.getFormOptions()}
           ref="form"
           type={UserType}
           value={{ password, ...formData }}
@@ -70,12 +75,12 @@ export default class User extends Component {
             <Button
               buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
               onPress={this.handleSubmit}
-              title="SIGN UP"
+              title={buttons.signUp}
             />
             <Button
               buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
               onPress={onCancel}
-              title="BACK"
+              title={buttons.back}
             />
           </View>
         )}
