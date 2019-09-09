@@ -364,7 +364,7 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "displayName": "song title 1",
             "startTime": "2019-05-14T21:15:03.000Z",
             "endTime": "2019-05-14T21:16:33.000Z",
-            "choiceType": "colors",
+            "choiceType": "CHOICE_COLOR",
             "choices": [
                 {"timestamp": "2019-05-14T21:15:03.000Z", "#ABABAB": 5, "#171717": 15},
                 {"timestamp": "2019-05-14T21:15:23.000Z", "#ABABAB": 10, "#CDCDCD": 7},
@@ -374,7 +374,7 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "displayName": "song title 2",
             "startTime": "2019-05-14T21:20:03.000Z",
             "endTime": "2019-05-14T21:21:33.000Z",
-            "choiceType": "chills",
+            "choiceType": "CHOICE_CHILLS",
             "choices": [
                 {"timestamp": "2019-05-14T21:20:03.000Z", "sum": 2.5, "count": 2},
                 {"timestamp": "2019-05-14T21:20:03.200Z", "sum": 1.5, "count": 1},
@@ -426,7 +426,7 @@ def test_song_list_and_aggregate_choices_added_to_event_stage_on_stage_end():
                                     "displayName": {"S": "song title 1"},
                                     "startTime": {"S": "2019-05-14T21:15:03.000Z"},
                                     "endTime": {"S": "2019-05-14T21:16:33.000Z"},
-                                    "choiceType": {"S": "colors"},
+                                    "choiceType": {"S": "CHOICE_COLOR"},
                                     "choices": {
                                         "L": [
                                             {
@@ -456,7 +456,7 @@ def test_song_list_and_aggregate_choices_added_to_event_stage_on_stage_end():
                                     "displayName": {"S": "song title 2"},
                                     "startTime": {"S": "2019-05-14T21:20:03.000Z"},
                                     "endTime": {"S": "2019-05-14T21:21:33.000Z"},
-                                    "choiceType": {"S": "chills"},
+                                    "choiceType": {"S": "CHOICE_CHILLS"},
                                     "choices": {
                                         "L": [
                                             {
