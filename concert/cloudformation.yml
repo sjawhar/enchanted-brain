@@ -395,11 +395,10 @@ Resources:
 
   OnStackChange:
     Type: Custom::InvokeLambda
+    Condition: IsProduction
     Properties:
-      ServiceToken:
-        !Ref PrepareStackFunction.Alias
-      StackName:
-        !Sub ${Environment}-enchanted-brain
+      ServiceToken: !Ref PrepareStackFunction.Alias
+      StackName: !Sub ${Environment}-enchanted-brain
       DependsOn:
         - ChoiceAggregator
         - Table
