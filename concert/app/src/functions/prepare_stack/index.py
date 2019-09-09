@@ -37,7 +37,8 @@ def handler(event, context):
 
 
 def prepare_aggregate_choices_record():
-    return update_aggregate_record(
+    return table.update_item(
+        Key={ATTR_RECORD_ID: RECORD_ID_AGGREGATE},
         UpdateExpression="SET #chills_map = if_not_exists(#chills_map, :empty_map), #colors_map = if_not_exists(#colors_map, :empty_map), #emotions_map = if_not_exists(#emotions_map, :empty_map)",
         ExpressionAttributeNames={
             "#chills_map": ATTR_CHOICE_VALUE_CHILLS,
@@ -45,12 +46,7 @@ def prepare_aggregate_choices_record():
             "#emotions_map": ATTR_CHOICE_VALUE_EMOTION,
         },
         ExpressionAttributeValues={":empty_map": {}},
-    )
-
-
-def update_aggregate_record(**update_args):
-    return table.update_item(
-        Key={ATTR_RECORD_ID: RECORD_ID_AGGREGATE}, ReturnValues="NONE", **update_args
+        ReturnValues="NONE",
     )
 
 
