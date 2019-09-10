@@ -14,7 +14,7 @@ const connect = () => {
   isConnect = true;
 
   if (isStub) {
-    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB](new Date());
+    const { eventData, storeActions } = require('./stub').default[WEBSOCKET_API_STUB]();
     if (storeActions) {
       const { store } = require('../state');
       storeActions.forEach(store.dispatch);
@@ -40,7 +40,7 @@ const connect = () => {
     };
 
     ws.onerror = e => {
-      console.error('ERROR', e.message);
+      console.debug('ERROR', e.message);
     };
 
     ws.onclose = e => {
@@ -63,7 +63,7 @@ const connect = () => {
         console.debug('MESSAGE', event, data);
         events.emit(event, data);
       } catch (error) {
-        console.error(error);
+        console.debug(error);
       }
     };
   }).then(ws => {
@@ -98,7 +98,7 @@ const disconnect = async () => {
 
 const send = async message => {
   if (isStub) {
-    console.log('SEND', message);
+    console.debug('SEND', message);
     return;
   }
 
@@ -108,7 +108,7 @@ const send = async message => {
     ws.send(data);
     return true;
   } catch (error) {
-    console.error(error);
+    console.debug(error);
     retryQueue.push(data);
     return false;
   }
