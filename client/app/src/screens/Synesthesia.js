@@ -5,7 +5,7 @@ import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
 import HexagonGrid from '../features/colors/HexagonGrid';
 import { store, actions } from '../state';
-import { VIBRATION_PATTERN } from '../config';
+import { getClockOffset, VIBRATION_PATTERN } from '../config';
 import { CHOICE_COLOR } from '../constants/Choices';
 import {
   MESSAGE_INSTRUCTION_COLOR,
@@ -28,7 +28,8 @@ export default class SynesthsiaScreen extends Component {
     waitingMessage: MESSAGE_RESPONSE_RECORDED_BODY,
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.clockOffset = await getClockOffset();
     this.scheduleNextPrompt();
   }
 
@@ -44,7 +45,7 @@ export default class SynesthsiaScreen extends Component {
     const { timestamp: lastTimestamp } = this.state;
     let timestamp = lastTimestamp || Date.parse(startTime);
 
-    const now = Date.now();
+    const now = Date.now() + this.clockOffset;
     while (timestamp < now) {
       timestamp += interval * 1000;
     }
@@ -63,7 +64,7 @@ export default class SynesthsiaScreen extends Component {
     this.setState({
       timeoutId: setTimeout(
         () => this.showInstruction(timestamp),
-        Math.max(0, timestamp - Date.now() - TIME_INSTRUCTIONS)
+        Math.max(0, timestamp - (Date.now() + this.clockOffset) - TIME_INSTRUCTIONS)
       ),
       timestamp,
     });
@@ -77,7 +78,7 @@ export default class SynesthsiaScreen extends Component {
         this.props.navigation.state.params.choiceType === CHOICE_COLOR
           ? MESSAGE_INSTRUCTION_COLOR
           : MESSAGE_INSTRUCTION_EMOTION,
-      timeoutId: setTimeout(this.showPrompt, timestamp - Date.now()),
+      timeoutId: setTimeout(this.showPrompt, timestamp - (Date.now() + this.clockOffset)),
     });
   };
 

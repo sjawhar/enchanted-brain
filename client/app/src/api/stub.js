@@ -2,13 +2,16 @@ import { sendChoice } from '../state/actions';
 import { swatchColors } from '../constants/Colors';
 import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 
+const TIME_SECONDS = 1000;
+const TIME_MINUTES = 60 * 1000;
+
 const colors = swatchColors.flat();
 
 const STAGE_CHOICE_CHILLS = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_CHILLS',
-    startTime: new Date(new Date().setSeconds(now.getSeconds() + 5)).toISOString(),
-    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
+    startTime: new Date(Date.now() + 5 * TIME_SECONDS).toISOString(),
+    endTime: new Date(Date.now() + 2 * TIME_MINUTES).toISOString(),
     interval: 0.2,
   },
 });
@@ -24,7 +27,7 @@ const STAGE_CHOICE_SYNESTHESIA = now => ({
   eventData: {
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
     startTime: now.toISOString(),
-    endTime: new Date(new Date().setMinutes(now.getMinutes() + 2)).toISOString(),
+    endTime: new Date(Date.now() + 2 * TIME_MINUTES).toISOString(),
     interval: 20,
     timeout: 5,
     choiceTypes: ['CHOICE_EMOTION_ANGER', 'CHOICE_COLOR'],
@@ -39,43 +42,43 @@ const STAGE_END = now => {
     songs: [
       {
         displayName: 'Color Song 1',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 34)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 31)).toISOString(),
+        startTime: new Date(Date.now() - 34 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 31 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_COLOR,
         choices: [],
       },
       {
         displayName: 'Color Song 2',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 28)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 25)).toISOString(),
+        startTime: new Date(Date.now() - 28 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 25 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_COLOR,
         choices: [],
       },
       {
         displayName: 'Color Song 3',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 22)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 19)).toISOString(),
+        startTime: new Date(Date.now() - 22 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 19 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_COLOR,
         choices: [],
       },
       {
         displayName: 'Color Song 4',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 16)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 13)).toISOString(),
+        startTime: new Date(Date.now() - 16 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 13 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_COLOR,
         choices: [],
       },
       {
         displayName: 'Synesthesia Song',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 10)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 7)).toISOString(),
+        startTime: new Date(Date.now() - 10 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 7 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_COLOR,
         choices: [],
       },
       {
         displayName: 'Chills Song',
-        startTime: new Date(new Date().setMinutes(now.getMinutes() - 4)).toISOString(),
-        endTime: new Date(new Date().setMinutes(now.getMinutes() - 1)).toISOString(),
+        startTime: new Date(Date.now() - 4 * TIME_MINUTES).toISOString(),
+        endTime: new Date(Date.now() - 1 * TIME_MINUTES).toISOString(),
         choiceType: CHOICE_CHILLS,
         choices: [],
       },
