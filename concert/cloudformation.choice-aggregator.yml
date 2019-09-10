@@ -103,18 +103,11 @@ Resources:
                     kms:EncryptionContext:aws:s3:arn: !Sub arn:aws:s3:::${S3Bucket}/*
               - Effect: Allow
                 Action: logs:PutLogEvents
-                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisFirehoseStreamLogStream}
-              - Effect: Allow
-                Action: kms:Decrypt
-                Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/kinesis
-                Condition:
-                  StringEquals:
-                    kms:ViaService: !Sub kinesis.${AWS::AccountId}.amazonaws.com
-                  StringLike:
-                    kms:EncryptionContext:aws:kinesis:arn: !Join
-                      - ''
-                      - - !Sub arn:aws:kinesis:${AWS::AccountId}:${AWS::AccountId}:stream
-                        - !Sub /${Environment}-enchanted-brain-kinesis-firehose
+                Resource: !Join
+                  - ':'
+                  - - !Select [0, !Split [':*', !GetAtt KinesisLogGroup.Arn]]
+                    - log-stream
+                    - !Ref KinesisFirehoseStreamLogStream
 
   KinesisFirehoseStream:
     Type: AWS::KinesisFirehose::DeliveryStream
@@ -133,8 +126,7 @@ Resources:
         CompressionFormat: GZIP
         EncryptionConfiguration:
           KMSEncryptionConfig:
-            AWSKMSKeyARN: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/kinesis
-        Prefix: YYYY/MM/DD/HH
+            AWSKMSKeyARN: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/aws/s3
         RoleARN: !GetAtt KinesisFirehoseStreamRole.Arn
 
   KinesisAnalyticsApplicationRole:
@@ -275,5 +267,6 @@ Outputs:
 
   KinesisFirehoseStreamName:
     Value: !Ref KinesisFirehoseStream
+
   KinesisAnalyticsApplicationName:
     Value: !Ref KinesisAnalyticsApplication
