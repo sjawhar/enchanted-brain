@@ -54,7 +54,7 @@ def get_update_args(event):
 
     # If choice type is not recognized, raise exception to indicate failure to SNS
     if choice_type not in CHOICE_TYPE_KEYS:
-        raise ValueError
+        raise ValueError("Unknown choice type %s" % choice_type)
 
     choice_key = CHOICE_TYPE_KEYS[choice_type]
     update_args = {
