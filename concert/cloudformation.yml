@@ -434,6 +434,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
       CodeUri: app/src/functions/choice_writer
+      Timeout: 10
       Layers:
         - !Ref LambdaLayer
       Events:
