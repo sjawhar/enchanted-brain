@@ -249,7 +249,7 @@ Resources:
         - !Ref LambdaLayer
       Handler: index.handler
       MemorySize: 128
-      Timeout: 3
+      Timeout: 30
       AutoPublishAlias: live
       Environment:
         Variables:
