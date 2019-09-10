@@ -275,3 +275,5 @@ Outputs:
 
   KinesisFirehoseStreamName:
     Value: !Ref KinesisFirehoseStream
+  KinesisAnalyticsApplicationName:
+    Value: !Ref KinesisAnalyticsApplication
