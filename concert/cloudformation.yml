@@ -396,13 +396,12 @@ Resources:
   OnStackChange:
     Type: Custom::InvokeLambda
     Condition: IsProduction
+    DependsOn:
+      - ChoiceAggregator
+      - Table
+      - PrepareStackFunction
     Properties:
       ServiceToken: !Ref PrepareStackFunction.Alias
-      StackName: !Sub ${Environment}-enchanted-brain
-      DependsOn:
-        - ChoiceAggregator
-        - Table
-        - PrepareStackFunction
 
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
