@@ -67,12 +67,13 @@ class ResultsScreen extends Component {
           case CHOICE_COLOR:
             this.prepChoices({
               song,
-              leftPad: COLOR_EMPTY,
+              pad: COLOR_EMPTY,
               userChoices: userChoices.colors,
               userChoiceModifier: choice => ({ value: 1, svg: { fill: choice } }),
             });
             return song;
           case CHOICE_CHILLS:
+            const maxCount = Math.max(...song.choices.map(({ count }) => count));
             this.prepChoices({
               song,
               chartProps: {
@@ -80,8 +81,8 @@ class ResultsScreen extends Component {
                 yMax: 1,
                 yMin: 0,
               },
-              modifier: ({ sum }) => ({ value: sum }),
-              leftPad: { value: 0 },
+              modifier: ({ sum }) => ({ value: sum / maxCount }),
+              pad: { value: 0 },
               userChoices: userChoices.chills,
               userChoiceModifier: choice => ({ value: choice }),
             });
@@ -97,13 +98,16 @@ class ResultsScreen extends Component {
     };
   }
 
-  prepChoices = ({ chartProps = {}, leftPad, modifier, song, userChoiceModifier, userChoices }) => {
+  prepChoices = ({ chartProps = {}, modifier, pad, song, userChoiceModifier, userChoices }) => {
     Object.assign(song.chartProps, chartProps);
     if (modifier) {
       song.choices = song.choices.map(choice => Object.assign(choice, modifier(choice)));
     }
     if (song.chartProps.xMin < song.choices[0].timestamp) {
-      song.choices.unshift({ timestamp: song.chartProps.xMin, ...leftPad });
+      song.choices.unshift({ timestamp: song.chartProps.xMin, ...pad });
+    }
+    if (song.chartProps.xMax > song.choices[song.choices.length - 1].timestamp) {
+      song.choices.push({ timestamp: song.chartProps.xMax, ...pad });
     }
     song.userChoices = userChoices
       .filter(({ timestamp }) => timestamp >= song.startTime && timestamp <= song.endTime)
@@ -188,7 +192,6 @@ class ResultsScreen extends Component {
       </View>
       <AreaChart
         data={choices}
-        curve={curveNatural}
         style={[styles.chillsChart, { marginBottom: -5, zIndex: 100 }]}
         svg={{ fill: COLORS.primaryBlue }}
         {...chartProps}
