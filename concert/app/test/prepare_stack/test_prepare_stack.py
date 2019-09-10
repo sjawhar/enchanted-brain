@@ -133,3 +133,32 @@ def test_failure_response_sent_to_s3_on_error(put_function):
     assert put_function.called
     request_args, requests_kwargs = put_function.call_args
     assert requests_kwargs == expected_params
+
+
+@mock.patch("botocore.vendored.requests.put", return_value=success_response)
+def test_success_response_sent_to_s3_on_kinesis_app_already_running(put_function):
+    expected_params = {
+        "data": json.dumps(
+            {
+                "Status": "SUCCESS",
+                "Reason": "See the details in CloudWatch Log Stream: log stream name",
+                "StackId": "arn:aws:cloudformation:us-west-2:123456789012:stack/stack-name/guid",
+                "RequestId": "unique id for this request",
+                "LogicalResourceId": "MyTestResource",
+                "PhysicalResourceId": "MyTestResource",
+            }
+        ),
+        "headers": {"content-length": "296", "content-type": ""},
+    }
+
+    with Stubber(dynamodb.meta.client) as dynamodb_stub, Stubber(
+        kinesis_analytics
+    ) as kinesis_analytics_stub:
+        dynamodb_stub.add_response("update_item", success_response)
+        kinesis_analytics_stub.add_client_error("start_application", service_error_code="ResourceInUseException")
+        resp = handler(event, context)
+
+    assert put_function.called
+    request_args, requests_kwargs = put_function.call_args
+    assert requests_kwargs == expected_params
+    assert resp == {"statusCode": 204}
