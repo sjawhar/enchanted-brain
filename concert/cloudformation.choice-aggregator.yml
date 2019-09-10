@@ -161,7 +161,7 @@ Resources:
                 Resource: !GetAtt KinesisFirehoseStream.Arn
               - Effect: Allow
                 Action: lambda:InvokeFunction
-                Resource: !GetAtt AggregateWriterFunction.Arn
+                Resource: !Ref AggregateWriterFunction.Alias
               - Effect: Allow
                 Action: logs:PutLogEvents
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/${Environment}-enchanted-brain-kinesis:log-stream:${KinesisAnalyticsLogStream}
@@ -268,7 +268,7 @@ Resources:
         DestinationSchema:
           RecordFormatType: JSON
         LambdaOutput:
-          ResourceARN: !GetAtt AggregateWriterFunction.Arn
+          ResourceARN: !Ref AggregateWriterFunction.Alias
 
 
 Outputs:
