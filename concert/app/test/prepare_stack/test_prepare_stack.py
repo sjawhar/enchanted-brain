@@ -155,7 +155,9 @@ def test_success_response_sent_to_s3_on_kinesis_app_already_running(put_function
         kinesis_analytics
     ) as kinesis_analytics_stub:
         dynamodb_stub.add_response("update_item", success_response)
-        kinesis_analytics_stub.add_client_error("start_application", service_error_code="ResourceInUseException")
+        kinesis_analytics_stub.add_client_error(
+            "start_application", service_error_code="ResourceInUseException"
+        )
         resp = handler(event, context)
 
     assert put_function.called
