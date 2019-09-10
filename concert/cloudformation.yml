@@ -371,6 +371,38 @@ Resources:
         FunctionArn: !Ref OnEventStageChangedFunction.Alias
         RouteKey: !FindInMap [RouteKeys, EventStageChanged, Key]
 
+  PrepareStackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-prepare-stack
+      CodeUri: app/src/functions/prepare_stack
+      Layers:
+        - !Ref LambdaLayer
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref Table
+          KINESIS_ANALYTICS_APPLICATION_NAME: !GetAtt ChoiceAggregator.Outputs.KinesisAnalyticsApplicationName
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: kinesisanalytics:StartApplication
+              Resource: !Sub
+                - arn:aws:kinesisanalytics:${AWS::Region}:${AWS::AccountId}:application/${KinesisAnalyticsApplicationName}
+                - { KinesisAnalyticsApplicationName: !GetAtt ChoiceAggregator.Outputs.KinesisAnalyticsApplicationName }
+
+  OnStackChange:
+    Type: Custom::InvokeLambda
+    Condition: IsProduction
+    DependsOn:
+      - ChoiceAggregator
+      - Table
+      - PrepareStackFunction
+    Properties:
+      ServiceToken: !Ref PrepareStackFunction.Alias
+
   ApiDeployment:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
