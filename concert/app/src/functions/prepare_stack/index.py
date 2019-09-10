@@ -31,6 +31,9 @@ def handler(event, context):
         prepare_aggregate_choices_record()
         start_kinesis_analytics_application()
         status = "SUCCESS"
+    except kinesis_analytics.exceptions.ResourceInUseException:
+        print("Kinesis application already running. Nothing to see here...")
+        status = "SUCCESS"
     finally:
         put_response(event, context, status)
     return {"statusCode": 204}
