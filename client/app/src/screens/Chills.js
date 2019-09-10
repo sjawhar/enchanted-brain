@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 
 import { store, actions } from '../state';
 import WaitingScreen from './Waiting';
+import { getClockOffset } from '../config';
 import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
@@ -27,6 +28,7 @@ class ChillsScreen extends Component {
     super(props);
 
     this.state = {
+      isEnded: false,
       isShowPrompt: false,
       touches: [],
     };
@@ -43,7 +45,8 @@ class ChillsScreen extends Component {
     });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.clockOffset = await getClockOffset();
     this.scheduleRecording(this.props.navigation.state.params);
   }
 
@@ -58,40 +61,45 @@ class ChillsScreen extends Component {
   }
 
   scheduleRecording = ({ startTime, endTime }) => {
-    const startDelay = Date.parse(startTime) - Date.now();
-    this.setState({
-      songTimeoutId: setTimeout(
-        () => this.setState({ isShowPrompt: true }),
-        Math.max(startDelay, 0)
-      ),
-    });
+    const now = Date.now() + this.clockOffset;
+    const endTimeMs = Date.parse(endTime);
+    if (endTimeMs > now) {
+      this.setState({
+        songTimeoutId: setTimeout(
+          () => this.setState({ isShowPrompt: true }),
+          Math.max(Date.parse(startTime) - now, 0)
+        ),
+      });
+    }
 
-    this.scheduleEndRecording(this.props.navigation.navigate, Date.parse(endTime), {
-      routeName: 'Welcome',
-      params: {
-        headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-        messageText: MESSAGE_STAGE_COMPLETE_BODY,
-      },
-    });
+    this.scheduleEndRecording(
+      () =>
+        this.props.navigation.navigate({
+          routeName: 'Welcome',
+          params: {
+            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+            messageText: MESSAGE_STAGE_COMPLETE_BODY,
+          },
+        }),
+      endTimeMs
+    );
   };
 
   // https://github.com/facebook/react-native/issues/12981#issuecomment-499827072
-  scheduleEndRecording = (fn, ttl, args) => {
-    const waitingTime = ttl - Date.now();
+  scheduleEndRecording = (cb, endTime) => {
+    const waitingTime = endTime - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
-      const { songTimeoutId } = this.state;
-      InteractionManager.runAfterInteractions(() => {
-        if (!songTimeoutId) {
-          return;
-        }
-        this.setState({ songTimeoutId: undefined });
-        fn(args);
-      });
+      const { panTimeoutId } = this.state;
+      if (panTimeoutId) {
+        clearTimeout(panTimeoutId);
+      }
+      this.setState({ isEnded: true });
+      InteractionManager.runAfterInteractions(cb);
       return;
     }
     const afterTime = Math.min(waitingTime, MAX_TIMER_DURATION_MS);
     this.setState({
-      songTimeoutId: setTimeout(() => this.scheduleEndRecording(fn, ttl, args), afterTime),
+      songTimeoutId: setTimeout(() => this.scheduleEndRecording(cb, endTime), afterTime),
     });
   };
 
@@ -106,7 +114,7 @@ class ChillsScreen extends Component {
   _onPanResponderMove = ({ timeStamp, nativeEvent: { pageY } }) => {
     this.registerChoice({
       choice: Math.min(Math.max(1 - (pageY - Constants.statusBarHeight) / INPUT_HEIGHT, 0), 1),
-      timestamp: this.roundTime(timeStamp),
+      timestamp: this.roundTime(timeStamp + this.clockOffset),
       source: 'touch',
     });
   };
@@ -125,8 +133,8 @@ class ChillsScreen extends Component {
   };
 
   registerChoice = ({ choice, timestamp }) => {
-    const { nextPollTime: pollTime = timestamp, panTimeoutId } = this.state;
-    if (timestamp < pollTime) {
+    const { nextPollTime: pollTime = timestamp, panTimeoutId, isEnded } = this.state;
+    if (isEnded || timestamp < pollTime) {
       return;
     }
     if (panTimeoutId) {
@@ -134,7 +142,7 @@ class ChillsScreen extends Component {
     }
 
     let nextPollTime = pollTime;
-    const now = Date.now();
+    const now = Date.now() + this.clockOffset;
     while (nextPollTime <= now) {
       nextPollTime += this.interval;
     }
@@ -146,7 +154,7 @@ class ChillsScreen extends Component {
         offset: new Animated.Value(-WAVEFORM_SIZE),
         panTimeoutId: setTimeout(
           () => this.registerChoice({ choice, timestamp: nextPollTime }),
-          0.5 * this.interval + nextPollTime - Date.now()
+          0.5 * this.interval + nextPollTime - (Date.now() + this.clockOffset)
         ),
         touches: [
           ...touches,
@@ -178,27 +186,31 @@ class ChillsScreen extends Component {
       .forEach(action => store.dispatch(action));
 
   render() {
-    const { isShowPrompt, touches, opacity, offset } = this.state;
+    const { isEnded, isShowPrompt, touches, opacity, offset } = this.state;
     if (!isShowPrompt) {
       return <WaitingScreen headerText={''} messageText={MESSAGE_INSTRUCTION_CHILLS} />;
     }
     return (
       <View style={styles.container}>
         <View style={styles.waveformContainer}>
-          {touches
-            .slice(-INPUT_BUFFER)
-            .reverse()
-            .map(({ timestamp, choice }, index) => (
-              <Animated.View
-                key={timestamp}
-                style={{
-                  ...styles.waveform,
-                  opacity,
-                  top: (1 - choice) * INPUT_HEIGHT,
-                  right: Animated.add(index * WAVEFORM_SIZE, offset),
-                }}
-              />
-            ))}
+          {isEnded ? (
+            <Text style={styles.endText}>Please release your finger</Text>
+          ) : (
+            touches
+              .slice(-INPUT_BUFFER)
+              .reverse()
+              .map(({ timestamp, choice }, index) => (
+                <Animated.View
+                  key={timestamp}
+                  style={{
+                    ...styles.waveform,
+                    opacity,
+                    top: (1 - choice) * INPUT_HEIGHT,
+                    right: Animated.add(index * WAVEFORM_SIZE, offset),
+                  }}
+                />
+              ))
+          )}
         </View>
         <View style={styles.rightBar}>
           <View {...this._panResponder.panHandlers} style={styles.input} />
@@ -229,6 +241,10 @@ const styles = EStyleSheet.create({
   waveformContainer: {
     overflow: 'hidden',
     width: WAVEFORM_WIDTH,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   waveform: {
     position: 'absolute',
@@ -237,6 +253,11 @@ const styles = EStyleSheet.create({
     height: WAVEFORM_SIZE,
     marginTop: -WAVEFORM_SIZE / 2,
     borderRadius: WAVEFORM_SIZE,
+  },
+  endText: {
+    fontSize: 21,
+    fontWeight: 'bold',
+    color: 'white',
   },
   rightBar: {
     width: Layout.window.width - WAVEFORM_WIDTH,
