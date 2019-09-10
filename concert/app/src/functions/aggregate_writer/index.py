@@ -3,7 +3,7 @@ import json
 import os
 from base64 import b64decode
 from botocore.exceptions import ClientError
-from decimal import *
+from decimal import Decimal
 from enchanted_brain.attributes import (
     ATTR_AGGREGATE_CHOICE_COUNT,
     ATTR_AGGREGATE_CHOICE_SUM,
