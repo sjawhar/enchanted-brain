@@ -2,10 +2,10 @@
   "expo": {
     "name": "Enchanted Brain",
     "slug": "enchanted-brain",
-    "privacy": "public",
+    "privacy": "unlisted",
     "sdkVersion": "33.0.0",
     "platforms": ["ios", "android"],
-    "version": "1.0.0",
+    "version": "0.1.0",
     "orientation": "portrait",
     "entryPoint": "./src/main.js",
     "icon": "./src/assets/images/icon.png",
@@ -20,10 +20,10 @@
     "assetBundlePatterns": ["src/**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "healthcare.neurotech.enchantedbrain"
+      "bundleIdentifier": "edu.ucsf.neuroscape.lecerveauenchante"
     },
     "android": {
-      "package": "healthcare.neurotech.enchantedbrain"
+      "package": "edu.ucsf.neuroscape.lecerveauenchante"
     }
   }
 }
