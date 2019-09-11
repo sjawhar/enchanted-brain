@@ -10,3 +10,9 @@ services:
     entrypoint: [npm]
     command: [install]
 
+  expo:
+    image: node:10
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    entrypoint: [expo]
