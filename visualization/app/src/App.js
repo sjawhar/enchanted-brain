@@ -15,15 +15,15 @@ class App extends Component {
   };
 
   componentDidMount() {
-    concertApi.connect();
     concertApi.on(CONNECTED, this.handleStageChanged);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageChanged);
+    concertApi.connect();
   }
 
   componentWillUnmount() {
+    concertApi.disconnect();
     concertApi.removeListener(CONNECTED, this.handleStageChanged);
     concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageChanged);
-    concertApi.disconnect();
   }
 
   handleStageChanged = eventData => {
@@ -70,4 +70,5 @@ const styles = {
 
 export default withAuthenticator(App, {
   includeGreetings: process.env.REACT_APP_AMPLIFY_INCLUDE_GREETING === 'true',
+  usernameAttributes: 'phone_number',
 });

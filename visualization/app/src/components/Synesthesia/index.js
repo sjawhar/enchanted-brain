@@ -94,12 +94,12 @@ export default class Synesthesia extends Component {
     return (
       <div>
         <div style={styles.axesContainer}>
-          <span style={[styles.axisLabel, styles.happy]}>Happy</span>
-          <span style={[styles.axisLabel, styles.sad]}>Sad</span>
-          <span style={[styles.axisLabel, styles.angry]}>Angry</span>
-          <span style={[styles.axisLabel, styles.calm]}>Calm</span>
-          <div style={[styles.axis, styles.axisX]} />
-          <div style={[styles.axis, styles.axisY]} />
+          <span style={{ ...styles.axisLabel, ...styles.happy }}>Happy</span>
+          <span style={{ ...styles.axisLabel, ...styles.sad }}>Sad</span>
+          <span style={{ ...styles.axisLabel, ...styles.angry }}>Angry</span>
+          <span style={{ ...styles.axisLabel, ...styles.calm }}>Calm</span>
+          <div style={{ ...styles.axis, ...styles.axisX }} />
+          <div style={{ ...styles.axis, ...styles.axisY }} />
         </div>
         <div style={styles.beesContainer}>
           {bees.map(({ x, y, color }, index) => (
