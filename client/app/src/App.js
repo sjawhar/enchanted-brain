@@ -89,8 +89,8 @@ I18n.setLanguage(store.getState().language);
 
 class App extends React.Component {
   async componentDidMount() {
-    const idToken = (await Auth.currentSession()).getIdToken();
-    store.dispatch(actions.setUID(idToken.payload['cognito:username']));
+    const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
+    store.dispatch(actions.setUID(username));
     concertApi.on(CONNECTED, this.handleStageNavigation);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
   }
