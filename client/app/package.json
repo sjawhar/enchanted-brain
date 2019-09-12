@@ -1,13 +1,14 @@
 {
   "main": "src/main.js",
   "scripts": {
-    "start": "expo start",
-    "publish": "expo publish",
     "android": "expo start --android",
-    "ios": "expo start --ios",
+    "build:ios": "expo build:ios",
     "eject": "expo eject",
     "format": "prettier-eslint --write \"+(src|test)/**/*.{js,json}\"",
+    "ios": "expo start --ios",
     "lint": "eslint .",
+    "publish": "expo publish",
+    "start": "expo start",
     "test": "jest",
     "test:dev": "jest --watchAll"
   },
