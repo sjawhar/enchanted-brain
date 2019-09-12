@@ -105,5 +105,6 @@ const styles = {
 };
 
 export default withAuthenticator(App, {
-  includeGreetings: true
+  includeGreetings: true,
+  usernameAttributes: 'phone_number',
 });
