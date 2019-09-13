@@ -7,7 +7,7 @@ const TIME_MINUTES = 60 * 1000;
 
 const colors = swatchColors.flat();
 
-const STAGE_CHOICE_CHILLS = now => ({
+const STAGE_CHOICE_CHILLS = () => ({
   eventData: {
     stageId: 'STAGE_CHOICE_CHILLS',
     startTime: new Date(Date.now() + 5 * TIME_SECONDS).toISOString(),
@@ -16,17 +16,17 @@ const STAGE_CHOICE_CHILLS = now => ({
   },
 });
 
-const STAGE_CHOICE_IMAGERY = now => ({
+const STAGE_CHOICE_IMAGERY = () => ({
   eventData: {
     stageId: 'STAGE_CHOICE_IMAGERY',
     formUrl: 'https://ucsf.co1.qualtrics.com/jfe/form/SV_eEBoIQ1RAp6UxdH',
   },
 });
 
-const STAGE_CHOICE_SYNESTHESIA = now => ({
+const STAGE_CHOICE_SYNESTHESIA = () => ({
   eventData: {
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    startTime: now.toISOString(),
+    startTime: new Date().toISOString(),
     endTime: new Date(Date.now() + 2 * TIME_MINUTES).toISOString(),
     interval: 20,
     timeout: 5,
@@ -36,7 +36,7 @@ const STAGE_CHOICE_SYNESTHESIA = now => ({
   },
 });
 
-const STAGE_END = now => {
+const STAGE_END = () => {
   const eventData = {
     stageId: 'STAGE_END',
     songs: [

@@ -185,7 +185,9 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
                 ATTR_SONG_LIST_START_TIME: start_time,
                 ATTR_SONG_LIST_END_TIME: end_time,
                 ATTR_CHOICE_TYPE: choice_type,
-                ATTR_SONG_LIST_CHOICES: choices,
+                ATTR_SONG_LIST_CHOICES: sorted(
+                    choices, key=lambda x: x[ATTR_CHOICE_TIMESTAMP]
+                ),
             }
         )
 
