@@ -38,15 +38,15 @@ def get_event(
 
 
 @pytest.mark.parametrize(
-    "choice_type, choice, timestamp, user_id",
+    "choice_type, choice, timestamp, user_id, is_visualization_published",
     [
-        ("CHOICE_COLOR", "#00AB00", "2019-05-14T20:20:03.000Z", "colorUser"),
-        ("CHOICE_EMOTION_HAPPINESS", 1, "2019-06-14T21:20:03.000Z", "happyUser"),
-        ("CHOICE_EMOTION_ANGER", 1, "2019-07-14T21:20:03.000Z", "angryUser"),
-        ("CHOICE_CHILLS", 1, "2019-08-14T11:20:03.000Z", "chillyUser"),
+        ("CHOICE_COLOR", "#00AB00", "2019-05-14T20:20:03.000Z", "colorUser", True),
+        ("CHOICE_EMOTION_HAPPINESS", 1, "2019-06-14T21:20:03.000Z", "happyUser", True),
+        ("CHOICE_EMOTION_ANGER", 1, "2019-07-14T21:20:03.000Z", "angryUser", True),
+        ("CHOICE_CHILLS", 1, "2019-08-14T11:20:03.000Z", "chillyUser", False),
     ],
 )
-def test_choices(choice_type, choice, timestamp, user_id):
+def test_choices(choice_type, choice, timestamp, user_id, is_visualization_published):
     event = get_event(
         user_id=user_id, choice=choice, choice_type=choice_type, timestamp=timestamp
     )
@@ -60,11 +60,15 @@ def test_choices(choice_type, choice, timestamp, user_id):
         }
     )
 
-    choice_made_sns_expected_params = {
-        "TopicArn": CHOICE_MADE_SNS_ARN,
-        "Message": expected_message,
-        "MessageStructure": "string",
-    }
+    choice_made_sns_expected_params = (
+        {
+            "TopicArn": CHOICE_MADE_SNS_ARN,
+            "Message": expected_message,
+            "MessageStructure": "string",
+        }
+        if is_visualization_published
+        else None
+    )
 
     visualization_sns_expected_params = {
         "TopicArn": VISUALIZATION_SNS_ARN,
@@ -82,9 +86,10 @@ def test_choices(choice_type, choice, timestamp, user_id):
         sns_stub.add_response(
             "publish", SNS_SUCCESS_RESPONSE, choice_made_sns_expected_params
         )
-        sns_stub.add_response(
-            "publish", SNS_SUCCESS_RESPONSE, visualization_sns_expected_params
-        )
+        if is_visualization_published:
+            sns_stub.add_response(
+                "publish", SNS_SUCCESS_RESPONSE, visualization_sns_expected_params
+            )
         firehose_stub.add_response(
             "put_record", PUT_RECORD_SUCCESS_RESPONSE, firehose_expected_params
         )

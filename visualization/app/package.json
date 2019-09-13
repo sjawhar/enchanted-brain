@@ -5,7 +5,10 @@
   "dependencies": {
     "aws-amplify": "^1.1.32",
     "aws-amplify-react": "^2.3.11",
+    "chart.js": "^2.8.0",
+    "chartjs-plugin-annotation": "^0.5.7",
     "react": "^16.8.6",
+    "react-chartjs-2": "^2.7.6",
     "react-dom": "^16.8.6",
     "react-scripts": "3.0.1"
   },
@@ -14,7 +17,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "prettier-eslint --write \"+(src|test)/**/*.{js,json}\""
+    "format": "prettier-eslint --write \"+(src|test)/**/*.{js,json}\"",
+    "lint": "eslint ."
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -32,6 +36,7 @@
     ]
   },
   "devDependencies": {
+    "eslint-config-universe": "^1.0.7",
     "eslint-plugin-react": "^7.14.3",
     "prettier": "^1.18.2",
     "prettier-eslint-cli": "^5.0.0"

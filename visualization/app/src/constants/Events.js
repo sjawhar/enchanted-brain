@@ -1,0 +1,3 @@
+export const CHOICE_MADE = 'CHOICE_MADE';
+export const CONNECTED = 'CONNECTED';
+export const EVENT_STAGE_CHANGED = 'EVENT_STAGE_CHANGED';
