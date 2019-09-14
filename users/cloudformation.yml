@@ -142,7 +142,7 @@ Resources:
       Action: lambda:invokeFunction
       Principal: cognito-idp.amazonaws.com
       FunctionName: !Ref PreSignUpFunction.Alias
-      SourceArn: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+      SourceArn: !GetAtt CognitoUserPool.Arn
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
