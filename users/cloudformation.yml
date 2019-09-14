@@ -75,8 +75,6 @@ Resources:
       UserPoolName: !Sub ${Environment}-enchanted-brain
       UsernameAttributes:
         - phone_number
-      AutoVerifiedAttributes:
-        - phone_number
       LambdaConfig:
         PreSignUp: !Ref PreSignUpFunction.Alias
       SmsConfiguration:
