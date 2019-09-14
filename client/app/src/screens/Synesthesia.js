@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Vibration } from 'react-native';
+import { InteractionManager, Vibration } from 'react-native';
 
 import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
@@ -18,12 +18,14 @@ import {
   MESSAGE_STAGE_COMPLETE_HEADER,
 } from '../constants/Messages';
 
-const TIME_INSTRUCTIONS = 3000;
+const TIME_INSTRUCTIONS = 3 * 1000;
+const MAX_TIMER_DURATION_MS = 60 * 1000;
 
 export default class SynesthsiaScreen extends Component {
   state = {
     isShowPrompt: false,
-    timeoutId: undefined,
+    promptTimeoutId: null,
+    songTimeoutId: null,
     waitingHeader: MESSAGE_STAGE_COMPLETE_HEADER,
     waitingMessage: MESSAGE_RESPONSE_RECORDED_BODY,
   };
@@ -31,17 +33,44 @@ export default class SynesthsiaScreen extends Component {
   async componentDidMount() {
     this.clockOffset = await getClockOffset();
     this.scheduleNextPrompt();
+    this.scheduleEndRecording();
   }
 
   componentWillUnmount() {
-    const { timeoutId } = this.state;
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
+    const { promptTimeoutId, songTimeoutId } = this.state;
+    if (promptTimeoutId) {
+      clearTimeout(promptTimeoutId);
+    }
+    if (songTimeoutId) {
+      clearTimeout(songTimeoutId);
     }
   }
 
+  scheduleEndRecording = () => {
+    const waitingTime =
+      Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
+    if (waitingTime > 1) {
+      this.setState({
+        songTimeoutId: setTimeout(
+          this.scheduleEndRecording,
+          Math.min(waitingTime, MAX_TIMER_DURATION_MS)
+        ),
+      });
+      return;
+    }
+    InteractionManager.runAfterInteractions(() =>
+      this.props.navigation.navigate({
+        routeName: 'Welcome',
+        params: {
+          headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+          messageText: MESSAGE_STAGE_COMPLETE_BODY,
+        },
+      })
+    );
+  };
+
   scheduleNextPrompt = () => {
-    const { startTime, endTime, interval } = this.props.navigation.state.params;
+    const { startTime, endTime, interval, timeout } = this.props.navigation.state.params;
     const { timestamp: lastTimestamp } = this.state;
     let timestamp = lastTimestamp || Date.parse(startTime);
 
@@ -50,19 +79,15 @@ export default class SynesthsiaScreen extends Component {
       timestamp += interval * 1000;
     }
 
-    if (timestamp > Date.parse(endTime)) {
-      this.props.navigation.navigate({
-        routeName: 'Welcome',
-        params: {
-          headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-          messageText: MESSAGE_STAGE_COMPLETE_BODY,
-        },
-      });
+    const endTimeMs = Date.parse(endTime);
+    if (timestamp > endTimeMs) {
       return;
+    } else if (timestamp + timeout * 1000 > endTimeMs) {
+      timestamp = endTimeMs - timeout * 1000;
     }
 
     this.setState({
-      timeoutId: setTimeout(
+      promptTimeoutId: setTimeout(
         () => this.showInstruction(timestamp),
         Math.max(0, timestamp - (Date.now() + this.clockOffset) - TIME_INSTRUCTIONS)
       ),
@@ -78,14 +103,17 @@ export default class SynesthsiaScreen extends Component {
         this.props.navigation.state.params.choiceType === CHOICE_COLOR
           ? MESSAGE_INSTRUCTION_COLOR
           : MESSAGE_INSTRUCTION_EMOTION,
-      timeoutId: setTimeout(this.showPrompt, timestamp - (Date.now() + this.clockOffset)),
+      promptTimeoutId: setTimeout(this.showPrompt, timestamp - (Date.now() + this.clockOffset)),
     });
   };
 
   showPrompt = () => {
     this.setState({
       isShowPrompt: true,
-      timeoutId: setTimeout(this.handleChoice, this.props.navigation.state.params.timeout * 1000),
+      promptTimeoutId: setTimeout(
+        this.handleChoice,
+        this.props.navigation.state.params.timeout * 1000
+      ),
     });
   };
 
