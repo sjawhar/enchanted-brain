@@ -2,20 +2,19 @@ import React from 'react';
 import { StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import Amplify, { Auth, I18n } from 'aws-amplify';
+import Amplify, { Auth } from 'aws-amplify';
 import {
   ConfirmSignIn,
   ConfirmSignUp,
   ForgotPassword,
   RequireNewPassword,
-  SignIn,
-  VerifyContact,
   withAuthenticator,
 } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
 import { persistor, store, actions } from './state';
+import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import concertApi from './api/concertApi';
 import NavigationService from './navigation/NavigationService';
@@ -85,7 +84,6 @@ const theme = {
 };
 
 Amplify.configure(AMPLIFY_CONFIG);
-I18n.setLanguage(store.getState().language);
 
 class App extends React.Component {
   async componentDidMount() {
@@ -189,11 +187,20 @@ const styles = StyleSheet.create({
   },
 });
 
+class SkipVerifyContact extends React.Component {
+  render() {
+    if (this.props.authState === 'verifyContact') {
+      setTimeout(() => this.props.onStateChange('signedIn'), 0);
+    }
+    return null;
+  }
+}
+
 export default withAuthenticator(App, {
   authenticatorComponents: [
     <SignIn />,
     <ConfirmSignIn />,
-    <VerifyContact />,
+    <SkipVerifyContact />,
     <SignUp />,
     <ConfirmSignUp />,
     <ForgotPassword />,

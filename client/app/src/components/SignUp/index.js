@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth, I18n } from 'aws-amplify';
 import Constants from 'expo-constants';
+import { CONCERT_PASSWORD } from 'react-native-dotenv';
 
 import Terms from './Terms';
 import Demographics from './Demographics';
@@ -22,10 +23,7 @@ const INITIAL_STATE = {
 };
 
 export default class Signup extends Component {
-  state = {
-    ...INITIAL_STATE,
-    language: store.getState().language,
-  };
+  state = { ...INITIAL_STATE };
 
   gotoSignIn = () => {
     this.setState(INITIAL_STATE, () => this.props.onStateChange('signIn', {}));
@@ -50,15 +48,14 @@ export default class Signup extends Component {
   handleLanguageChange = language => {
     I18n.setLanguage(language);
     store.dispatch(actions.setLanguage(language));
-    this.setState({ language });
+    this.forceUpdate();
   };
 
   handleSubmitTerms = ({ acceptResearch }) => this.gotoNextStep({ acceptResearch });
 
   handleSubmitDemographics = demographics => this.gotoNextStep({ demographics });
 
-  handleSubmitUser = async user => {
-    const { phoneNumber, password } = user;
+  handleSubmitUser = async ({ phoneNumber }) => {
     const {
       demographics: { age, colorPerception, countryOfBirth, countryOfResidence, gender },
       acceptResearch,
@@ -66,9 +63,10 @@ export default class Signup extends Component {
 
     this.setState({ isLoading: true, error: null });
     try {
+      const username = phoneNumber.trim();
       const { userConfirmed } = await Auth.signUp({
-        username: phoneNumber.toLowerCase().trim(),
-        password,
+        username,
+        password: CONCERT_PASSWORD,
         attributes: {
           'custom:acceptResearch': acceptResearch ? 'Y' : 'N',
           'custom:age': age.toString(),
@@ -78,9 +76,8 @@ export default class Signup extends Component {
           gender,
         },
       });
-      if (!userConfirmed) {
-        this.gotoConfirm();
-      }
+      this.setState(INITIAL_STATE);
+      await Auth.signIn({ username, password: CONCERT_PASSWORD });
     } catch (error) {
       const isUserExists = error.code === 'UsernameExistsException';
       this.setState({
@@ -91,15 +88,19 @@ export default class Signup extends Component {
     this.setState({ isLoading: false });
   };
 
+  hideModal = () => this.setState({ user: INITIAL_STATE.user, isShowModal: false });
+
   render() {
     if (this.props.authState !== 'signUp') {
       return null;
     }
-    const { demographics, error, language, isLoading, isShowModal, step, user } = this.state;
+    const { language } = store.getState();
+    const { demographics, error, isLoading, isShowModal, step, user } = this.state;
     return (
       <View style={styles.container}>
         <UserExistsModal
           language={language}
+          onBack={this.hideModal}
           onConfirm={this.gotoConfirm}
           onSignIn={this.gotoSignIn}
           visible={isShowModal}
