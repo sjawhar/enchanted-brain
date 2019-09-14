@@ -150,6 +150,9 @@ class App extends React.Component {
     }
 
     const canConnect = !!isShowConnect || stageId === STAGE_END ? true : null;
+    if (screen === NavigationService.getState()) {
+      NavigationService.navigate('Welcome');
+    }
     NavigationService.navigate(screen, {
       choiceInverted,
       choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
