@@ -14,6 +14,7 @@ import {
 } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { persistor, store, actions } from './state';
 import SignUp from './components/SignUp';
@@ -93,9 +94,11 @@ class App extends React.Component {
     store.dispatch(actions.setUID(username));
     concertApi.on(CONNECTED, this.handleStageNavigation);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
+    activateKeepAwake();
   }
 
   componentWillUnmount() {
+    deactivateKeepAwake();
     concertApi.removeListener(CONNECTED, this.handleStageNavigation);
     concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageNavigation);
     concertApi.disconnect();
