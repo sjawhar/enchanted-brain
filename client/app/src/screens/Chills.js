@@ -33,8 +33,6 @@ class ChillsScreen extends Component {
       touches: [],
     };
 
-    this.interval = this.props.navigation.state.params.interval * 1000;
-
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
@@ -135,6 +133,8 @@ class ChillsScreen extends Component {
     }).start();
   };
 
+  getInterval = () => this.props.navigation.state.params.interval * 1000;
+
   registerChoice = ({ choice, timestamp }) => {
     const { nextPollTime: pollTime = timestamp, panTimeoutId, isEnded } = this.state;
     if (isEnded || timestamp < pollTime) {
@@ -146,8 +146,9 @@ class ChillsScreen extends Component {
 
     let nextPollTime = pollTime;
     const now = Date.now() + this.clockOffset;
+    const interval = this.getInterval();
     while (nextPollTime <= now) {
-      nextPollTime += this.interval;
+      nextPollTime += interval;
     }
     nextPollTime = this.roundTime(nextPollTime);
 
@@ -157,7 +158,7 @@ class ChillsScreen extends Component {
         offset: new Animated.Value(-WAVEFORM_SIZE),
         panTimeoutId: setTimeout(
           () => this.registerChoice({ choice, timestamp: nextPollTime }),
-          0.5 * this.interval + nextPollTime - (Date.now() + this.clockOffset)
+          0.5 * interval + nextPollTime - (Date.now() + this.clockOffset)
         ),
         touches: [
           ...touches,
@@ -170,12 +171,12 @@ class ChillsScreen extends Component {
       () =>
         Animated.timing(this.state.offset, {
           toValue: 0,
-          duration: this.interval,
+          duration: interval,
         }).start()
     );
   };
 
-  roundTime = time => time - (time % this.interval);
+  roundTime = time => time - (time % this.getInterval());
 
   sendTouches = touches =>
     touches

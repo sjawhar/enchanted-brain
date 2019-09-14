@@ -8,15 +8,10 @@ import { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { MESSAGE_STAGE_COMPLETE_HEADER, MESSAGE_STAGE_COMPLETE_BODY } from '../constants/Messages';
 
 export default class MentalImageryScreen extends Component {
-  constructor(props) {
-    super(props);
-
-    const { formUrl } = props.navigation.state.params;
-    this.endpoint = `${formUrl}?uid=${store.getState().uid}`;
-  }
+  getEndpoint = () => `${this.props.navigation.state.params.formUrl}?uid=${store.getState().uid}`;
 
   handleNavigationStateChange = ({ url }) => {
-    if (url === this.endpoint) {
+    if (url === this.getEndpoint()) {
       return;
     }
 
@@ -39,7 +34,7 @@ export default class MentalImageryScreen extends Component {
     return (
       <SafeAreaView style={styles.container}>
         <WebView
-          source={{ uri: this.endpoint }}
+          source={{ uri: this.getEndpoint() }}
           startInLoadingState
           renderLoading={() => loadingIndicator}
           onNavigationStateChange={this.handleNavigationStateChange}
