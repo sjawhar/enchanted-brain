@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import './Synesthesia.css';
 import Bee from './Bee';
 import concertApi from '../../util/concertApi';
 import {
@@ -21,9 +20,6 @@ export default class Synesthesia extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      animationDelays: Array(BUFFER_RING_SIZE)
-        .fill(0)
-        .map(() => `${-Math.random().toFixed(2)}s`),
       buffers: [],
       choiceCount: 0,
       minTimestamp: Date.parse(props.startTime),
@@ -81,7 +77,7 @@ export default class Synesthesia extends Component {
   };
 
   render() {
-    const { animationDelays, buffers } = this.state;
+    const { buffers } = this.state;
     const bees = Array.from(buffers[0], (x, index) => {
       const y = buffers[1][index];
       const color = buffers[2][index];
@@ -108,7 +104,6 @@ export default class Synesthesia extends Component {
               width={BEE_SIZE}
               style={{
                 ...styles.bee,
-                animationDelay: animationDelays[index],
                 left: `${x}%`,
                 top: `${y}%`,
               }}
