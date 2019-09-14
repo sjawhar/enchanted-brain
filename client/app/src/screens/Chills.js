@@ -62,8 +62,7 @@ class ChillsScreen extends Component {
 
   scheduleRecording = ({ startTime, endTime }) => {
     const now = Date.now() + this.clockOffset;
-    const endTimeMs = Date.parse(endTime);
-    if (endTimeMs > now) {
+    if (Date.parse(endTime) > now) {
       this.setState({
         songTimeoutId: setTimeout(
           () => this.setState({ isShowPrompt: true }),
@@ -72,34 +71,26 @@ class ChillsScreen extends Component {
       });
     }
 
-    this.scheduleEndRecording(
-      () =>
-        this.props.navigation.navigate({
-          routeName: 'Welcome',
-          params: {
-            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-            messageText: MESSAGE_STAGE_COMPLETE_BODY,
-          },
-        }),
-      endTimeMs
-    );
+    this.scheduleEndRecording();
   };
 
   // https://github.com/facebook/react-native/issues/12981#issuecomment-499827072
-  scheduleEndRecording = (cb, endTime) => {
-    const waitingTime = endTime - (Date.now() + this.clockOffset);
+  scheduleEndRecording = () => {
+    const waitingTime =
+      Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
       const { panTimeoutId } = this.state;
       if (panTimeoutId) {
         clearTimeout(panTimeoutId);
       }
       this.setState({ isEnded: true });
-      InteractionManager.runAfterInteractions(cb);
       return;
     }
-    const afterTime = Math.min(waitingTime, MAX_TIMER_DURATION_MS);
     this.setState({
-      songTimeoutId: setTimeout(() => this.scheduleEndRecording(cb, endTime), afterTime),
+      songTimeoutId: setTimeout(
+        this.scheduleEndRecording,
+        Math.min(waitingTime, MAX_TIMER_DURATION_MS)
+      ),
     });
   };
 
@@ -120,12 +111,24 @@ class ChillsScreen extends Component {
   };
 
   _onPanResponderRelease = () => {
-    const { touches, panTimeoutId } = this.state;
+    const { touches, panTimeoutId, isEnded } = this.state;
     if (panTimeoutId) {
       clearTimeout(panTimeoutId);
     }
     this.setState({ nextPollTime: undefined });
     this.sendTouches(touches);
+    if (isEnded) {
+      InteractionManager.runAfterInteractions(() =>
+        this.props.navigation.navigate({
+          routeName: 'Welcome',
+          params: {
+            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+            messageText: MESSAGE_STAGE_COMPLETE_BODY,
+          },
+        })
+      );
+      return;
+    }
     Animated.timing(this.state.opacity, {
       toValue: 0,
       duration: 500,
