@@ -63,7 +63,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-pre-signup
       Runtime: python3.7
-      CodeUri: ../concert/app/src/functions/pre_signup
+      CodeUri: app/src/functions/pre_signup
       Handler: index.handler
       MemorySize: 128
       Timeout: 3
