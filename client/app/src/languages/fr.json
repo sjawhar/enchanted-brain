@@ -30,11 +30,11 @@
     "gender": "Sexe",
     "password": "Mot de passe",
     "phoneNumber": "Numéro de téléphone (avec le code du pays)",
-    "phoneNumberHelp": "Ceci sera votre identifiant. Ne mettez pas de zéros après le code du pays. Un code de confirmation vous sera envoyé par SMS."
+    "phoneNumberHelp": "Ceci sera votre identifiant. Ne mettez pas de zéros après le code du pays."
   },
   "modal": {
     "header": "Le compte utilisateur existe déjà.",
-    "body": "Essayez-vous de finaliser le processus d'inscription en entrant un code de confirmation? Ou souhaitez-vous vous connecter?"
+    "body": "Souhaitez-vous vous connecter?"
   },
   "terms": {
     "title": "Application Mobile Conditions Générales d’Utilisation",
