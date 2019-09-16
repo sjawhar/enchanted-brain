@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { Auth, I18n } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
 import { CONCERT_PASSWORD } from 'react-native-dotenv';
 
@@ -46,7 +46,6 @@ export default class Signup extends Component {
     }));
 
   handleLanguageChange = language => {
-    I18n.setLanguage(language);
     store.dispatch(actions.setLanguage(language));
     this.forceUpdate();
   };
