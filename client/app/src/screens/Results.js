@@ -19,8 +19,8 @@ const CARD_MARGIN = 0.05 * Layout.window.width;
 const CARD_WIDTH = 0.9 * Layout.window.width;
 const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const CARD_HEIGHT = 0.85 * CONTAINER_HEIGHT;
-const CHART_COLOR_AGGREGATE_HEIGHT = 0.75 * CARD_HEIGHT;
-const CHART_COLOR_USER_HEIGHT = 0.075 * CARD_HEIGHT;
+const CHART_COLOR_AGGREGATE_HEIGHT = 0.7 * CARD_HEIGHT;
+const CHART_COLOR_USER_HEIGHT = 0.07 * CARD_HEIGHT;
 const CHART_CHILLS_HEIGHT = 0.8 * CARD_HEIGHT;
 
 class ResultsScreen extends Component {
@@ -134,8 +134,8 @@ class ResultsScreen extends Component {
   handleIndexChange = index => this.setState({ currentIndex: index });
 
   renderColorCard = ({ choices, userChoices, chartProps: { contentInset, ...chartProps } }) => (
-    <React.Fragment>
-      <Text style={styles.chartTitle}>Total Audience Choices</Text>
+    <View style={styles.colorChartContainer}>
+      <Text style={styles.colorChartTitle}>Total Audience Choices</Text>
       <StackedAreaChart
         data={choices}
         keys={COLOR_KEYS}
@@ -153,10 +153,10 @@ class ResultsScreen extends Component {
             yAccessor={({ item }) => item.value}
             {...chartProps}
           />
-          <Text style={styles.chartTitle}>Your Choices</Text>
+          <Text style={styles.colorChartTitle}>Your Choices</Text>
         </React.Fragment>
       )}
-    </React.Fragment>
+    </View>
   );
 
   renderChillsCard = ({ choices, userChoices, chartProps }) => (
@@ -209,12 +209,21 @@ class ResultsScreen extends Component {
     </React.Fragment>
   );
 
-  renderSongCard = ({ animatedValue, currentIndex, item: { displayName, ...item }, itemIndex }) => (
-    <View style={styles.card}>
-      <Text style={styles.cardHeaderText}>{displayName}</Text>
-      {item.choiceType === CHOICE_COLOR ? this.renderColorCard(item) : this.renderChillsCard(item)}
-    </View>
-  );
+  renderSongCard = ({ animatedValue, currentIndex, item: { displayName, ...item }, itemIndex }) => {
+    const [composer, songName, emotion] = displayName.split('/');
+    return (
+      <View style={styles.card}>
+        <View style={styles.songNameContainer}>
+          <Text style={styles.composerText}>{composer}</Text>
+          {songName && <Text style={styles.songName}>{songName}</Text>}
+          {emotion && <Text style={styles.emotionText}>({emotion})</Text>}
+        </View>
+        {item.choiceType === CHOICE_COLOR
+          ? this.renderColorCard(item)
+          : this.renderChillsCard(item)}
+      </View>
+    );
+  };
 
   render() {
     const { isConnected, onDisconnect } = this.props.navigation.state.params || {};
@@ -293,16 +302,39 @@ const styles = EStyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: COLOR_BACKGROUND_DARK,
-    paddingVertical: 5,
   },
-  cardHeaderText: {
+  songNameContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: COLORS.primaryOrange,
+    alignSelf: 'stretch',
+    paddingBottom: 5,
+  },
+  composerText: {
     color: 'white',
     fontSize: '1rem',
     fontWeight: 'bold',
   },
-  chartTitle: {
+  songName: {
+    color: 'white',
+    fontSize: '1rem',
+  },
+  emotionText: {
+    color: 'white',
+  },
+  colorChartContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  colorChartTitle: {
     color: 'white',
     fontSize: '0.8rem',
+    backgroundColor: COLORS.primaryBlue,
+    alignSelf: 'stretch',
+    textAlign: 'center',
+    paddingVertical: 2,
   },
   colorAggregateChart: {
     height: CHART_COLOR_AGGREGATE_HEIGHT,
