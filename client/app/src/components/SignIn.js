@@ -5,7 +5,6 @@ import { Button } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
 import t from 'tcomb-form-native';
-import { CONCERT_PASSWORD } from 'react-native-dotenv';
 
 import { store, actions } from '../state';
 import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
@@ -63,7 +62,7 @@ export default class SignIn extends Component {
       const { phoneNumber } = formData;
       await Auth.signIn({
         username: phoneNumber.trim(),
-        password: CONCERT_PASSWORD,
+        password: Constants.deviceId,
       });
     } catch (error) {
       this.setState({ error: error.message });
