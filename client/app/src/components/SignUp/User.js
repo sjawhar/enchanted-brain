@@ -9,18 +9,12 @@ import LANGUAGES from '../../languages';
 
 const UserType = t.struct({
   phoneNumber: t.refinement(t.String, val => /^\+[0-9]+$/.test(val)),
-  password: t.String,
 });
 
 export default class User extends Component {
-  state = {
-    password: '',
-  };
-
   getFormOptions = () => {
-    const { password, phoneNumber, phoneNumberHelp } = LANGUAGES[this.props.language].fields;
+    const { phoneNumber, phoneNumberHelp } = LANGUAGES[this.props.language].fields;
     return {
-      order: ['phoneNumber', 'password'],
       fields: {
         phoneNumber: {
           label: phoneNumber,
@@ -29,21 +23,15 @@ export default class User extends Component {
           keyboardType: 'phone-pad',
           textContentType: 'telephoneNumber',
         },
-        password: {
-          label: password,
-          secureTextEntry: true,
-          autoCompleteType: 'password',
-          textContentType: 'password',
-        },
       },
     };
   };
 
-  handleChange = ({ phoneNumber, password, ...formData }) => {
+  handleChange = ({ phoneNumber, ...formData }) => {
     if (!phoneNumber.startsWith('+')) {
       phoneNumber = `+${phoneNumber}`;
     }
-    this.setState({ password }, () => this.props.onChange({ phoneNumber, ...formData }));
+    this.props.onChange({ phoneNumber, ...formData });
   };
 
   handleSubmit = () => {
@@ -55,7 +43,6 @@ export default class User extends Component {
   };
 
   render() {
-    const { password } = this.state;
     const { error, formData, language, isLoading, onCancel } = this.props;
     const { buttons } = LANGUAGES[language];
     return (
@@ -65,7 +52,7 @@ export default class User extends Component {
           options={this.getFormOptions()}
           ref="form"
           type={UserType}
-          value={{ password, ...formData }}
+          value={formData}
         />
         {isLoading ? (
           <ActivityIndicator size="large" color={COLORS.primaryOrange} />
