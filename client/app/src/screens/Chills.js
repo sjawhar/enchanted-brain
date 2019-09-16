@@ -77,11 +77,14 @@ class ChillsScreen extends Component {
     const waitingTime =
       Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
-      const { panTimeoutId } = this.state;
+      const { isTouching, panTimeoutId } = this.state;
       if (panTimeoutId) {
         clearTimeout(panTimeoutId);
       }
       this.setState({ isEnded: true });
+      if (!isTouching) {
+        this.gotoWelcome();
+      }
       return;
     }
     this.setState({
@@ -94,8 +97,9 @@ class ChillsScreen extends Component {
 
   _onPanResponderGrant = event => {
     this.setState({
-      touches: [],
+      isTouching: false,
       opacity: new Animated.Value(1),
+      touches: [],
     });
     this._onPanResponderMove(event);
   };
@@ -108,23 +112,15 @@ class ChillsScreen extends Component {
     });
   };
 
-  _onPanResponderRelease = () => {
-    const { touches, panTimeoutId, isEnded } = this.state;
+  _onPanResponderRelease = isEnded => {
+    const { touches, panTimeoutId } = this.state;
     if (panTimeoutId) {
       clearTimeout(panTimeoutId);
     }
-    this.setState({ nextPollTime: undefined });
+    this.setState({ isTouching: false, nextPollTime: undefined });
     this.sendTouches(touches);
-    if (isEnded) {
-      InteractionManager.runAfterInteractions(() =>
-        this.props.navigation.navigate({
-          routeName: 'Welcome',
-          params: {
-            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-            messageText: MESSAGE_STAGE_COMPLETE_BODY,
-          },
-        })
-      );
+    if (isEnded === true) {
+      this.gotoWelcome();
       return;
     }
     Animated.timing(this.state.opacity, {
@@ -134,6 +130,17 @@ class ChillsScreen extends Component {
   };
 
   getInterval = () => this.props.navigation.state.params.interval * 1000;
+
+  gotoWelcome = () =>
+    InteractionManager.runAfterInteractions(() =>
+      this.props.navigation.navigate({
+        routeName: 'Welcome',
+        params: {
+          headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+          messageText: MESSAGE_STAGE_COMPLETE_BODY,
+        },
+      })
+    );
 
   registerChoice = ({ choice, timestamp }) => {
     const { nextPollTime: pollTime = timestamp, panTimeoutId, isEnded } = this.state;
