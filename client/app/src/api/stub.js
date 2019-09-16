@@ -78,13 +78,6 @@ const STAGE_DATA = {
           choices: [],
         },
         {
-          displayName: 'Synesthesia Song',
-          startTime: new Date(Date.now() - 16 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 13 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_COLOR,
-          choices: [],
-        },
-        {
           displayName: 'Barber/Adagio for Strings',
           startTime: new Date(Date.now() - 10 * TIME_MINUTES).toISOString(),
           endTime: new Date(Date.now() - 7 * TIME_MINUTES).toISOString(),

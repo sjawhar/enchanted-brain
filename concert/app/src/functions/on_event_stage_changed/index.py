@@ -59,11 +59,9 @@ def handler(event, context):
 def update_event_stage_and_song_list(message):
     data = message["data"]
 
-    event_stage_put_transaction_item = get_event_stage_put_transaction_item(data)
+    transaction_items = [get_event_stage_put_transaction_item(data)]
     song_list_update_transaction_item = get_song_list_update_transaction_item(data)
-
-    transaction_items = [event_stage_put_transaction_item]
-    if song_list_update_transaction_item:
+    if song_list_update_transaction_item is not None:
         transaction_items.append(song_list_update_transaction_item)
 
     return dynamodb.transact_write_items(TransactItems=transaction_items)
@@ -92,7 +90,7 @@ def get_song_list_update_transaction_item(message_data):
     end_time = message_data.get(ATTR_SONG_LIST_END_TIME)
 
     if not (display_name and start_time and end_time):
-        return
+        return None
 
     song = [
         {

@@ -47,7 +47,6 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Coriolan Overture',
     choiceTypes: [
       'CHOICE_COLOR',
       'CHOICE_EMOTION_HAPPINESS',
