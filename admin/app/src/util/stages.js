@@ -15,7 +15,7 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Fantasia on a Theme by Thomas Tallis',
+    displayName: 'Vaughan Williams/Fantasia on a Theme by Thomas Tallis/sad',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -23,7 +23,7 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Two Elegiac Melodies',
+    displayName: 'Grieg/Two Elegiac Melodies/calm',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -31,7 +31,7 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Symphony No. 7 - 4th Movement',
+    displayName: 'Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -39,7 +39,7 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Chamber Symphony',
+    displayName: 'Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -59,13 +59,13 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
-    displayName: 'Adagio for Strings',
+    displayName: 'Barber/Adagio for Strings',
     interval: 0.2,
     ...getTimes(5, 0)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
-    displayName: 'The Four Seasons - Summer',
+    displayName: 'Vivaldi/The Four Seasons - Summer (Storm)',
     interval: 0.2,
     ...getTimes(2, 59)
   }),
