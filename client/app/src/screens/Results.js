@@ -36,10 +36,6 @@ class ResultsScreen extends Component {
         if (!choices || !choices.length) {
           return null;
         }
-        // TEMPORARY: Don't display synesthesia results
-        if (songInfo.displayName.toLowerCase().includes('coriolan overture')) {
-          return null;
-        }
         const song = {
           startTime,
           endTime,
