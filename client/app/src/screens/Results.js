@@ -113,29 +113,22 @@ class ResultsScreen extends Component {
     if (song.chartProps.xMax > song.choices[song.choices.length - 1].timestamp) {
       song.choices.push({ timestamp: song.chartProps.xMax, ...pad });
     }
-    song.userChoices = userChoices
-      .filter(({ timestamp }) => timestamp >= song.startTime && timestamp <= song.endTime)
-      .map(({ timestamp, choice }) => ({
+    song.userChoices = Object.entries(userChoices)
+      .filter(([timestamp]) => timestamp >= song.startTime && timestamp <= song.endTime)
+      .map(([timestamp, { choice }]) => ({
         timestamp: new Date(timestamp),
         ...userChoiceModifier(choice),
       }));
 
-    let filled = false;
     song.choices.forEach(({ timestamp }) => {
-      const userChoice = song.userChoices.find(
-        choice => choice.timestamp.valueOf() === timestamp.valueOf()
-      );
-      if (userChoice) {
+      if (userChoices[timestamp.toISOString()]) {
         return;
       }
       song.userChoices.push({ timestamp, value: 0 });
-      filled = true;
     });
-    if (filled) {
-      song.userChoices.sort(({ timestamp: a }, { timestamp: b }) =>
-        a.valueOf() === b.valueOf() ? 0 : a < b ? -1 : 1
-      );
-    }
+    song.userChoices.sort(({ timestamp: a }, { timestamp: b }) =>
+      a.valueOf() === b.valueOf() ? 0 : a < b ? -1 : 1
+    );
   };
 
   handleIndexChange = index => this.setState({ currentIndex: index });
