@@ -30,11 +30,11 @@
     "gender": "Gender",
     "password": "Password",
     "phoneNumber": "Phone Number (with country code)",
-    "phoneNumberHelp": "This will be your username. Do not include leading zeros after the country code. A confirmation code will be sent by SMS."
+    "phoneNumberHelp": "This will be your username. Do not include leading zeros after the country code."
   },
   "modal": {
     "header": "User already exists",
-    "body": "Are you trying to complete the sign up process by entering a confirmation code? Or would you like to sign in instead?"
+    "body": "Would you like to sign in?"
   },
   "terms": {
     "title": "Mobile Application Terms and Conditions of Use",

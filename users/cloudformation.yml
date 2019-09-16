@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
+Transform: AWS::Serverless-2016-10-31
+
 Parameters:
 
   Environment:
@@ -56,14 +58,25 @@ Resources:
                 Effect: Allow
                 Resource: '*'
 
+  PreSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-pre-signup
+      Runtime: python3.7
+      CodeUri: app/src/functions/pre_signup
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 3
+      AutoPublishAlias: live
+
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub ${Environment}-enchanted-brain
       UsernameAttributes:
         - phone_number
-      AutoVerifiedAttributes:
-        - phone_number
+      LambdaConfig:
+        PreSignUp: !Ref PreSignUpFunction.Alias
       SmsConfiguration:
         ExternalId: !Sub
           - '{{resolve:ssm:/${Environment}/${Parameter}:${Version}}}'
@@ -122,6 +135,14 @@ Resources:
           StringAttributeConstraints:
             MinLength: 2
             MaxLength: 3
+
+  UserPoolLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:invokeFunction
+      Principal: cognito-idp.amazonaws.com
+      FunctionName: !Ref PreSignUpFunction.Alias
+      SourceArn: !GetAtt CognitoUserPool.Arn
 
   AdminUserPoolGroup:
     Type: AWS::Cognito::UserPoolGroup
