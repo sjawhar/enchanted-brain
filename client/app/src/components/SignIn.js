@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Button } from 'react-native-elements';
-import { Auth, I18n } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
 import Constants from 'expo-constants';
 import t from 'tcomb-form-native';
 import { CONCERT_PASSWORD } from 'react-native-dotenv';
@@ -48,7 +48,6 @@ export default class SignIn extends Component {
   };
 
   handleLanguageChange = language => {
-    I18n.setLanguage(language);
     store.dispatch(actions.setLanguage(language));
     this.forceUpdate();
   };
@@ -75,7 +74,6 @@ export default class SignIn extends Component {
 
   render() {
     const language = this.getLanguage();
-    I18n.setLanguage(language);
     if (this.props.authState !== 'signIn') {
       return null;
     }
