@@ -76,8 +76,8 @@ export default class Signup extends Component {
           gender,
         },
       });
-      this.setState(INITIAL_STATE);
       await Auth.signIn({ username, password: CONCERT_PASSWORD });
+      this.setState(INITIAL_STATE);
     } catch (error) {
       const isUserExists = error.code === 'UsernameExistsException';
       this.setState({
