@@ -188,7 +188,6 @@ const STAGE_DATA = {
   [STAGE_WAITING]: () => ({}),
 };
 
-
 export default stageId => {
   const { eventData, ...stageData } = STAGE_DATA[stageId]();
   return {

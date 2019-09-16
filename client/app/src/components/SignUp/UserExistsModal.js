@@ -8,7 +8,7 @@ import LANGUAGES from '../../languages';
 
 export default class UserExistsModal extends Component {
   render() {
-    const { language, onConfirm, onSignIn, visible } = this.props;
+    const { language, onBack, onSignIn, visible } = this.props;
     const { modal, buttons } = LANGUAGES[language];
     return (
       <Modal animationType="slide" transparent={false} visible={visible}>
@@ -17,13 +17,13 @@ export default class UserExistsModal extends Component {
           <Text style={styles.modalText}>{modal.body}</Text>
           <Button
             buttonStyle={{ backgroundColor: COLORS.primaryOrange, ...styles.button }}
-            onPress={onConfirm}
-            title={buttons.confirmUser}
-          />
-          <Button
-            buttonStyle={{ backgroundColor: COLORS.primaryBlue, ...styles.button }}
             onPress={onSignIn}
             title={buttons.signIn}
+          />
+          <Button
+            buttonStyle={{ backgroundColor: 'gray', ...styles.button }}
+            onPress={onBack}
+            title={buttons.back}
           />
         </View>
       </Modal>
