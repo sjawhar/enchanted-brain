@@ -12,6 +12,7 @@ import {
 } from 'aws-amplify-react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { activateKeepAwake, deactivateKeepAwake } from 'expo-keep-awake';
 
 import { persistor, store, actions } from './state';
 import SignIn from './components/SignIn';
@@ -87,6 +88,7 @@ Amplify.configure(AMPLIFY_CONFIG);
 
 class App extends React.Component {
   async componentDidMount() {
+    activateKeepAwake();
     const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
     store.dispatch(actions.setUID(username));
     concertApi.on(CONNECTED, this.handleStageNavigation);
@@ -94,6 +96,7 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
+    deactivateKeepAwake();
     concertApi.removeListener(CONNECTED, this.handleStageNavigation);
     concertApi.removeListener(EVENT_STAGE_CHANGED, this.handleStageNavigation);
     concertApi.disconnect();
@@ -145,6 +148,9 @@ class App extends React.Component {
     }
 
     const canConnect = !!isShowConnect || stageId === STAGE_END ? true : null;
+    if (screen === NavigationService.getState()) {
+      NavigationService.navigate('Welcome');
+    }
     NavigationService.navigate(screen, {
       choiceInverted,
       choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
