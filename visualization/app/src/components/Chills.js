@@ -112,33 +112,43 @@ export default class Chills extends Component {
   render() {
     return (
       <div style={styles.container}>
-        {this.getChillsSongs().map(({ displayName, startTime, sum, count, chilliest, yMax }) => (
-          <div key={displayName} style={styles.songContainer}>
-            <div style={styles.songHeader}>{displayName}</div>
-            <div>
-              <Line
-                {...this.getChartProps({
-                  backgroundColor: '#d15700',
-                  data: sum,
-                  title: 'Total Chill Intensity',
-                  yMax: yMax.sum,
-                  annotate: chilliest,
-                })}
-              />
-              <div style={styles.chilliest}>
-                Chilliest Moment: {this.getSongTimeString(chilliest.timestamp)}
+        {this.getChillsSongs().map(({ displayName, startTime, sum, count, chilliest, yMax }) => {
+          const [composer, songName] = displayName.split('/');
+          return (
+            <div key={displayName} style={styles.songContainer}>
+              <div style={styles.songNameContainer}>
+                <div>
+                  <strong>{composer}</strong>
+                </div>
+                <div>{songName}</div>
+              </div>
+              <div style={styles.chartContainer}>
+                <Line
+                  {...this.getChartProps({
+                    backgroundColor: '#d15700',
+                    data: sum,
+                    title: 'Total Chill Intensity',
+                    yMax: yMax.sum,
+                    annotate: chilliest,
+                  })}
+                />
+                <div style={styles.chilliest}>
+                  Chilliest Moment: {this.getSongTimeString(chilliest.timestamp)}
+                </div>
+              </div>
+              <div style={styles.chartContainer}>
+                <Line
+                  {...this.getChartProps({
+                    backgroundColor: '#000081',
+                    data: count,
+                    title: 'Audience Members Experiencing Chills',
+                    yMax: yMax.count,
+                  })}
+                />
               </div>
             </div>
-            <Line
-              {...this.getChartProps({
-                backgroundColor: '#000081',
-                data: count,
-                title: 'Audience Members Experiencing Chills',
-                yMax: yMax.count,
-              })}
-            />
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -153,18 +163,29 @@ const styles = {
     alignItems: 'stretch',
   },
   songContainer: {
-    width: '50vw',
-    height: '100vh',
+    borderColor: '#222',
+    borderStyle: 'solid',
+    borderWidth: '0px 1px',
+    height: 'calc(100vh - 2px)',
+    width: 'calc(50vw - 2px)',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-around',
-    padding: '0 50px',
+    justifyContent: 'space-between',
   },
-  songHeader: {
+  songNameContainer: {
     color: 'white',
     textAlign: 'center',
-    fontWeight: 'bold',
     fontSize: 35,
+    alignSelf: 'stretch',
+    backgroundColor: '#222',
+    padding: '8px 0px 13px',
+  },
+  chartContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '0 13px',
   },
   chilliest: {
     color: '#d15700',
