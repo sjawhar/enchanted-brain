@@ -88,6 +88,10 @@ Amplify.configure(AMPLIFY_CONFIG);
 store.subscribe(() => I18n.setLanguage(store.getState().language));
 
 class App extends React.Component {
+  state = {
+    stageNumber: 0
+  };
+
   async componentDidMount() {
     activateKeepAwake();
     const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
@@ -117,6 +121,7 @@ class App extends React.Component {
     choiceTypes,
     stageId,
     isShowConnect,
+    stageNumber,
     ...stageData
   }) => {
     if (choiceType) {
@@ -124,6 +129,9 @@ class App extends React.Component {
     }
     if (choiceInverted !== undefined) {
       store.dispatch(actions.setChoiceInverted(choiceInverted));
+    }
+    if (stageNumber <= this.state.stageNumber) {
+      return;
     }
 
     ({ choiceType, choiceInverted } = store.getState());

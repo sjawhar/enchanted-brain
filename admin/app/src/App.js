@@ -15,7 +15,7 @@ class App extends Component {
     super(props);
     this.state = {
       isConnected: false,
-      stage: 0,
+      stageNumber: 0,
       lastReceived: null
     };
     concertApi.on('CONNECTED', this.handleConnected);
@@ -34,21 +34,23 @@ class App extends Component {
   }
 
   getNextStage = () => {
-    const { stage } = this.state;
-    return { stage, data: getStageData(stage) };
+    const { stageNumber } = this.state;
+    return { stageNumber, data: getStageData(stageNumber) };
   };
 
-  handleBack = () => this.setState(({ stage }) => ({ stage: stage - 1 }));
+  handleBack = () =>
+    this.setState(({ stageNumber }) => ({ stageNumber: stageNumber - 1 }));
 
   handleConnected = () => this.setState({ isConnected: true });
 
   handleNextStage = () => {
-    const { stage, data } = this.getNextStage();
+    const { stageNumber, data } = this.getNextStage();
     concertApi.send({ event: 'EVENT_STAGE_CHANGED', data });
-    this.setState({ stage: stage + 1 });
+    this.setState({ stageNumber: stageNumber + 1 });
   };
 
-  handleSkipNext = () => this.setState(({ stage }) => ({ stage: stage + 1 }));
+  handleSkipNext = () =>
+    this.setState(({ stageNumber }) => ({ stageNumber: stageNumber + 1 }));
 
   handleStageChanged = lastReceived => this.setState({ lastReceived });
 

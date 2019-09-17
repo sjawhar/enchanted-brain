@@ -73,10 +73,10 @@ const STAGE_DATA = [
   })
 ];
 
-export const getStageData = stage => {
-  const generator = STAGE_DATA[stage];
+export const getStageData = stageNumber => {
+  const generator = STAGE_DATA[stageNumber];
   if (!generator) {
     return null;
   }
-  return generator(new Date());
+  return { stageNumber, ...generator(new Date()) };
 };
