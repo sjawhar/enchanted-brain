@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
+import Constants from 'expo-constants';
 
 import Terms from './Terms';
 import Demographics from './Demographics';
