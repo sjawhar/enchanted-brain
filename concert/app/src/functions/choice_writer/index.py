@@ -19,8 +19,15 @@ from enchanted_brain.attributes import (
 
 """
 Processes SNS messages containing user choices by writing choices to Dynamo.
-For event and database record shapes, see https://github.com/sjawhar/enchanted-brain/issues/4.
+For event and database record shapes, see https://github.com/sjawhar/enchanted-brain/wiki
 """
+
+CHOICE_TYPE_KEYS = {
+    CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
+    CHOICE_EMOTION_ANGER: ATTR_CHOICE_VALUE_EMOTION,
+    CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
+    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
+}
 
 DYNAMODB_TABLE_NAME = os.environ.get("DYNAMODB_TABLE_NAME")
 DYNAMODB_ENDPOINT = os.environ.get("DYNAMODB_ENDPOINT")
@@ -30,13 +37,6 @@ if DYNAMODB_ENDPOINT:
     dynamodb_args["endpoint_url"] = DYNAMODB_ENDPOINT
 dynamodb = boto3.resource("dynamodb", **dynamodb_args)
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)
-
-CHOICE_TYPE_KEYS = {
-    CHOICE_COLOR: ATTR_CHOICE_VALUE_COLOR,
-    CHOICE_EMOTION_ANGER: ATTR_CHOICE_VALUE_EMOTION,
-    CHOICE_EMOTION_HAPPINESS: ATTR_CHOICE_VALUE_EMOTION,
-    CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
-}
 
 
 def handler(event, context):
@@ -73,7 +73,7 @@ def get_update_args(event):
         update_args["ExpressionAttributeNames"][
             "#emotion_type"
         ] = ATTR_CHOICE_VALUE_EMOTION_TYPE
-        # Trim off starting CHOICE_
+        # Trim CHOICE_ from beginning
         update_args["ExpressionAttributeValues"][":emotion_type"] = choice_type[7:]
 
     return update_args

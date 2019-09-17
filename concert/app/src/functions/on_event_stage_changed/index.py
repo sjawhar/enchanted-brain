@@ -100,27 +100,27 @@ def get_song_list_update_transaction_item(message_data):
         }
     ]
 
-    song_list_update_args = {
-        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_SONG_LIST)},
-        "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
-        "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
-        "ExpressionAttributeValues": {
-            ":song": dynamodb_serializer.serialize(song),
-            ":empty_list": dynamodb_serializer.serialize([]),
-        },
-        "TableName": DYNAMODB_TABLE_NAME,
+    return {
+        "Update": {
+            "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(RECORD_ID_SONG_LIST)},
+            "UpdateExpression": "SET #songs = list_append(if_not_exists(#songs, :empty_list), :song)",
+            "ExpressionAttributeNames": {"#songs": ATTR_SONG_LIST_SONGS},
+            "ExpressionAttributeValues": {
+                ":song": dynamodb_serializer.serialize(song),
+                ":empty_list": dynamodb_serializer.serialize([]),
+            },
+            "TableName": DYNAMODB_TABLE_NAME,
+        }
     }
-
-    return {"Update": song_list_update_args}
 
 
 def get_get_transaction_item(record_id):
-    get_args = {
-        "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(record_id)},
-        "TableName": DYNAMODB_TABLE_NAME,
+    return {
+        "Get": {
+            "Key": {ATTR_RECORD_ID: dynamodb_serializer.serialize(record_id)},
+            "TableName": DYNAMODB_TABLE_NAME,
+        }
     }
-
-    return {"Get": get_args}
 
 
 def get_song_list_and_aggregate_data():
@@ -154,28 +154,20 @@ def get_songs_with_aggregate_choices(song_list, aggregate_data):
 
         choices = []
         for timestamp, aggregate_choice_data in aggregate_data[choice_key].items():
-            if start_time <= timestamp < end_time:
-                choices_at_timestamp = {ATTR_CHOICE_TIMESTAMP: timestamp}
-                if choice_type == CHOICE_COLOR:
-                    choices_at_timestamp.update(
-                        {
-                            k[4:]: v
-                            for k, v in aggregate_choice_data.items()
-                            if str.startswith(k, ATTR_AGGREGATE_CHOICE_SUM)
-                        }
-                    )
-                else:
-                    choices_at_timestamp.update(
-                        {
-                            ATTR_AGGREGATE_CHOICE_SUM: aggregate_choice_data[
-                                ATTR_AGGREGATE_CHOICE_SUM
-                            ],
-                            ATTR_AGGREGATE_CHOICE_COUNT: aggregate_choice_data[
-                                ATTR_AGGREGATE_CHOICE_COUNT
-                            ],
-                        }
-                    )
-                choices.append(choices_at_timestamp)
+            if not (start_time <= timestamp < end_time):
+                continue
+            choices_at_timestamp = {ATTR_CHOICE_TIMESTAMP: timestamp}
+            choices.append(choices_at_timestamp)
+            if choice_type == CHOICE_CHILLS:
+                choices_at_timestamp.update(aggregate_choice_data)
+                continue
+            choices_at_timestamp.update(
+                {
+                    k[4:]: v
+                    for k, v in aggregate_choice_data.items()
+                    if str.startswith(k, ATTR_AGGREGATE_CHOICE_SUM)
+                }
+            )
 
         songs_with_aggregate_choices.append(
             {

@@ -350,6 +350,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-on-event-stage-changed
       CodeUri: app/src/functions/on_event_stage_changed
+      Timeout: 20
       Layers:
         - !Ref LambdaLayer
       Environment:
@@ -434,7 +435,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
       CodeUri: app/src/functions/choice_writer
-      Timeout: 10
+      Timeout: 120
       Layers:
         - !Ref LambdaLayer
       Events:
