@@ -6,46 +6,42 @@ describe('root reducer', () => {
     const state = reducer(undefined, { type: '' });
     expect(state.choiceType).toEqual('CHOICE_COLOR');
     expect(state.choiceInverted).toEqual(false);
-    expect(state.choices.colors).toEqual([]);
-    expect(state.choices.chills).toEqual([]);
-    expect(state.choices.emotions).toEqual([]);
+    expect(state.choices.colors).toEqual({});
+    expect(state.choices.chills).toEqual({});
+    expect(state.choices.emotions).toEqual({});
   });
 
   describe(actions.SEND_CHOICE, () => {
     it('should add the CHOICE_COLOR to choices.colors', () => {
       const expected = { choiceType: 'CHOICE_COLOR', choice: 'foo' };
-      const state = reducer(undefined, actions.sendChoice(expected));
-      expect(state.choices.colors.length).toEqual(1);
-      expect(state.choices.colors).toEqual(
-        expect.arrayContaining([expect.objectContaining(expected)])
-      );
+      const timestamp = new Date().toISOString();
+      const state = reducer(undefined, actions.sendChoice({ ...expected, timestamp }));
+      expect(Object.keys(state.choices.colors).length).toEqual(1);
+      expect(state.choices.colors[timestamp]).toEqual(expected);
     });
 
     it('should add the CHOICE_EMOTION_HAPPINESS to choices.emotions', () => {
       const expected = { choiceType: 'CHOICE_EMOTION_HAPPINESS', choice: 'foo' };
-      const state = reducer(undefined, actions.sendChoice(expected));
-      expect(state.choices.emotions.length).toEqual(1);
-      expect(state.choices.emotions).toEqual(
-        expect.arrayContaining([expect.objectContaining(expected)])
-      );
+      const timestamp = new Date().toISOString();
+      const state = reducer(undefined, actions.sendChoice({ ...expected, timestamp }));
+      expect(Object.keys(state.choices.emotions).length).toEqual(1);
+      expect(state.choices.emotions[timestamp]).toEqual(expected);
     });
 
     it('should add the CHOICE_EMOTION_ANGER to choices.emotions', () => {
       const expected = { choiceType: 'CHOICE_EMOTION_ANGER', choice: 'foo' };
-      const state = reducer(undefined, actions.sendChoice(expected));
-      expect(state.choices.emotions.length).toEqual(1);
-      expect(state.choices.emotions).toEqual(
-        expect.arrayContaining([expect.objectContaining(expected)])
-      );
+      const timestamp = new Date().toISOString();
+      const state = reducer(undefined, actions.sendChoice({ ...expected, timestamp }));
+      expect(Object.keys(state.choices.emotions).length).toEqual(1);
+      expect(state.choices.emotions[timestamp]).toEqual(expected);
     });
 
     it('should add the CHOICE_CHILLS to choices.chills', () => {
       const expected = { choiceType: 'CHOICE_CHILLS', choice: 'foo' };
-      const state = reducer(undefined, actions.sendChoice(expected));
-      expect(state.choices.chills.length).toEqual(1);
-      expect(state.choices.chills).toEqual(
-        expect.arrayContaining([expect.objectContaining(expected)])
-      );
+      const timestamp = new Date().toISOString();
+      const state = reducer(undefined, actions.sendChoice({ ...expected, timestamp }));
+      expect(Object.keys(state.choices.chills).length).toEqual(1);
+      expect(state.choices.chills[timestamp]).toEqual(expected);
     });
   });
 
