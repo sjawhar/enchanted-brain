@@ -89,7 +89,7 @@ store.subscribe(() => I18n.setLanguage(store.getState().language));
 
 class App extends React.Component {
   state = {
-    stageNumber: 0
+    stageNumber: 0,
   };
 
   async componentDidMount() {
