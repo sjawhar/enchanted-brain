@@ -70,7 +70,7 @@ export default class SynesthsiaScreen extends Component {
   };
 
   scheduleNextPrompt = () => {
-    const { startTime, endTime, intervalSeconds, timeout } = this.props.navigation.state.params;
+    const { startTime, endTime, interval: intervalSeconds, timeout } = this.props.navigation.state.params;
     const { timestamp: lastTimestamp } = this.state;
 
     const interval = intervalSeconds * 1000;

@@ -23,7 +23,7 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Grieg/Two Elegiac Melodies/calm',
+    displayName: 'Edvard Grieg/Two Elegiac Melodies/calm',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -80,5 +80,5 @@ export const getStageData = stageNumber => {
   if (!generator) {
     return null;
   }
-  return { stageNumber, ...generator(new Date()) };
+  return { stageNumber: stageNumber + 1, ...generator(new Date()) };
 };
