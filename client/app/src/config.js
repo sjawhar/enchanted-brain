@@ -28,7 +28,7 @@ export const VIBRATION_PATTERN = Platform.select({
 
 let clockOffsetPromise = null;
 
-export const CONCERT_PASSWORD = Constants.deviceId.replace(/([a-z])/, c => c.toUpperCase());
+export const CONCERT_PASSWORD = `a${Constants.deviceId}Z`;
 
 export const getClockOffset = () => {
   if (!clockOffsetPromise) {
