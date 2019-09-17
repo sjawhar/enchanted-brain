@@ -4,6 +4,7 @@ import {
   AMPLIFY_USER_POOL_ID,
   AMPLIFY_USER_POOL_WEB_CLIENT_ID,
 } from 'react-native-dotenv';
+import Constants from 'expo-constants';
 
 export const AMPLIFY_CONFIG = {
   Auth: {
@@ -26,6 +27,8 @@ export const VIBRATION_PATTERN = Platform.select({
 });
 
 let clockOffsetPromise = null;
+
+export const CONCERT_PASSWORD = Constants.deviceId.replace(/([a-z])/, c => c.toUpperCase());
 
 export const getClockOffset = () => {
   if (!clockOffsetPromise) {

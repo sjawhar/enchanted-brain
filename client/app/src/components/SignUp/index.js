@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Auth } from 'aws-amplify';
-import Constants from 'expo-constants';
 
 import Terms from './Terms';
 import Demographics from './Demographics';
@@ -10,6 +9,7 @@ import User from './User';
 import UserExistsModal from './UserExistsModal';
 import { store, actions } from '../../state';
 import Layout from '../../constants/Layout';
+import { CONCERT_PASSWORD } from '../../config';
 
 const INITIAL_STATE = {
   acceptResearch: false,
@@ -62,10 +62,9 @@ export default class Signup extends Component {
     this.setState({ isLoading: true, error: null });
     try {
       const username = phoneNumber.trim();
-      const { deviceId: password } = Constants;
       const { userConfirmed } = await Auth.signUp({
         username,
-        password,
+        password: CONCERT_PASSWORD,
         attributes: {
           'custom:acceptResearch': acceptResearch ? 'Y' : 'N',
           'custom:age': age.toString(),
@@ -75,7 +74,7 @@ export default class Signup extends Component {
           gender,
         },
       });
-      await Auth.signIn({ username, password });
+      await Auth.signIn({ username, password: CONCERT_PASSWORD });
       this.setState(INITIAL_STATE);
     } catch (error) {
       const isUserExists = error.code === 'UsernameExistsException';

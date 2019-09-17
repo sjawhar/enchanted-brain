@@ -10,6 +10,7 @@ import { store, actions } from '../state';
 import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
 import Layout from '../constants/Layout';
 import COLORS from '../constants/Colors';
+import { CONCERT_PASSWORD } from '../config';
 
 const INITIAL_STATE = {
   error: null,
@@ -62,7 +63,7 @@ export default class SignIn extends Component {
       const { phoneNumber } = formData;
       await Auth.signIn({
         username: phoneNumber.trim(),
-        password: Constants.deviceId,
+        password: CONCERT_PASSWORD,
       });
     } catch (error) {
       this.setState({ error: error.message });
