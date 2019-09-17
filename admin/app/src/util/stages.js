@@ -31,7 +31,8 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
+    displayName:
+      'Ludwig van Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -39,7 +40,8 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
-    displayName: 'Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
+    displayName:
+      'Dmitri Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
@@ -58,13 +60,13 @@ const STAGE_DATA = [
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
-    displayName: 'Barber/Adagio for Strings',
+    displayName: 'Samuel Barber/Adagio for Strings',
     interval: 0.2,
     ...getTimes(5, 0)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
-    displayName: 'Vivaldi/The Four Seasons - Summer (Storm)',
+    displayName: 'Antonio Vivaldi/The Four Seasons - Summer (Storm)',
     interval: 0.2,
     ...getTimes(2, 59)
   }),
