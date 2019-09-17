@@ -376,8 +376,8 @@ def test_song_list_and_aggregate_choices_sent_to_callback_on_stage_end():
             "endTime": "2019-05-14T21:21:33.000Z",
             "choiceType": "CHOICE_CHILLS",
             "choices": [
-                {"timestamp": "2019-05-14T21:20:03.000Z", "sum": 2.5, "count": 2},
-                {"timestamp": "2019-05-14T21:20:03.200Z", "sum": 1.5, "count": 1},
+                {"timestamp": "2019-05-14T21:20:03.000Z", "count": 2, "sum": 2.5},
+                {"timestamp": "2019-05-14T21:20:03.200Z", "count": 1, "sum": 1.5},
             ],
         },
     ]
