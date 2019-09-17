@@ -14,7 +14,7 @@ import COLORS, { swatchColorInfo, COLOR_BACKGROUND_DARK } from '../constants/Col
 import { CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
 
 const COLOR_KEYS = Object.keys(swatchColorInfo);
-const COLOR_EMPTY = Object.fromEntries(COLOR_KEYS.map(color => [color, 0]));
+const COLOR_EMPTY = COLOR_KEYS.reduce((colors, color) => Object.assign(colors, { [color]: 0 }), {});
 const CARD_MARGIN = 0.05 * Layout.window.width;
 const CARD_WIDTH = 0.9 * Layout.window.width;
 const CONTAINER_HEIGHT = Layout.window.height - Constants.statusBarHeight;
