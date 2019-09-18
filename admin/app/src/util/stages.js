@@ -45,7 +45,7 @@ const STAGE_DATA = [
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
-    ...getTimes(3, 12)
+    ...getTimes(3, 10)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
@@ -56,13 +56,13 @@ const STAGE_DATA = [
     ],
     interval: 20,
     timeout: 5,
-    ...getTimes(8, 0)
+    ...getTimes(7, 30)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
     displayName: 'Samuel Barber/Adagio for Strings',
     interval: 0.2,
-    ...getTimes(5, 0)
+    ...getTimes(3, 33)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_CHILLS',
