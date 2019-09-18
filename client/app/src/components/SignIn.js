@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { Button } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
@@ -77,7 +77,7 @@ export default class SignIn extends Component {
     if (this.props.authState !== 'signIn') {
       return null;
     }
-    const { buttons, fields } = LANGUAGES[language];
+    const { buttons } = LANGUAGES[language];
     const { error, formData, isButtonDisabled } = this.state;
     return (
       <View style={styles.container}>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Animated, PanResponder, InteractionManager } from 'react-native';
+import { View, Text, Animated, PanResponder } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import Constants from 'expo-constants';
 
@@ -30,6 +30,7 @@ class ChillsScreen extends Component {
     this.state = {
       isEnded: false,
       isShowPrompt: false,
+      isTouching: false,
       touches: [],
     };
 
@@ -77,14 +78,15 @@ class ChillsScreen extends Component {
     const waitingTime =
       Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
-      const { isTouching, panTimeoutId } = this.state;
-      if (panTimeoutId) {
-        clearTimeout(panTimeoutId);
-      }
-      this.setState({ isEnded: true });
-      if (!isTouching) {
-        this.gotoWelcome();
-      }
+      this.setState({ songTimeoutId: null, isEnded: true }, () =>
+        this.props.navigation.navigate({
+          routeName: 'Welcome',
+          params: {
+            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+            messageText: MESSAGE_STAGE_COMPLETE_BODY,
+          },
+        })
+      );
       return;
     }
     this.setState({
@@ -96,54 +98,26 @@ class ChillsScreen extends Component {
   };
 
   _onPanResponderGrant = event => {
-    this.setState({
-      isTouching: false,
-      opacity: new Animated.Value(1),
-      touches: [],
-    });
-    this._onPanResponderMove(event);
+    if (this.state.isEnded) {
+      return;
+    }
+    event.persist();
+    this.setState({ isTouching: true }, () => this._onPanResponderMove(event));
   };
 
   _onPanResponderMove = ({ timeStamp, nativeEvent: { pageY } }) => {
     this.registerChoice({
       choice: Math.min(Math.max(1 - (pageY - Constants.statusBarHeight) / INPUT_HEIGHT, 0), 1),
       timestamp: this.roundTime(timeStamp + this.clockOffset),
-      source: 'touch',
     });
   };
 
-  _onPanResponderRelease = isEnded => {
-    const { touches, panTimeoutId } = this.state;
-    if (panTimeoutId) {
-      clearTimeout(panTimeoutId);
-    }
-    this.setState({ isTouching: false, nextPollTime: undefined });
-    this.sendTouches(touches);
-    if (isEnded === true) {
-      this.gotoWelcome();
-      return;
-    }
-    Animated.timing(this.state.opacity, {
-      toValue: 0,
-      duration: 500,
-    }).start();
-  };
+  _onPanResponderRelease = () => !this.state.isEnded && this.setState({ isTouching: false });
 
   getInterval = () => this.props.navigation.state.params.interval * 1000;
 
-  gotoWelcome = () =>
-    InteractionManager.runAfterInteractions(() =>
-      this.props.navigation.navigate({
-        routeName: 'Welcome',
-        params: {
-          headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-          messageText: MESSAGE_STAGE_COMPLETE_BODY,
-        },
-      })
-    );
-
-  registerChoice = ({ choice, timestamp }) => {
-    const { nextPollTime: pollTime = timestamp, panTimeoutId, isEnded } = this.state;
+  registerChoice = ({ choice: rawChoice, timestamp }) => {
+    const { nextPollTime: pollTime = timestamp, panTimeoutId, isEnded, isTouching } = this.state;
     if (isEnded || timestamp < pollTime) {
       return;
     }
@@ -154,11 +128,14 @@ class ChillsScreen extends Component {
     let nextPollTime = pollTime;
     const now = Date.now() + this.clockOffset;
     const interval = this.getInterval();
-    while (nextPollTime <= now) {
+    do {
       nextPollTime += interval;
-    }
+    } while (nextPollTime <= now);
     nextPollTime = this.roundTime(nextPollTime);
 
+    const choice = isTouching ? rawChoice : 0;
+    timestamp = pollTime;
+    this.sendTouch({ choice, timestamp });
     this.setState(
       ({ touches }) => ({
         nextPollTime,
@@ -167,13 +144,7 @@ class ChillsScreen extends Component {
           () => this.registerChoice({ choice, timestamp: nextPollTime }),
           0.5 * interval + nextPollTime - (Date.now() + this.clockOffset)
         ),
-        touches: [
-          ...touches,
-          {
-            choice,
-            timestamp: pollTime,
-          },
-        ],
+        touches: [{ choice, timestamp }].concat(touches.slice(0, INPUT_BUFFER - 1)),
       }),
       () =>
         Animated.timing(this.state.offset, {
@@ -185,19 +156,17 @@ class ChillsScreen extends Component {
 
   roundTime = time => time - (time % this.getInterval());
 
-  sendTouches = touches =>
-    touches
-      .map(({ timestamp, choice }) =>
-        actions.sendChoice({
-          choice: parseFloat(parseFloat(choice).toFixed(2)),
-          choiceType: CHOICE_CHILLS,
-          timestamp: new Date(timestamp).toISOString(),
-        })
-      )
-      .forEach(action => store.dispatch(action));
+  sendTouch = ({ timestamp, choice }) =>
+    store.dispatch(
+      actions.sendChoice({
+        choice: parseFloat(parseFloat(choice).toFixed(2)),
+        choiceType: CHOICE_CHILLS,
+        timestamp: new Date(timestamp).toISOString(),
+      })
+    );
 
   render() {
-    const { isEnded, isShowPrompt, touches, opacity, offset } = this.state;
+    const { isEnded, isShowPrompt, touches, offset } = this.state;
     if (!isShowPrompt) {
       return <WaitingScreen headerText={''} messageText={MESSAGE_INSTRUCTION_CHILLS} />;
     }
@@ -207,20 +176,16 @@ class ChillsScreen extends Component {
           {isEnded ? (
             <Text style={styles.endText}>Please release your finger</Text>
           ) : (
-            touches
-              .slice(-INPUT_BUFFER)
-              .reverse()
-              .map(({ timestamp, choice }, index) => (
-                <Animated.View
-                  key={timestamp}
-                  style={{
-                    ...styles.waveform,
-                    opacity,
-                    top: (1 - choice) * INPUT_HEIGHT,
-                    right: Animated.add(index * WAVEFORM_SIZE, offset),
-                  }}
-                />
-              ))
+            touches.map(({ timestamp, choice }, index) => (
+              <Animated.View
+                key={timestamp}
+                style={{
+                  ...styles.waveform,
+                  top: (1 - choice) * INPUT_HEIGHT,
+                  right: Animated.add(index * WAVEFORM_SIZE, offset),
+                }}
+              />
+            ))
           )}
         </View>
         <View style={styles.rightBar}>
