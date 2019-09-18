@@ -209,7 +209,7 @@ def test_multiple_records_result_in_multiple_dynamo_calls():
             "update_item",
             dynamo_update_item_success_response,
             {
-                "UpdateExpression": "ADD #k0.#t0.#s0 :c0, #k0.#t0.#c0 :c0, #k0.#t0.#s1 :c1, #k0.#t0.#c0 :c1, #k0.#t2.#s0 :c2, #k0.#t2.#c0 :c2, #k3.#t2.#s3 :s3, #k3.#t2.#c0 :c3",
+                "UpdateExpression": "ADD #k0.#t0.#s0 :s0, #k0.#t0.#c0 :c0, #k0.#t0.#s1 :s1, #k0.#t2.#s0 :s2, #k0.#t2.#c0 :c2, #k3.#t2.#s3 :s3, #k3.#t2.#c0 :c3",
                 "TableName": table_name,
                 "Key": {"recordId": "AGGREGATE"},
                 "ExpressionAttributeNames": {
@@ -223,10 +223,12 @@ def test_multiple_records_result_in_multiple_dynamo_calls():
                     "#s3": "sum",
                 },
                 "ExpressionAttributeValues": {
-                    ":c0": Decimal(1),
-                    ":c1": Decimal(2),
+                    ":c0": Decimal(3),
                     ":c2": Decimal(3),
                     ":c3": Decimal(6),
+                    ":s0": Decimal(1),
+                    ":s1": Decimal(2),
+                    ":s2": Decimal(3),
                     ":s3": Decimal(4.5),
                 },
                 "ReturnValues": "NONE",

@@ -17,6 +17,6 @@ python_version = "3.7"
 
 [scripts]
 test = "pytest -v"
-test-dev = "pytest-watch -- -v"
+test-dev = "pytest-watch -- -vv"
 format = "black --verbose --target-version py37 ."
 lint = "pipenv run format --check"

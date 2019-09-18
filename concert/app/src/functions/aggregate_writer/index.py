@@ -36,79 +36,96 @@ CHOICE_TYPE_KEYS = {
     CHOICE_CHILLS: ATTR_CHOICE_VALUE_CHILLS,
 }
 
-REGEX_NAME_MATCH = re.compile("#[kt]")
+PREFIX_TIMESTAMP = "t"
+PREFIX_CHOICE_KEY = "k"
+PREFIX_COUNT = "c"
+PREFIX_SUM = "s"
+
+REGEX_NAME_MATCH = re.compile(f"#[{PREFIX_CHOICE_KEY}{PREFIX_TIMESTAMP}]")
 
 
 def get_db_args(records):
     op_count = None
     db_args = []
     for i in range(len(records)):
-        if len(db_args) == 0 or len(args["add"]) == 50:
+        if len(db_args) == 0 or len(args["add"]) == 75:
             db_args.append({"set": [], "add": [], "names": {}, "values": {}})
         args = db_args[-1]
         data = json.loads(
             b64decode(records[i]["data"]).decode("utf-8"), parse_float=Decimal
         )
         names = {
-            "t": data["CHOICE_TIME"].replace(" ", "T") + "Z",
-            "c": ATTR_AGGREGATE_CHOICE_COUNT,
-            "s": ATTR_AGGREGATE_CHOICE_SUM,
+            PREFIX_TIMESTAMP: data["CHOICE_TIME"].replace(" ", "T") + "Z",
+            PREFIX_COUNT: ATTR_AGGREGATE_CHOICE_COUNT,
+            PREFIX_SUM: ATTR_AGGREGATE_CHOICE_SUM,
         }
-        values = {"c": data["CHOICE_COUNT"], "s": data["CHOICE_SUM"]}
-        choice_type = data["CHOICE_TYPE"]
 
+        choice_type = data["CHOICE_TYPE"]
         if choice_type.startswith(CHOICE_COLOR):
             color = choice_type.split("_")[2]
             choice_type = CHOICE_COLOR
-            names["s"] += f"_{color}"
-
+            names[PREFIX_SUM] += f"_{color}"
         elif choice_type.startswith(PREFIX_CHOICE_TYPE_EMOTION):
             emotion = choice_type[7:]
-            names["s"] += f"_{emotion}"
-            names["c"] += f"_{emotion}"
+            names[PREFIX_SUM] += f"_{emotion}"
+            names[PREFIX_COUNT] += f"_{emotion}"
 
-        names["k"] = CHOICE_TYPE_KEYS[choice_type]
+        names[PREFIX_CHOICE_KEY] = CHOICE_TYPE_KEYS[choice_type]
 
         is_new_set = False
-        is_new_add = False
-        for p, name in list(names.items()):
+        is_new_sum = False
+        is_new_count = False
+        for prefix, name in list(names.items()):
             if name in args["names"]:
                 names[name] = args["names"][name]
                 continue
-            if p in ["k", "t"]:
+            if prefix is PREFIX_CHOICE_KEY or prefix is PREFIX_TIMESTAMP:
                 is_new_set = True
-            is_new_add = True
-            placeholder = f"#{p}{i}"
+                is_new_count = True
+                is_new_sum = True
+            elif prefix is PREFIX_COUNT:
+                is_new_count = True
+            elif prefix is PREFIX_SUM:
+                is_new_sum = True
+            placeholder = f"#{prefix}{i}"
             args["names"][name] = placeholder
             names[name] = placeholder
 
-        for p, value in list(values.items()):
-            if value in args["values"]:
-                values[value] = args["values"][value]
-                continue
-            is_new_add = True
-            placeholder = f":{p}{i}"
-            args["values"][value] = placeholder
-            values[value] = placeholder
-
-        choice_key = names[names["k"]]
-        timestamp = names[names["t"]]
-        count_name = names[names["c"]]
-        count_value = values[values["c"]]
-        sum_name = names[names["s"]]
-        sum_value = values[values["s"]]
+        choice_key = names[names[PREFIX_CHOICE_KEY]]
+        timestamp = names[names[PREFIX_TIMESTAMP]]
         if is_new_set:
             args["set"].append(
                 f"{choice_key}.{timestamp} = if_not_exists({choice_key}.{timestamp}, :e)"
             )
-        if is_new_add:
+
+        sum_name = names[names[PREFIX_SUM]]
+        sum_value = data["CHOICE_SUM"]
+        sum_value_placeholder = (
+            f":{PREFIX_SUM}{i}" if is_new_sum else sum_name.replace("#", ":")
+        )
+        if is_new_sum:
             args["add"].append(
-                f"{choice_key}.{timestamp}.{sum_name} {sum_value}, {choice_key}.{timestamp}.{count_name} {count_value}"
+                f"{choice_key}.{timestamp}.{sum_name} {sum_value_placeholder}"
             )
+            args["values"][sum_value_placeholder] = sum_value
+        else:
+            args["values"][sum_value_placeholder] += sum_value
+
+        count_name = names[names[PREFIX_COUNT]]
+        count_value = data["CHOICE_COUNT"]
+        count_value_placeholder = (
+            f":{PREFIX_COUNT}{i}" if is_new_count else count_name.replace("#", ":")
+        )
+        if is_new_count:
+            args["add"].append(
+                f"{choice_key}.{timestamp}.{count_name} {count_value_placeholder}"
+            )
+            args["values"][count_value_placeholder] = count_value
+        else:
+            args["values"][count_value_placeholder] += count_value
 
     for args in db_args:
         args["names"] = {v: k for k, v in args["names"].items()}
-        args["values"] = {v: k for k, v in args["values"].items()}
     return db_args
 
 
