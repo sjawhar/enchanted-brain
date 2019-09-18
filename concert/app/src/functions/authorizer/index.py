@@ -1,5 +1,4 @@
 import base64
-import hashlib
 import json
 import os
 import time
@@ -51,8 +50,7 @@ def get_verified_token(event):
 
 
 def get_choice_vars(user_id):
-    user_id_hash = int(hashlib.md5(user_id.encode("utf-8")).hexdigest(), 16)
-    choice_mod = user_id_hash % (NUM_BUCKETS * 2)
+    choice_mod = int(user_id.replace("-", ""), 16) % (NUM_BUCKETS * 2)
     context = {
         "choiceType": CHOICE_BUCKETS[int(choice_mod / 2)],
         "choiceInverted": bool(choice_mod % 2),
