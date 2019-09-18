@@ -63,6 +63,7 @@ class ResultsScreen extends Component {
           },
           ...songInfo,
         };
+        const maxCount = Math.max(...song.choices.map(({ count }) => count));
         switch (choiceType) {
           case CHOICE_COLOR:
             this.prepChoices({
@@ -73,7 +74,6 @@ class ResultsScreen extends Component {
             });
             return song;
           case CHOICE_CHILLS:
-            const maxCount = Math.max(...song.choices.map(({ count }) => count));
             this.prepChoices({
               song,
               chartProps: {

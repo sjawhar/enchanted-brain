@@ -63,7 +63,7 @@ export default class Signup extends Component {
     this.setState({ isLoading: true, error: null });
     try {
       const username = phoneNumber.trim();
-      const { userConfirmed } = await Auth.signUp({
+      await Auth.signUp({
         username,
         password: CONCERT_PASSWORD,
         attributes: {
