@@ -12,6 +12,7 @@ Amplify.configure(amplifyConfig);
 class App extends Component {
   state = {
     Component: null,
+    stageNumber: 0,
   };
 
   componentDidMount() {
@@ -27,7 +28,10 @@ class App extends Component {
   }
 
   handleStageChanged = eventData => {
-    const { stageId, choiceTypes } = eventData;
+    const { stageId, choiceTypes, stageNumber } = eventData;
+    if (stageNumber <= this.state.stageNumber) {
+      return;
+    }
     const Component = (() => {
       switch (stageId) {
         case 'STAGE_CHOICE_SYNESTHESIA':
@@ -42,7 +46,7 @@ class App extends Component {
       }
     })();
     if (Component) {
-      this.setState({ Component, eventData });
+      this.setState({ Component, eventData, stageNumber });
     }
   };
 
