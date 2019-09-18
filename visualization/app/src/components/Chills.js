@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Line } from 'react-chartjs-2';
-import 'chartjs-plugin-annotation';
 
 import { CHOICE_CHILLS } from '../constants/ChoiceTypes';
 
@@ -23,7 +22,6 @@ export default class Chills extends Component {
           endTime,
           sum: Array(choices.length),
           count: Array(choices.length),
-          chilliest: {},
           yMax,
           ...songInfo,
         };
@@ -31,7 +29,6 @@ export default class Chills extends Component {
           const x = new Date(Date.parse(timestamp) - Date.parse(startTime));
           song.sum[index] = { x, y: sum };
           song.count[index] = { x, y: count };
-          song.chilliest = song.chilliest.sum > sum ? song.chilliest : { timestamp: x, sum };
           Object.assign(yMax, {
             sum: Math.max(yMax.sum || 0, sum),
             count: Math.max(yMax.count || 0, count),
@@ -59,22 +56,6 @@ export default class Chills extends Component {
       ],
     },
     options: {
-      annotation: annotate && {
-        annotations: [
-          {
-            type: 'line',
-            mode: 'vertical',
-            scaleID: 'x-axis-0',
-            value: annotate.timestamp,
-            borderColor: '#000081',
-            label: {
-              content: `Chilliest Moment: ${this.getSongTimeString(annotate.timestamp)}`,
-              enabled: true,
-              position: 'top',
-            },
-          },
-        ],
-      },
       legend: {
         labels: {
           boxWidth: 0,
@@ -112,7 +93,7 @@ export default class Chills extends Component {
   render() {
     return (
       <div style={styles.container}>
-        {this.getChillsSongs().map(({ displayName, startTime, sum, count, chilliest, yMax }) => {
+        {this.getChillsSongs().map(({ displayName, startTime, sum, count, yMax }) => {
           const [composer, songName] = displayName.split('/');
           return (
             <div key={displayName} style={styles.songContainer}>
@@ -129,12 +110,8 @@ export default class Chills extends Component {
                     data: sum,
                     title: 'Total Chill Intensity',
                     yMax: yMax.sum,
-                    annotate: chilliest,
                   })}
                 />
-                <div style={styles.chilliest}>
-                  Chilliest Moment: {this.getSongTimeString(chilliest.timestamp)}
-                </div>
               </div>
               <div style={styles.chartContainer}>
                 <Line
@@ -186,11 +163,5 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     padding: '0 13px',
-  },
-  chilliest: {
-    color: '#d15700',
-    fontSize: 21,
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
 };
