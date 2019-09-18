@@ -42,13 +42,12 @@ export default class Colors extends Component {
     return (
       <div style={styles.container}>
         {this.state.songs.map(({ displayName, choices }) => {
-          const [composer, songName, emotion] = displayName.split('/');
+          const [composer, songName] = displayName.split('/');
           return (
             <div key={displayName} style={styles.songContainer}>
               <div style={styles.songNameContainer}>
                 <div style={styles.composerText}>{composer}</div>
                 <div style={styles.songName}>{songName}</div>
-                <div style={styles.emotionText}>({emotion})</div>
               </div>
               <div style={styles.swatchesWrapper}>
                 {Object.entries(choices)
@@ -100,9 +99,6 @@ const styles = {
   songName: {
     fontSize: 34,
     margin: '5px 0px 8px',
-  },
-  emotionText: {
-    fontSize: 21,
   },
   swatchesWrapper: {
     flex: 1,
