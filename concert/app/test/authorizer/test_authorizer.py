@@ -5,6 +5,7 @@ import time
 from . import TEST_KEY
 from jose import jwt, jwk
 from src.functions.authorizer.index import handler
+from uuid import uuid4
 
 API_ARN = os.environ.get("API_ARN")
 
@@ -17,7 +18,7 @@ def make_event():
         is_expired=None,
         is_kid_match=True,
         is_signature_valid=True,
-        user_id="test-user",
+        user_id=str(uuid4()),
     ):
         event = {"headers": {"Authorization": None}}
         if authorization is None:
@@ -91,9 +92,9 @@ def test_all_methods_denied(
 @pytest.mark.parametrize(
     "user_id, groups, method",
     [
-        ("audience-user", [], "CHOICE_MADE"),
-        ("admin-user", ["Admin"], "EVENT_STAGE_CHANGED"),
-        ("visualization-user", ["Visualization"], None),
+        (str(uuid4()), [], "CHOICE_MADE"),
+        (str(uuid4()), ["Admin"], "EVENT_STAGE_CHANGED"),
+        (str(uuid4()), ["Visualization"], None),
     ],
 )
 def test_methods_allowed(user_id, groups, method, make_event):
