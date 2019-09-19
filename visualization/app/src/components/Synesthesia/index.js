@@ -105,7 +105,7 @@ export default class Synesthesia extends Component {
               style={{
                 ...styles.bee,
                 left: `${x}%`,
-                top: `${y}%`,
+                bottom: `${y}%`,
               }}
               fill="white"
               stroke={color}
