@@ -19,7 +19,7 @@ const STAGE_DATA = [
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
-    ...getTimes(2, 51)
+    ...getTimes(2, 35)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
@@ -45,7 +45,7 @@ const STAGE_DATA = [
     choiceTypes: ['CHOICE_COLOR'],
     interval: 20,
     timeout: 5,
-    ...getTimes(3, 10)
+    ...getTimes(2, 59)
   }),
   startTime => ({
     stageId: 'STAGE_CHOICE_SYNESTHESIA',
@@ -68,7 +68,7 @@ const STAGE_DATA = [
     stageId: 'STAGE_CHOICE_CHILLS',
     displayName: 'Antonio Vivaldi/The Four Seasons - Summer (Storm)',
     interval: 0.2,
-    ...getTimes(2, 59)
+    ...getTimes(2, 30)
   }),
   () => ({
     stageId: 'STAGE_END'
