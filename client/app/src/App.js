@@ -130,7 +130,7 @@ class App extends React.Component {
     if (choiceInverted !== undefined) {
       store.dispatch(actions.setChoiceInverted(choiceInverted));
     }
-    if (stageNumber <= this.state.stageNumber) {
+    if (stageNumber && stageNumber <= this.state.stageNumber) {
       return;
     }
 
@@ -160,15 +160,17 @@ class App extends React.Component {
     if (screen === NavigationService.getState()) {
       NavigationService.navigate('Welcome');
     }
-    NavigationService.navigate(screen, {
-      choiceInverted,
-      choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
-      isConnected: canConnect && concertApi.isConnected(),
-      onConnect: canConnect && this.handleConnect,
-      onDisconnect: canConnect && this.handleDisconnect,
-      stageId,
-      ...stageData,
-    });
+    this.setState({ stageNumber: stageNumber || 0 }, () =>
+      NavigationService.navigate(screen, {
+        choiceInverted,
+        choiceType: choiceTypes.includes(choiceType) ? choiceType : choiceTypes[0],
+        isConnected: canConnect && concertApi.isConnected(),
+        onConnect: canConnect && this.handleConnect,
+        onDisconnect: canConnect && this.handleDisconnect,
+        stageId,
+        ...stageData,
+      })
+    );
   };
 
   handleNavigatorRef = navigatorRef => {
