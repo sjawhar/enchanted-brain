@@ -48,7 +48,7 @@ def get_db_args(records):
     op_count = None
     db_args = []
     for i in range(len(records)):
-        if len(db_args) == 0 or len(args["add"]) == 75:
+        if len(db_args) == 0 or len(args["add"]) == 10:
             db_args.append({"set": [], "add": [], "names": {}, "values": {}})
         args = db_args[-1]
         data = json.loads(
