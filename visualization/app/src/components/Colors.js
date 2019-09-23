@@ -6,7 +6,48 @@ import { CHOICE_MADE } from '../constants/Events';
 
 export default class Colors extends Component {
   state = {
-    songs: [],
+    songs: [
+      {
+        displayName: 'Vaughan Williams/Fantasia on a Theme by Thomas Tallis/sad',
+        startTime: '2019-09-03T09:18:19.003Z',
+        endTime: '2019-09-03T09:20:19.003Z',
+        choices: {
+          '#0000FF': 22,
+          '#8080FF': 17,
+          '#FFFF00': 15,
+        }
+      },
+      {
+        displayName: 'Grieg/Two Elegiac Melodies/calm',
+        startTime: '2019-09-03T09:19:49.897Z',
+        endTime: '2019-09-03T09:21:49.897Z',
+        choices: {
+          '#FFFF00': 20,
+          '#00FF00': 17,
+          '#8080FF': 16,
+        }
+      },
+      {
+        displayName: 'Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
+        startTime: '2019-09-03T09:22:07.505Z',
+        endTime: '2019-09-03T09:24:07.505Z',
+        choices: {
+          '#FF0000': 73,
+          '#FFFF00': 25,
+          '#FF8000': 24,
+        }
+      },
+      {
+        displayName: 'Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
+        startTime: '2019-09-03T09:24:28.440Z',
+        endTime: '2019-09-03T09:26:28.440Z',
+        choices: {
+          '#000000': 82,
+          '#FF0000': 55,
+          '#AB0000': 48,
+        }
+      }
+    ]
   };
 
   componentDidMount() {

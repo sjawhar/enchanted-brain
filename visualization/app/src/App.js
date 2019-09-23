@@ -11,7 +11,7 @@ Amplify.configure(amplifyConfig);
 
 class App extends Component {
   state = {
-    Component: null,
+    Component: Colors,
     stageNumber: 0,
   };
 
@@ -72,7 +72,4 @@ const styles = {
   },
 };
 
-export default withAuthenticator(App, {
-  includeGreetings: process.env.REACT_APP_AMPLIFY_INCLUDE_GREETING === 'true',
-  usernameAttributes: 'phone_number',
-});
+export default App;

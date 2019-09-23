@@ -94,7 +94,8 @@ class App extends React.Component {
 
   async componentDidMount() {
     activateKeepAwake();
-    const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
+    // const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
+    const username = 'hello';
     store.dispatch(actions.setUID(username));
     concertApi.on(CONNECTED, this.handleStageNavigation);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
@@ -111,8 +112,8 @@ class App extends React.Component {
 
   handleDisconnect = async () => {
     concertApi.disconnect();
-    await Auth.signOut();
-    this.props.onStateChange('signIn');
+    // await Auth.signOut();
+    // this.props.onStateChange('signIn');
   };
 
   handleStageNavigation = ({
@@ -213,17 +214,4 @@ class SkipVerifyContact extends React.Component {
   }
 }
 
-export default withAuthenticator(App, {
-  authenticatorComponents: [
-    <SignIn />,
-    <ConfirmSignIn />,
-    <SkipVerifyContact />,
-    <SignUp />,
-    <ConfirmSignUp />,
-    <ForgotPassword />,
-    <RequireNewPassword />,
-  ],
-  includeGreetings: false,
-  signUpConfig: {},
-  usernameAttributes: 'phone_number',
-});
+export default App;

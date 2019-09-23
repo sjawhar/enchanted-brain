@@ -47,70 +47,17 @@ const STAGE_DATA = {
     };
   },
   [STAGE_END]: () => {
-    const eventData = {
-      songs: [
-        {
-          displayName: 'Vaughan Williams/Fantasia on a Theme by Thomas Tallis/sad',
-          startTime: new Date(Date.now() - 40 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 37 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_COLOR,
-          choices: [],
-        },
-        {
-          displayName: 'Edvard Grieg/Two Elegiac Melodies/calm',
-          startTime: new Date(Date.now() - 34 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 31 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_COLOR,
-          choices: [],
-        },
-        {
-          displayName: 'Ludwig van Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
-          startTime: new Date(Date.now() - 28 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 25 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_COLOR,
-          choices: [],
-        },
-        {
-          displayName: 'Dmitri Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
-          startTime: new Date(Date.now() - 22 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 19 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_COLOR,
-          choices: [],
-        },
-        {
-          displayName: 'Samuel Barber/Adagio for Strings',
-          startTime: new Date(Date.now() - 10 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 7 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_CHILLS,
-          choices: [],
-        },
-        {
-          displayName: 'Antonio Vivaldi/The Four Seasons - Summer (Storm)',
-          startTime: new Date(Date.now() - 4 * TIME_MINUTES).toISOString(),
-          endTime: new Date(Date.now() - 1 * TIME_MINUTES).toISOString(),
-          choiceType: CHOICE_CHILLS,
-          choices: [],
-        },
-      ],
-    };
+    const eventData = require('./results.json');
     const storeActions = [];
 
     eventData.songs
       .filter(({ choiceType }) => choiceType === CHOICE_COLOR)
-      .forEach(({ startTime, endTime, choices }) => {
+      .forEach(({ startTime, endTime }) => {
         let time = new Date(startTime);
 
         while (time.valueOf() < Date.parse(endTime)) {
           time.setSeconds(time.getSeconds() + 20);
           const timestamp = time.toISOString();
-
-          choices.push(
-            colors.reduce(
-              (choices, color) =>
-                Object.assign(choices, { [color.hex]: Math.floor(Math.random() * 25) }),
-              { timestamp }
-            )
-          );
 
           if (Math.random() < 0.25) {
             continue;
