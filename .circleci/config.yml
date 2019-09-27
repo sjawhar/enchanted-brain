@@ -95,16 +95,16 @@ workflows:
       - lambdas-test
       - lambdas-lint
       - cloudformation-validate
-      - deploy:
-          requires:
-            - client-lint
-            - client-test
-            - lambdas-lint
-            - lambdas-test
-            - cloudformation-validate
-          filters:
-            branches:
-              only: master
+      # - deploy:
+      #     requires:
+      #       - client-lint
+      #       - client-test
+      #       - lambdas-lint
+      #       - lambdas-test
+      #       - cloudformation-validate
+      #     filters:
+      #       branches:
+      #         only: master
       - github-wiki/build-and-deploy:
           name: deploy-wiki
           commit-user-email: circleci@enchanted-brain
