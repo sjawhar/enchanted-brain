@@ -39,7 +39,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: client/app
-      - run: cd client && cp app/.env.dist app/.env && npm run test
+      - run: cd client/app && cp .env.dist .env && npm run test
 
   lambdas-test:
     docker:
