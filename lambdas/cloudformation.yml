@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+
+Resources:
+
+  Table:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Sub ${Environment}-enchanted-brain
+      AttributeDefinitions:
+        - AttributeName: recordId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: recordId
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: True
+
+  ChoiceWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
+      CodeUri: app/src/functions/choice_writer
+      Timeout: 120
+      Events:
+        SnsEvent:
+          Type: SNS
+          Properties:
+            Topic: !Ref ChoiceMadeSnsTopic
+      Environment:
+        Variables:
+          DYNAMODB_TABLE_NAME: !Ref Table
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table

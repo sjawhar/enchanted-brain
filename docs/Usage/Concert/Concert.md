@@ -140,26 +140,6 @@ This indicates the end of the part of the concert that uses the app. At this poi
 The event body here is the same as the CHOICE_MADE event [sent by the mobile app](#reporting-a-choice).
 
 ## Data Storage
-### User choices
-```js
-{
-  recordId: ['CHOICE', userId].join('$'),
-  colors: {
-    [timestamp]: String,    // hex color string
-    ...
-  },
-  emotionType: String,      // EMOTION_HAPPINESS | EMOTION_ANGER
-  emotions: {
-    [timestamp]: intensity,
-    ...
-  },
-  chills: {
-    [timestamp]: intensity,
-    ...
-  },
-}
-```
-
 ### Aggregated choices
 ```js
 {

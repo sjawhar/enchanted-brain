@@ -1,2 +1,2 @@
-## Diagram
-[[resources/architecture.png]]
+## Concert Architecture
+[[resources/concert.png]]

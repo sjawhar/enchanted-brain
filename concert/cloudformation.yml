@@ -14,6 +14,7 @@ Parameters:
 
   EventName:
     Type: String
+    AllowedPattern: ^[a-z][a-z-]+[a-z]$
 
 
 Mappings:
@@ -62,7 +63,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Retain
     Properties:
-      TableName: !Sub ${Environment}-enchanted-brain
+      TableName: !Sub ${Environment}-enchanted-brain-${EventName}
       AttributeDefinitions:
         - AttributeName: recordId
           AttributeType: S
@@ -76,20 +77,20 @@ Resources:
   DeadLetterQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: !Sub ${Environment}-enchanted-brain-dlq
+      QueueName: !Sub ${Environment}-enchanted-brain-${EventName}-dlq
       KmsMasterKeyId: alias/aws/sqs
 
   Api:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: !Sub ${Environment}-enchanted-brain
+      Name: !Sub ${Environment}-enchanted-brain-${EventName}
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: $request.body.event
 
   AuthorizerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-authorizer
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-authorizer
       CodeUri: app/src/functions/authorizer
       Environment:
         Variables:
@@ -119,7 +120,7 @@ Resources:
   ApiAuthorizer:
     Type: AWS::ApiGatewayV2::Authorizer
     Properties:
-      Name: !Sub ${Environment}-enchanted-brain
+      Name: !Sub ${Environment}-enchanted-brain-${EventName}
       ApiId: !Ref Api
       AuthorizerType: REQUEST
       AuthorizerUri: !Join
@@ -132,7 +133,7 @@ Resources:
   LambdaLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: !Sub ${Environment}-enchanted-brain
+      LayerName: !Sub ${Environment}-enchanted-brain-${EventName}
       ContentUri: app/src/layer
       CompatibleRuntimes:
         - python3.7
@@ -140,19 +141,19 @@ Resources:
   CallbackGlobalSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-global
+      TopicName: !Sub ${Environment}-enchanted-brain-${EventName}-callback-global
       KmsMasterKeyId: alias/aws/sns
 
   CallbackVisualizationSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-callback-visualization
+      TopicName: !Sub ${Environment}-enchanted-brain-${EventName}-callback-visualization
       KmsMasterKeyId: alias/aws/sns
 
   CallbackKmsKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: !Sub ${Environment}-enchanted-brain-callback
+      Description: !Sub ${Environment}-enchanted-brain-${EventName}-callback
       EnableKeyRotation: true
       KeyPolicy:
         Version: '2012-10-17'
@@ -173,13 +174,13 @@ Resources:
   CallbackKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub alias/${Environment}/enchanted-brain/callback
+      AliasName: !Sub alias/${Environment}/enchanted-brain/${EventName}/callback
       TargetKeyId: !Ref CallbackKmsKey
 
   CallbackFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-callback
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-callback
       CodeUri: app/src/functions/callback
       Layers:
         - !Ref LambdaLayer
@@ -191,7 +192,7 @@ Resources:
             - StageName: !FindInMap [ApiParams,  ServerlessRestApi, StageName]
       Policies:
         - SQSPollerPolicy:
-            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
+            QueueName: !Sub ${Environment}-enchanted-brain-${EventName}-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -207,12 +208,12 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref CallbackFunction.Alias
       Principal: sqs.amazonaws.com
-      SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+      SourceArn: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-${EventName}-callback-*
 
   OnConnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-on-connect
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-on-connect
       CodeUri: app/src/functions/on_connect
       Layers:
         - !Ref LambdaLayer
@@ -221,7 +222,7 @@ Resources:
         Variables:
           CALLBACK_FUNCTION_ARN: !Ref CallbackFunction.Alias
           CALLBACK_GLOBAL_SNS_TOPIC_ARN: !Ref CallbackGlobalSnsTopic
-          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback
+          CALLBACK_SQS_QUEUE_ARN_PREFIX: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-${EventName}-callback
           CALLBACK_TIMEOUT_SECONDS: !FindInMap [CallbackParams, Timeout, Value]
           CALLBACK_VISUALIZATION_SNS_TOPIC_ARN: !Ref CallbackVisualizationSnsTopic
           DEAD_LETTER_QUEUE_ARN: !GetAtt DeadLetterQueue.Arn
@@ -230,12 +231,12 @@ Resources:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
         - SQSSendMessagePolicy:
-            QueueName: !Sub ${Environment}-enchanted-brain-callback-*
+            QueueName: !Sub ${Environment}-enchanted-brain-${EventName}-callback-*
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Action: sqs:CreateQueue
-              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-${EventName}-callback-*
             - Effect: Allow
               Action: sns:Subscribe
               Resource:
@@ -245,7 +246,7 @@ Resources:
                 ForAnyValue:StringEquals:
                   sns:Protocol: sqs
                 ForAnyValue:StringLike:
-                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+                  sns:Endpoint: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-${EventName}-callback-*
             - Effect: Allow
               Action: lambda:CreateEventSourceMapping
               Resource: '*'
@@ -266,7 +267,7 @@ Resources:
   OnDisconnectFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-on-disconnect
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-on-disconnect
       CodeUri: app/src/functions/on_disconnect
       Layers:
         - !Ref LambdaLayer
@@ -281,7 +282,7 @@ Resources:
           Statement:
             - Effect: Allow
               Action: sqs:DeleteQueue
-              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-callback-*
+              Resource: !Sub arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:${Environment}-enchanted-brain-${EventName}-callback-*
             - Effect: Allow
               Action: sns:Unsubscribe
               Resource: '*'
@@ -304,7 +305,7 @@ Resources:
   ChoiceMadeSnsTopic:
     Type: AWS::SNS::Topic
     Properties:
-      TopicName: !Sub ${Environment}-enchanted-brain-choice-made
+      TopicName: !Sub ${Environment}-enchanted-brain-${EventName}-choice-made
       KmsMasterKeyId: alias/aws/sns
 
   ChoiceAggregator:
@@ -319,7 +320,7 @@ Resources:
   OnChoiceMadeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-on-choice-made
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-on-choice-made
       CodeUri: app/src/functions/on_choice_made
       Layers:
         - !Ref LambdaLayer
@@ -348,7 +349,7 @@ Resources:
   OnEventStageChangedFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-on-event-stage-changed
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-on-event-stage-changed
       CodeUri: app/src/functions/on_event_stage_changed
       Timeout: 20
       Layers:
@@ -375,7 +376,7 @@ Resources:
   PrepareStackFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-prepare-stack
+      FunctionName: !Sub ${Environment}-enchanted-brain-${EventName}-prepare-stack
       CodeUri: app/src/functions/prepare_stack
       Layers:
         - !Ref LambdaLayer
@@ -429,29 +430,6 @@ Resources:
       DefaultRouteSettings:
         DataTraceEnabled: true
         LoggingLevel: !If [IsProduction, ERROR, INFO]
-
-  ChoiceWriterFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${Environment}-enchanted-brain-choice-writer
-      CodeUri: app/src/functions/choice_writer
-      Timeout: 120
-      Layers:
-        - !Ref LambdaLayer
-      Events:
-        SnsEvent:
-          Type: SNS
-          Properties:
-            Topic: !Ref ChoiceMadeSnsTopic
-      Environment:
-        Variables:
-          DYNAMODB_TABLE_NAME: !Ref Table
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref Table
-      DeadLetterQueue:
-        Type: SQS
-        TargetArn: !GetAtt DeadLetterQueue.Arn
 
 Outputs:
 
