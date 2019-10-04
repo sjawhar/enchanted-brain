@@ -33,6 +33,10 @@ export default class Synesthesia extends Component {
       };
       this.state.buffers.push(buffer);
     });
+
+    if (process.env.REACT_APP_SYNESTHESIA_SIMULATE) {
+      this.runSimulation();
+    }
   }
 
   componentDidMount() {
@@ -46,6 +50,32 @@ export default class Synesthesia extends Component {
   shouldComponentUpdate(props, { choiceCount }) {
     return choiceCount === 0;
   }
+
+  runSimulation = () => {
+    const stubChoices = require('./stub.json');
+    const baseTimestamp = Date.now();
+    stubChoices.forEach((roundChoices, roundIndex) => {
+      const delay = roundIndex * 5000;
+      const timestamp = new Date(baseTimestamp + delay).toISOString();
+      setTimeout(
+        () =>
+          Object.entries(roundChoices).forEach(([choiceType, choices]) =>
+            Object.entries(choices).forEach(([choice, count]) => {
+              if (choiceType !== CHOICE_COLOR) {
+                choice = parseInt(choice);
+              }
+              for (let i = 0; i < count; i++) {
+                setTimeout(
+                  () => this.handleChoiceMade({ timestamp, choiceType, choice }),
+                  3000 * Math.random()
+                );
+              }
+            })
+          ),
+        delay
+      );
+    });
+  };
 
   perturb = val => 20 * (val + 2.5) + OFFSET_SIZE * (Math.random() - 0.5);
 

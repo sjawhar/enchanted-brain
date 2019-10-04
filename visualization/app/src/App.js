@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Amplify from 'aws-amplify';
-import { withAuthenticator } from 'aws-amplify-react';
 
 import concertApi from './util/concertApi';
 import { Chills, Colors, Synesthesia } from './components';
@@ -11,7 +10,7 @@ Amplify.configure(amplifyConfig);
 
 class App extends Component {
   state = {
-    Component: Colors,
+    Component: Synesthesia,
     stageNumber: 0,
   };
 

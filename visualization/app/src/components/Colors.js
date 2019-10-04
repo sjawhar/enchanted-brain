@@ -15,7 +15,7 @@ export default class Colors extends Component {
           '#0000FF': 22,
           '#8080FF': 17,
           '#FFFF00': 15,
-        }
+        },
       },
       {
         displayName: 'Grieg/Two Elegiac Melodies/calm',
@@ -25,7 +25,7 @@ export default class Colors extends Component {
           '#FFFF00': 20,
           '#00FF00': 17,
           '#8080FF': 16,
-        }
+        },
       },
       {
         displayName: 'Beethoven/Symphony No. 7 in A Major, Op. 92, 4th Mvt./happy',
@@ -35,7 +35,7 @@ export default class Colors extends Component {
           '#FF0000': 73,
           '#FFFF00': 25,
           '#FF8000': 24,
-        }
+        },
       },
       {
         displayName: 'Shostakovich/Chamber Symphony, Op. 110a, 2nd Mvt./angry',
@@ -45,9 +45,9 @@ export default class Colors extends Component {
           '#000000': 82,
           '#FF0000': 55,
           '#AB0000': 48,
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
   componentDidMount() {
