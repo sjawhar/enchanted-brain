@@ -35,10 +35,19 @@ export default class Signup extends Component {
   };
 
   gotoNextStep = (state = {}) =>
-    this.setState(({ step }) => ({
-      step: step + 1,
-      ...state,
-    }));
+    this.setState(
+      ({ step }) => ({
+        step: step + 1,
+        ...state,
+      }),
+      () => {
+        const { finalStep, onFinalStep } = this.props;
+        if (!onFinalStep || !finalStep || this.state.step <= finalStep) {
+          return;
+        }
+        onFinalStep(this.state);
+      }
+    );
 
   handleBack = () =>
     this.setState(({ step }) => ({
