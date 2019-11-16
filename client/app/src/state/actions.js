@@ -32,6 +32,12 @@ export const setChoiceType = choiceType => ({
   },
 });
 
+export const SET_DEMOGRAPHICS = 'SET_DEMOGRAPHICS';
+export const setDemographics = demographics => ({
+  type: SET_DEMOGRAPHICS,
+  payload: { demographics },
+});
+
 export const SET_LANGUAGE = 'SET_LANGUAGE';
 export const setLanguage = language => ({
   type: SET_LANGUAGE,

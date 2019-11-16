@@ -160,7 +160,7 @@ class App extends React.Component {
           return 'Results';
         case STAGE_WAITING:
         default:
-          return 'Welcome';
+          return isAuthEnabled ? 'Welcome' : 'SignUp';
       }
     })();
 

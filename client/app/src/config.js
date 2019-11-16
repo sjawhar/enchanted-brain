@@ -38,7 +38,7 @@ export const getClockOffset = () => {
   if (!clockOffsetPromise) {
     clockOffsetPromise = new Promise(async resolve => {
       const start = Date.now();
-      const response = await fetch('https://worldtimeapi.org/api/timezone/UTC');
+      const response = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC');
       const end = Date.now();
       const { datetime } = await response.json();
       resolve(Date.parse(datetime) - 0.5 * (start + end));

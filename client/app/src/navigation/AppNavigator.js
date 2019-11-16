@@ -5,6 +5,7 @@ import SynesthesiaScreen from '../screens/Synesthesia';
 import MentalImageryScreen from '../screens/MentalImagery';
 import ResultsScreen from '../screens/Results';
 import WelcomeScreen from '../screens/Welcome';
+import SignUpScreen from '../screens/SignUp';
 
 export default createAppContainer(
   createSwitchNavigator(
@@ -16,6 +17,7 @@ export default createAppContainer(
       Synesthesia: SynesthesiaScreen,
       Chills: ChillsScreen,
       Results: ResultsScreen,
+      SignUp: SignUpScreen,
     },
     {
       headerMode: 'none',

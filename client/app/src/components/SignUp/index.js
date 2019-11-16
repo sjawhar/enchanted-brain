@@ -12,13 +12,17 @@ import { store, actions } from '../../state';
 import Layout from '../../constants/Layout';
 import { CONCERT_PASSWORD } from '../../config';
 
+export const STEP_TERMS = 0;
+export const STEP_DEMOGRAPHICS = 1;
+export const STEP_USER = 2;
+
 const INITIAL_STATE = {
   acceptResearch: false,
   demographics: {},
   error: null,
   isLoading: false,
   isShowModal: false,
-  step: 0,
+  step: STEP_TERMS,
   user: { phoneNumber: '+41' },
 };
 
@@ -115,7 +119,7 @@ export default class Signup extends Component {
         />
         {(() => {
           switch (step) {
-            case 2:
+            case STEP_USER:
               return (
                 <User
                   error={error}
@@ -127,7 +131,7 @@ export default class Signup extends Component {
                   onSubmit={this.handleSubmitUser}
                 />
               );
-            case 1:
+            case STEP_DEMOGRAPHICS:
               return (
                 <Demographics
                   formData={demographics}
@@ -137,7 +141,7 @@ export default class Signup extends Component {
                   onSubmit={this.handleSubmitDemographics}
                 />
               );
-            case 0:
+            case STEP_TERMS:
             default:
               return (
                 <Terms
@@ -145,6 +149,7 @@ export default class Signup extends Component {
                   onCancel={this.gotoSignIn}
                   onLanguageChange={this.handleLanguageChange}
                   onSubmit={this.handleSubmitTerms}
+                  requireAcceptResearch={this.props.requireAcceptResearch}
                 />
               );
           }

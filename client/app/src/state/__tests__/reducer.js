@@ -9,6 +9,7 @@ describe('root reducer', () => {
     expect(state.choices.colors).toEqual({});
     expect(state.choices.chills).toEqual({});
     expect(state.choices.emotions).toEqual({});
+    expect(state.demographics).toEqual({});
   });
 
   describe(actions.SEND_CHOICE, () => {
@@ -56,6 +57,14 @@ describe('root reducer', () => {
     it('should set choice inverted', () => {
       const state = reducer(undefined, actions.setChoiceInverted(true));
       expect(state.choiceInverted).toBeTruthy();
+    });
+  });
+
+  describe(actions.SET_DEMOGRAPHICS, () => {
+    it('should set demographics', () => {
+      const expected = { foo: 'bar' };
+      const state = reducer(undefined, actions.setDemographics(expected));
+      expect(state.demographics).toEqual(expected);
     });
   });
 
