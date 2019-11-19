@@ -41,7 +41,7 @@ jobs:
           at: client/app
       - run: cd client/app && cp .env.dist .env && npm run test
 
-  lambdas-test:
+  concert-test:
     docker:
       - image: circleci/python:3.7
     steps:
@@ -50,7 +50,7 @@ jobs:
           version: 18.09.3
       - run: cd concert && ./test.sh
 
-  lambdas-lint:
+  concert-lint:
     docker:
       - image: circleci/python:3.7
     steps:
@@ -92,15 +92,15 @@ workflows:
       - client-test:
           requires:
             - client-install
-      - lambdas-test
-      - lambdas-lint
+      - concert-test
+      - concert-lint
       - cloudformation-validate
       # - deploy:
       #     requires:
       #       - client-lint
       #       - client-test
-      #       - lambdas-lint
-      #       - lambdas-test
+      #       - concert-lint
+      #       - concert-test
       #       - cloudformation-validate
       #     filters:
       #       branches:
