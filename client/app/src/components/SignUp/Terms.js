@@ -35,10 +35,10 @@ export default class Terms extends Component {
   };
 
   handleChange = formData => {
-    const { acceptTerms = false } = formData || {};
+    const { acceptTerms = false, acceptResearch = false } = formData || {};
     this.setState({
       formData,
-      isSubmitDisabled: !acceptTerms,
+      isSubmitDisabled: !acceptTerms || (this.props.requireAcceptResearch && !acceptResearch),
     });
   };
 

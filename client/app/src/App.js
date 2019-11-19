@@ -84,6 +84,7 @@ const theme = {
   },
 };
 
+const isAuthEnabled = !!AMPLIFY_CONFIG.Auth;
 Amplify.configure(AMPLIFY_CONFIG);
 store.subscribe(() => I18n.setLanguage(store.getState().language));
 
@@ -94,7 +95,7 @@ class App extends React.Component {
 
   async componentDidMount() {
     activateKeepAwake();
-    const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
+    const username = await this.getUsername();
     store.dispatch(actions.setUID(username));
     concertApi.on(CONNECTED, this.handleStageNavigation);
     concertApi.on(EVENT_STAGE_CHANGED, this.handleStageNavigation);
@@ -107,12 +108,23 @@ class App extends React.Component {
     concertApi.disconnect();
   }
 
+  async getUsername() {
+    if (isAuthEnabled) {
+      const { 'cognito:username': username } = (await Auth.currentSession()).getIdToken().payload;
+      return username;
+    }
+    // TODO: Get from MTurk
+    return 'temp';
+  }
+
   handleConnect = concertApi.connect;
 
   handleDisconnect = async () => {
     concertApi.disconnect();
-    await Auth.signOut();
-    this.props.onStateChange('signIn');
+    if (isAuthEnabled) {
+      await Auth.signOut();
+      this.props.onStateChange('signIn');
+    }
   };
 
   handleStageNavigation = ({
@@ -148,7 +160,7 @@ class App extends React.Component {
           return 'Results';
         case STAGE_WAITING:
         default:
-          return 'Welcome';
+          return isAuthEnabled ? 'Welcome' : 'SignUp';
       }
     })();
 
@@ -213,17 +225,19 @@ class SkipVerifyContact extends React.Component {
   }
 }
 
-export default withAuthenticator(App, {
-  authenticatorComponents: [
-    <SignIn />,
-    <ConfirmSignIn />,
-    <SkipVerifyContact />,
-    <SignUp />,
-    <ConfirmSignUp />,
-    <ForgotPassword />,
-    <RequireNewPassword />,
-  ],
-  includeGreetings: false,
-  signUpConfig: {},
-  usernameAttributes: 'phone_number',
-});
+export default !isAuthEnabled
+  ? App
+  : withAuthenticator(App, {
+      authenticatorComponents: [
+        <SignIn />,
+        <ConfirmSignIn />,
+        <SkipVerifyContact />,
+        <SignUp />,
+        <ConfirmSignUp />,
+        <ForgotPassword />,
+        <RequireNewPassword />,
+      ],
+      includeGreetings: false,
+      signUpConfig: {},
+      usernameAttributes: 'phone_number',
+    });

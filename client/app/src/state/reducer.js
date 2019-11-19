@@ -2,6 +2,7 @@ import {
   SEND_CHOICE,
   SET_CHOICE_TYPE,
   SET_CHOICE_INVERTED,
+  SET_DEMOGRAPHICS,
   SET_LANGUAGE,
   SET_UID,
 } from './actions';
@@ -21,6 +22,7 @@ const INITIAL_STATE = () => ({
   },
   choiceInverted: false,
   choiceType: CHOICE_COLOR,
+  demographics: {},
   language: LANGUAGE_FR,
   uid: null,
 });
@@ -55,6 +57,9 @@ const reducer = (state, action) => {
     }
     case SET_CHOICE_INVERTED: {
       return { ...state, choiceInverted: payload.choiceInverted };
+    }
+    case SET_DEMOGRAPHICS: {
+      return { ...state, demographics: payload.demographics };
     }
     case SET_LANGUAGE: {
       return { ...state, language: payload.language };
