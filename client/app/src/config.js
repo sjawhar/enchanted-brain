@@ -3,7 +3,7 @@ import {
   AMPLIFY_AUTH_DISABLE,
   AMPLIFY_AUTH_REGION,
   AMPLIFY_AUTH_USER_POOL_ID,
-  AMPLIFY_AUTH_USER_POOL_WEB_CLIENT_ID,
+  AMPLIFY_AUTH_WEB_CLIENT_ID,
 } from 'react-native-dotenv';
 import Constants from 'expo-constants';
 
@@ -14,7 +14,7 @@ export const AMPLIFY_CONFIG = {
       : {
           region: AMPLIFY_AUTH_REGION,
           userPoolId: AMPLIFY_AUTH_USER_POOL_ID,
-          userPoolWebClientId: AMPLIFY_AUTH_USER_POOL_WEB_CLIENT_ID,
+          userPoolWebClientId: AMPLIFY_AUTH_WEB_CLIENT_ID,
         },
   Analytics: {
     disabled: true,
