@@ -19,10 +19,12 @@ Copy `.env.dist` to `.env` and fill in the necessary environment variables:
 ```bash
 docker-compose -f docker-compose.util.yml run --rm npm install
 ```
-**Launch Expo**
+**Launch Expo packager**
 ```bash
 REACT_NATIVE_PACKAGER_HOSTNAME=$IPADDRESS docker-compose -f docker-compose.development.yml up
 ```
+`$IPADDRESS` should be an IP address at which your phone can reach the computer running the Expo packager. After you run this, a QR code will be output to the console. Scan this QR code from your phone to launch the app. Code changes will trigger an automatic re-bundle and deploy to your phone.
+
 **Auto-format code**
 ```bash
 docker-compose -f docker-compose.util.yml run --rm npm run format
