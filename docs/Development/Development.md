@@ -2,17 +2,7 @@
 Client files are in the `client` directory. We use a Docker container running the Expo CLI for local development. This builds and streams the necessary JavaScript bundle to phones running the Expo app.
 
 ### Setup
-Copy `.env.dist` to `.env` and fill in the necessary environment variables:
-
-| Environment Variable       | App Version    | Description                                                                                                                                                                                     |
-|----------------------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| AMPLIFY_AUTH_DISABLE       | Concert, MTurk | If `true`, then no user login is needed and the MTurk version of the app runs. Otherwise, the concert version of the app runs and all other environment variables need to be filled in as well. |
-| AMPLIFY_AUTH_REGION        | Concert        | Region of AWS Cognito user pool                                                                                                                                                                 |
-| AMPLIFY_AUTH_USER_POOL_ID  | Concert        | AWS Cognito user pool ID                                                                                                                                                                        |
-| AMPLIFY_AUTH_WEB_CLIENT_ID | Concert        | ID of web client which can connect to AWS Cognito user pool                                                                                                                                     |
-| CONCERT_START_TIME         | Concert        | If an integer, the welcome countdown lasts for this many milliseconds. Otherwise, a datetime value is expected and is used as the countdown date.                                               |
-| WEBSOCKET_API_STUB         | Concert        | If anything other than `false`, then calling `concertApi.connect()` will load `STAGE_DATA[WEBSOCKET_API_STUB]` in `api/stub.js`. Otherwise a working API is needed to which to connect.         |
-| WEBSOCKET_API_URL          | Concert        | The URL of the API to which the app should connect                                                                                                                                              |
+Copy `.env.dist` to `.env` and fill in the necessary environment variables. See the Usage instructions for the relevant client version you want to run for necessary environment variables.
 
 ### Useful Commands
 **Install packages**

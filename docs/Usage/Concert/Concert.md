@@ -1,7 +1,13 @@
-## Authentication
-There are two methods by which you can authenticate when connecting to the websocket server:
-* Include the user's JWT in the `Authentication` header and include a random unique value in the `token` query string parameter (recommended)
-* Include the user's JWT in the `token` query string parameter
+## Mobile Client Configuration
+| Environment Variable       | Description / Valid Values                                                                                                                                                              |
+| :------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AMPLIFY_AUTH_DISABLE       | Omit or set to `false` to enable AWS Amplify authentication and the concert app                                                                                                         |
+| AMPLIFY_AUTH_REGION        | Region of AWS Cognito user pool                                                                                                                                                         |
+| AMPLIFY_AUTH_USER_POOL_ID  | AWS Cognito user pool ID                                                                                                                                                                |
+| AMPLIFY_AUTH_WEB_CLIENT_ID | ID of web client which can connect to AWS Cognito user pool                                                                                                                             |
+| CONCERT_START_TIME         | If an integer, the welcome countdown lasts for this many milliseconds. Otherwise, a datetime value is expected and is used as the countdown date.                                       |
+| WEBSOCKET_API_STUB         | If anything other than `false`, then calling `concertApi.connect()` will load `STAGE_DATA[WEBSOCKET_API_STUB]` in `api/stub.js`. Otherwise a working API is needed to which to connect. |
+| WEBSOCKET_API_URL          | The URL of the Websocket API to which the app should connect                                                                                                                            |
 
 ## Websocket API
 The guided concert experience uses a websocket API for realtime communication between the client and server. Requests to the server are routed based on the `event` attribute of the request body. For example, a request with the following body would be treated as a FOO request:
@@ -24,6 +30,11 @@ The websocket API will also be used to guide the mobile app through the concert 
   },
 }
 ```
+
+### Authentication
+There are two methods by which you can authenticate when connecting to the websocket server:
+* Include the user's JWT in the `Authentication` header and include a random unique value in the `token` query string parameter (recommended)
+* Include the user's JWT in the `token` query string parameter
 
 ### Connecting
 On connection, the server will respond with the current event stage. This can be used to ensure the app is in the correct state when reconnecting after being disconnected.

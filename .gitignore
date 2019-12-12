@@ -572,3 +572,4 @@ sam-cache
 cloudformation-generated.yml
 vendor
 Pipfile.*.bak
+*.code-workspace
