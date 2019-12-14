@@ -1,0 +1,15 @@
+exports.ATTR_AGE = 'age';
+exports.ATTR_CHOICE = 'choice';
+exports.ATTR_CHOICE_INVERTED = 'choiceInverted';
+exports.ATTR_CHOICE_TYPE = 'choiceType';
+exports.ATTR_CHOICES = 'choices';
+exports.ATTR_COLOR_PERCEPTION = 'colorPerception';
+exports.ATTR_COUNTRY_OF_BIRTH = 'countryOfBirth';
+exports.ATTR_COUNTRY_OF_RESIDENCE = 'countryOfResidence';
+exports.ATTR_DEMOGRAPHICS = 'demographics';
+exports.ATTR_GENDER = 'gender';
+exports.ATTR_ID = 'id';
+exports.ATTR_INTERVAL = 'interval';
+exports.ATTR_SONG_ID = 'songId';
+exports.ATTR_TIMEOUT = 'timeout';
+exports.ATTR_TIMESTAMP = 'timestamp';

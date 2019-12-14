@@ -26,7 +26,7 @@ module.exports = {
     'no-mixed-operators': ['off'],
   },
   parserOptions: {
-    ecmaVersion: 8,
+    ecmaVersion: 2019,
   },
   settings: {
     'import/core-modules': ['aws-sdk'],
