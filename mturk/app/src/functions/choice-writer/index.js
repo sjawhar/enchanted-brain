@@ -1,3 +1,5 @@
+const AWS = require('aws-sdk');
+const crypto = require('crypto');
 const { getError, getErrorResponse } = require('./utils');
 const {
   ATTR_AGE,
@@ -19,6 +21,7 @@ const {
 
 const {
   ENCHANTED_BRAIN_APP_SECRET,
+  ENCHANTED_BRAIN_S3_BUCKET_NAME,
   ENCHANTED_BRAIN_VALID_CHOICE_TYPES = '',
   ENCHANTED_BRAIN_VALID_SONG_IDS = '',
 } = process.env;
@@ -27,6 +30,8 @@ const VALID_CHOICE_TYPES = ENCHANTED_BRAIN_VALID_CHOICE_TYPES.split(',');
 const VALID_SONG_IDS = ENCHANTED_BRAIN_VALID_SONG_IDS.split(',');
 const VALID_GENDERS = ['GENDER_MALE', 'GENDER_FEMALE', 'GENDER_OTHER'];
 const VALID_UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
+
+const s3 = new AWS.S3();
 
 const validateSongParameters = ({ [ATTR_CHOICE_INVERTED]: choiceInverted, ...sample }) => {
   if (typeof choiceInverted !== 'boolean') {
@@ -89,7 +94,7 @@ const validateChoices = choices => {
     }
     const choiceTime = Date.parse(timestamp);
     if (Number.isNaN(choiceTime) || choiceTime < minChoiceTime || choiceTime > maxChoiceTime) {
-      throw getError([ATTR_TIMESTAMP, timestamp, 'Expected a valid datetime']);
+      throw getError([ATTR_TIMESTAMP, timestamp, 'Expected a valid, recent datetime']);
     }
   });
 };
@@ -119,7 +124,22 @@ const getSample = ({ headers: { Authorization: authorization }, body: bodyString
   return sample;
 };
 
-const saveSample = () => {};
+const saveSample = sample => {
+  const body = JSON.stringify(sample);
+  const { choiceType, id, songId } = sample;
+  return s3
+    .putObject({
+      Body: body,
+      Bucket: ENCHANTED_BRAIN_S3_BUCKET_NAME,
+      Key: `${songId}/${choiceType}/${id}.json`,
+      ContentType: 'application/json',
+      ContentMD5: crypto
+        .createHash('md5')
+        .update(body, 'utf-8')
+        .digest('base64'),
+    })
+    .promise();
+};
 
 exports.handler = async event => {
   let sample;

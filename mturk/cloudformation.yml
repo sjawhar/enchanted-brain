@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AppSecret:
+    Type: SecureString
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - development
+      - production
+      - staging
+      - testing
+
+  ValidChoiceTypes:
+    Description: List of valid choice types
+    Type: CommaDelimitedList
+
+  ValidSongIds:
+    Description: List of valid song IDs
+    Type: CommaDelimitedList
+
+
+Resources:
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub ${Environment}-enchanted-brain-mturk
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
+
+  ChoiceWriter:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${Environment}-enchanted-brain-mturk-choice-writer
+      Runtime: nodejs10.x
+      CodeUri: app/src/functions/choice-writer
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 10
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          ENCHANTED_BRAIN_APP_SECRET: !Ref AppSecret
+          ENCHANTED_BRAIN_S3_BUCKET_NAME: !Ref S3Bucket
+          ENCHANTED_BRAIN_VALID_CHOICE_TYPES: !Join [',', !Ref ValidChoiceTypes]
+          ENCHANTED_BRAIN_VALID_SONG_IDS: !Join [',', !Ref ValidSongIds]
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /Choices
+            Method: POST
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: s3:PutObject
+              Resource: !Sub ${S3Bucket.Arn}/*

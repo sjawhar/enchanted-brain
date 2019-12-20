@@ -1,11 +1,21 @@
 import test from 'ava';
+import sinon from 'sinon';
+import aws from 'aws-sdk';
 
 const TEST_APP_SECRET = 'test-app-secret';
+const TEST_S3_BUCKET = 'test-s3-bucket';
 const CHOICE_VALID = {
-  timestamp: new Date().toISOString(),
+  timestamp: '2019-12-20T11:16:00.000Z',
   choice: 1,
 };
 
+const putObject = sinon.stub().resolves();
+aws.S3 = function S3() {
+  this.putObject = (...args) => {
+    const promise = putObject(...args);
+    return { promise: () => promise };
+  };
+};
 let handler;
 
 const getEvent = ({
@@ -61,9 +71,16 @@ const macroErrorResponse = async (t, context, {
 };
 
 test.before(() => {
-  process.env.ENCHANTED_BRAIN_APP_SECRET = TEST_APP_SECRET;
-  process.env.ENCHANTED_BRAIN_VALID_CHOICE_TYPES = 'CHOICE_TYPE_TEST,CHOICE_TYPE_TEST_TWO';
-  process.env.ENCHANTED_BRAIN_VALID_SONG_IDS = 'SONG_TEST_1,SONG_TEST_2';
+  Object.assign(process.env, {
+    ENCHANTED_BRAIN_APP_SECRET: TEST_APP_SECRET,
+    ENCHANTED_BRAIN_S3_BUCKET_NAME: TEST_S3_BUCKET,
+    ENCHANTED_BRAIN_VALID_CHOICE_TYPES: 'CHOICE_TYPE_TEST,CHOICE_TYPE_TEST_TWO',
+    ENCHANTED_BRAIN_VALID_SONG_IDS: 'SONG_TEST_1,SONG_TEST_2',
+  });
+  sinon.useFakeTimers({
+    now: Date.parse(CHOICE_VALID.timestamp),
+    toFake: ['Date'],
+  });
   ({ handler } = require('../src/functions/choice-writer')); // eslint-disable-line global-require
 });
 
@@ -175,8 +192,38 @@ test(
   { statusCode: 422, message: '-3' },
 );
 
-test.todo('If all checks pass, file is saved to S3 in expected location');
-test.todo('If s3 saving fails, returns 500');
+test('If all checks pass, file is saved to S3 in expected location', async t => {
+  const choiceType = 'CHOICE_TYPE_TEST_TWO';
+  const id = 'ada0d7bc-f569-49bc-9a81-dd3eda2b11c1';
+  const songId = 'SONG_TEST_1';
+  const event = getEvent({
+    choiceType,
+    id,
+    songId,
+  });
+
+  await handler(event);
+
+  t.true(
+    putObject.calledWithExactly({
+      Body: event.body,
+      Bucket: TEST_S3_BUCKET,
+      Key: `${songId}/${choiceType}/${id}.json`,
+      ContentMD5: 'IyWxRiZLxktnLX5jm3vl9A==',
+      ContentType: 'application/json',
+    }),
+    JSON.stringify(putObject.args, null, 2),
+  );
+});
+
+test('If s3 saving fails, returns 500', async t => {
+  const event = getEvent({ id: '851f9f89-27d2-403d-a3b4-ad97b3b78a98' });
+  const error = new Error('S3 fail rejection');
+  putObject.withArgs(sinon.match({ Body: event.body })).rejects(error);
+
+  return macroErrorResponse(t, {}, { event, error });
+});
+
 test('On success, returns 204', async t => {
   const event = getEvent(t.context);
 
