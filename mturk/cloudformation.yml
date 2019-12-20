@@ -46,7 +46,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${Environment}-enchanted-brain-mturk-choice-writer
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       CodeUri: app/src/functions/choice-writer
       Handler: index.handler
       MemorySize: 128
