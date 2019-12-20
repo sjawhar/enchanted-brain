@@ -46,3 +46,5 @@ Each user submission is saved to an S3 bucket as `${songId}/${choiceType}/${id}.
 
 ### Authentication
 Requests to the Choices API must include the app secret as a Bearer token in the `Authentication` header. For example: `Authentication: Bearer super-secret-string`.
+
+The app secret is created in AWS Secrets Manager under `${Environment}/enchanted-brain/mturk/app-secret` when the CloudFormation stack is deployed.
