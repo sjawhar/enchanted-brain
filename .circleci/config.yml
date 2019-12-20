@@ -57,6 +57,22 @@ jobs:
       - checkout
       - run: cd concert/app && pipenv install --dev && pipenv run lint
 
+  mturk-test:
+    docker:
+      - image: circleci/node:12.14.0
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: cd mturk && ./test.sh
+
+  mturk-lint:
+    docker:
+      - image: circleci/node:12.14.0
+    steps:
+      - checkout
+      - run: cd mturk/app && npm install && npm run lint
+
   cloudformation-validate:
     docker:
       - image: circleci/python:3.7
@@ -94,6 +110,8 @@ workflows:
             - client-install
       - concert-test
       - concert-lint
+      - mturk-test
+      - mturk-lint
       - cloudformation-validate
       # - deploy:
       #     requires:

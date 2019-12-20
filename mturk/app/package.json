@@ -1,0 +1,30 @@
+{
+  "name": "enchanted-brain-mturk",
+  "version": "1.0.0",
+  "description": "Handles saving of choices collected through mturk",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "format": "prettier-eslint --write \"$(pwd)/+(src|test)/**/*.{js,json}\"",
+    "lint": "eslint .",
+    "posttest": "npm run lint",
+    "test": "NODE_ENV=test ava --verbose",
+    "test:dev": "nodemon --legacy-watch --exec 'npm test'"
+  },
+  "author": "Neuroscape UCSF",
+  "license": "ISC",
+  "devDependencies": {
+    "ava": "^2.4.0",
+    "aws-sdk": "2.488.0",
+    "eslint": "^6.7.2",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1",
+    "prettier-eslint": "^9.0.1",
+    "prettier-eslint-cli": "^5.0.0",
+    "sinon": "^7.5.0"
+  }
+}

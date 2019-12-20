@@ -1,0 +1,61 @@
+version: '3.5'
+
+services:
+
+  api:
+    image: sjawhar/aws-cli:1.16.160
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/${PWD}
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-west-2}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
+      AWS_SESSION_TOKEN:
+    ports:
+      - 3000:3000
+    user: root
+    working_dir: ${PWD}
+    entrypoint: [sam]
+    command:
+      - local
+      - start-api
+      - --debug
+      - --host
+      - 0.0.0.0
+      - --template
+      - cloudformation.yml
+      - --env-vars
+      - env.local.json
+      - --docker-network
+      - enchanted-brain-mturk
+
+  invoke-lambda:
+    image: sjawhar/aws-cli:1.16.160
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/${PWD}
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-west-2}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
+      AWS_SESSION_TOKEN:
+    user: root
+    working_dir: ${PWD}
+    entrypoint:
+      - sam
+      - local
+      - invoke
+      - --template
+      - cloudformation.yml
+      - --env-vars
+      - env.local.json
+      - --docker-network
+      - enchanted-brain-mturk
+      - --event
+    command:
+      - event.local.json
+
+networks:
+  default:
+    name: enchanted-brain-mturk

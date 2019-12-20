@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+
+  npm:
+    image: lambci/lambda:build-nodejs12.x
+    volumes:
+      - ./app:/var/task/lambda
+    working_dir: /var/task/lambda
+    entrypoint: [npm]
+    command: [install]
