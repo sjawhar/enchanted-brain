@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk');
+const aws = require('aws-sdk');
 const crypto = require('crypto');
 const { getError, getErrorResponse } = require('./utils');
 const {
@@ -20,7 +20,7 @@ const {
 } = require('./attributes');
 
 const {
-  ENCHANTED_BRAIN_APP_SECRET,
+  ENCHANTED_BRAIN_APP_SECRET_ARN,
   ENCHANTED_BRAIN_S3_BUCKET_NAME,
   ENCHANTED_BRAIN_VALID_CHOICE_TYPES = '',
   ENCHANTED_BRAIN_VALID_SONG_IDS = '',
@@ -30,8 +30,31 @@ const VALID_CHOICE_TYPES = ENCHANTED_BRAIN_VALID_CHOICE_TYPES.split(',');
 const VALID_SONG_IDS = ENCHANTED_BRAIN_VALID_SONG_IDS.split(',');
 const VALID_GENDERS = ['GENDER_MALE', 'GENDER_FEMALE', 'GENDER_OTHER'];
 const VALID_UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
+const VALID_TIME_WINDOW = 10 * 60 * 1000;
 
-const s3 = new AWS.S3();
+const s3 = new aws.S3();
+const secretsManager = new aws.SecretsManager();
+
+let appSecretPromise = null;
+const getAppSecret = () => {
+  if (appSecretPromise) {
+    return appSecretPromise;
+  }
+  appSecretPromise = (async () => {
+    try {
+      const { SecretString: secret } = await secretsManager
+        .getSecretValue({
+          SecretId: ENCHANTED_BRAIN_APP_SECRET_ARN,
+        })
+        .promise();
+      return secret;
+    } catch (error) {
+      appSecretPromise = null;
+      throw Object.assign(error, { statusCode: 500 });
+    }
+  })();
+  return appSecretPromise;
+};
 
 const validateSongParameters = ({ [ATTR_CHOICE_INVERTED]: choiceInverted, ...sample }) => {
   if (typeof choiceInverted !== 'boolean') {
@@ -86,8 +109,8 @@ const validateChoices = choices => {
   if (!(choices instanceof Array) || choices.length === 0) {
     throw getError('choices must be a non-empty array');
   }
-  const maxChoiceTime = Date.now() + 10 * 60 * 1000;
-  const minChoiceTime = Date.now() - 10 * 60 * 1000;
+  const maxChoiceTime = Date.now() + VALID_TIME_WINDOW;
+  const minChoiceTime = Date.now() - VALID_TIME_WINDOW;
   choices.forEach(({ [ATTR_CHOICE]: choice, [ATTR_TIMESTAMP]: timestamp }) => {
     if (typeof choice !== 'number' || choice % 1 || choice < -2 || choice > 2) {
       throw getError([ATTR_CHOICE, choice, 'Expected an integer between -2 and 2']);
@@ -99,8 +122,9 @@ const validateChoices = choices => {
   });
 };
 
-const getSample = ({ headers: { Authorization: authorization }, body: bodyString }) => {
-  if (authorization !== ENCHANTED_BRAIN_APP_SECRET) {
+const getSample = async ({ headers: { Authorization, authorization }, body: bodyString }) => {
+  const token = (Authorization || authorization || '').split('Bearer ')[1];
+  if (!token || token !== (await getAppSecret())) {
     throw getError('Unauthorized', 401);
   }
   if (!bodyString) {
@@ -144,7 +168,7 @@ const saveSample = sample => {
 exports.handler = async event => {
   let sample;
   try {
-    sample = getSample(event);
+    sample = await getSample(event);
   } catch (error) {
     console.error(error);
     return getErrorResponse(error, 400);

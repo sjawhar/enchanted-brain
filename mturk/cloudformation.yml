@@ -3,8 +3,6 @@ AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  AppSecret:
-    Type: SecureString
 
   Environment:
     Type: String
@@ -37,6 +35,13 @@ Resources:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: alias/aws/s3
 
+  AppSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub ${Environment}/enchanted-brain/mturk/app-secret
+      GenerateSecretString:
+        PasswordLength: 32
+
   ChoiceWriter:
     Type: AWS::Serverless::Function
     Properties:
@@ -45,11 +50,11 @@ Resources:
       CodeUri: app/src/functions/choice-writer
       Handler: index.handler
       MemorySize: 128
-      Timeout: 10
+      Timeout: 30
       AutoPublishAlias: live
       Environment:
         Variables:
-          ENCHANTED_BRAIN_APP_SECRET: !Ref AppSecret
+          ENCHANTED_BRAIN_APP_SECRET_ARN: !Ref AppSecret
           ENCHANTED_BRAIN_S3_BUCKET_NAME: !Ref S3Bucket
           ENCHANTED_BRAIN_VALID_CHOICE_TYPES: !Join [',', !Ref ValidChoiceTypes]
           ENCHANTED_BRAIN_VALID_SONG_IDS: !Join [',', !Ref ValidSongIds]
@@ -65,3 +70,14 @@ Resources:
             - Effect: Allow
               Action: s3:PutObject
               Resource: !Sub ${S3Bucket.Arn}/*
+        - AWSSecretsManagerGetSecretValuePolicy:
+            SecretArn: !Ref AppSecret
+
+
+Outputs:
+
+  ServerlessRestApiId:
+    Value: !Ref ServerlessRestApi
+
+  ServerlessRestApiUrl:
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}

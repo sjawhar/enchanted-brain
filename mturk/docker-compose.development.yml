@@ -9,6 +9,7 @@ services:
       - ./:/${PWD}
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-west-2}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
       AWS_SESSION_TOKEN:
     ports:
@@ -28,8 +29,6 @@ services:
       - env.local.json
       - --docker-network
       - enchanted-brain-mturk
-      - --region
-      - us-west-2
 
   invoke-lambda:
     image: sjawhar/aws-cli:1.16.160
@@ -38,6 +37,7 @@ services:
       - ./:/${PWD}
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-test}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-west-2}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
       AWS_SESSION_TOKEN:
     user: root
@@ -52,8 +52,6 @@ services:
       - env.local.json
       - --docker-network
       - enchanted-brain-mturk
-      - --region
-      - us-west-2
       - --event
     command:
       - event.local.json

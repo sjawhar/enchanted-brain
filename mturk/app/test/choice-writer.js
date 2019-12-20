@@ -3,19 +3,26 @@ import sinon from 'sinon';
 import aws from 'aws-sdk';
 
 const TEST_APP_SECRET = 'test-app-secret';
+const TEST_APP_SECRET_ARN = 'arn:aws:test:secrets/test-app-secret';
 const TEST_S3_BUCKET = 'test-s3-bucket';
 const CHOICE_VALID = {
   timestamp: '2019-12-20T11:16:00.000Z',
   choice: 1,
 };
 
-const putObject = sinon.stub().resolves();
-aws.S3 = function S3() {
-  this.putObject = (...args) => {
-    const promise = putObject(...args);
+const stubber = method => {
+  function ServiceMock() {}
+  const stub = sinon.stub().resolves();
+  ServiceMock.prototype[method] = (...args) => {
+    const promise = stub(...args);
     return { promise: () => promise };
   };
+  return [ServiceMock, stub];
 };
+const [S3, putObject] = stubber('putObject');
+const [SecretsManager, getSecretValue] = stubber('getSecretValue');
+Object.assign(aws, { S3, SecretsManager });
+
 let handler;
 
 const getEvent = ({
@@ -34,7 +41,7 @@ const getEvent = ({
   songId = 'SONG_TEST_2',
   timeout = 5,
 }) => ({
-  headers: authorization === false ? {} : { Authorization: authorization },
+  headers: authorization === false ? {} : { Authorization: `Bearer ${authorization}` },
   body:
     body === false
       ? undefined
@@ -72,7 +79,7 @@ const macroErrorResponse = async (t, context, {
 
 test.before(() => {
   Object.assign(process.env, {
-    ENCHANTED_BRAIN_APP_SECRET: TEST_APP_SECRET,
+    ENCHANTED_BRAIN_APP_SECRET_ARN: TEST_APP_SECRET_ARN,
     ENCHANTED_BRAIN_S3_BUCKET_NAME: TEST_S3_BUCKET,
     ENCHANTED_BRAIN_VALID_CHOICE_TYPES: 'CHOICE_TYPE_TEST,CHOICE_TYPE_TEST_TWO',
     ENCHANTED_BRAIN_VALID_SONG_IDS: 'SONG_TEST_1,SONG_TEST_2',
@@ -81,11 +88,19 @@ test.before(() => {
     now: Date.parse(CHOICE_VALID.timestamp),
     toFake: ['Date'],
   });
+  getSecretValue.resolves({ SecretString: TEST_APP_SECRET });
   ({ handler } = require('../src/functions/choice-writer')); // eslint-disable-line global-require
 });
 
 test('Choice writer exports a handler function', t => {
   t.true(handler instanceof Function);
+});
+test('SecretsManager.getSecretValue() is called with expected arguments', async t => {
+  const event = getEvent({});
+
+  await handler(event);
+
+  t.true(getSecretValue.calledWithExactly({ SecretId: TEST_APP_SECRET_ARN }));
 });
 
 test(

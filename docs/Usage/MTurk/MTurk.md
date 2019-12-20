@@ -45,4 +45,4 @@ The value of the `id` attribute should be a UUID that the client generates for e
 Each user submission is saved to an S3 bucket as `${songId}/${choiceType}/${id}.json`
 
 ### Authentication
-Requests to the Choices API must include the app secret as the value of the `Authentication` header.
+Requests to the Choices API must include the app secret as a Bearer token in the `Authentication` header. For example: `Authentication: Bearer super-secret-string`.
