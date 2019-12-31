@@ -1,0 +1,62 @@
+<meta content="width=device-width,initial-scale=1" name="viewport" />
+<section class="container" id="SurveyLink">
+  <div class="row">
+    <div class="col-12">
+      <div class="panel panel-primary">
+        <div class="panel-body">
+          <h1>Overview</h1>
+          <p>
+            We are conducting a cognitive science experiment on music. We would like to
+            understand which emotions a particular piece of music evokes in you. You
+            will use our app to listen to a 2-3 minute excerpt of classical music and
+            periodically tell us how it makes you feel. You will then be provided with
+            a unique code to enter into the box at the bottom of this page, which will
+            complete the assignment.
+          </p>
+          <h1>Instructions</h1>
+          <p>To complete this task, you will need to use your mobile phone:</p>
+          <ol>
+            <li>Install the <a href="https://expo.io" target="_blank">Expo app</a> on your mobile phone.</li>
+            <li>Once Expo is installed, open it and click "Scan QR Code" at the top of the screen.</li>
+            <li>Scan the QR code below to load our app.</li>
+            <li>When the app loads, you will see our terms and conditions. Review and accept these to continue.</li>
+            <li>You will now see a brief demographics form. Please fill this out.</li>
+            <li>After submitting the demographics form, the music will begin.</li>
+          </ol>
+          <p>
+            While listening to the music, you will be prompted every 20 seconds to
+            evaluate how ${emotion} you feel the previous 20 seconds of music was.
+            You will have five seconds to respond to each prompt.
+          </p>
+          <p>
+            When the excerpt ends, you will be given a unique code. <strong>Make sure
+              to leave this window open as you complete the task.</strong> When you are
+            finished, return to this page to paste the code into the box below.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <h1>Assignment</h1>
+    </div>
+    <div class="col-md-6">
+      <div>
+        <p><strong>Scan the below QR code in Expo to launch our app</strong></p>
+        <img src="${qrCode}" width="300" />
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="surveycode"><strong>Enter the code provided after completion</strong></label>
+        <input class="form-control form-control-lg" id="surveycode" name="surveycode"
+          placeholder="123e4567-e89b-12d3-a456-426655440000" required="true" type="text" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
