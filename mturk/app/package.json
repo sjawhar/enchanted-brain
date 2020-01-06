@@ -31,7 +31,11 @@
   },
   "dependencies": {
     "@aws-cdk/aws-apigateway": "^1.19.0",
+    "@aws-cdk/aws-ec2": "^1.19.0",
+    "@aws-cdk/aws-ecs": "^1.19.0",
+    "@aws-cdk/aws-iam": "^1.19.0",
     "@aws-cdk/aws-lambda": "^1.19.0",
+    "@aws-cdk/aws-logs": "^1.19.0",
     "@aws-cdk/aws-s3": "^1.19.0",
     "@aws-cdk/aws-secretsmanager": "^1.19.0",
     "@aws-cdk/core": "^1.19.0"
