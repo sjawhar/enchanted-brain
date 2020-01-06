@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import { InteractionManager, Vibration } from 'react-native';
-import { Audio } from 'expo-av';
-import { MTURK_SONG_ID } from 'react-native-dotenv';
 
 import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
@@ -9,6 +7,7 @@ import HexagonGrid from '../features/colors/HexagonGrid';
 import { store, actions } from '../state';
 import { getClockOffset, VIBRATION_PATTERN } from '../config';
 import { CHOICE_COLOR } from '../constants/Choices';
+import { startMusic, stopMusic } from '../services/musicPlayer';
 import {
   MESSAGE_INSTRUCTION_COLOR,
   MESSAGE_INSTRUCTION_EMOTION,
@@ -30,16 +29,17 @@ export default class SynesthsiaScreen extends Component {
     songTimeoutId: null,
     waitingHeader: MESSAGE_STAGE_COMPLETE_HEADER,
     waitingMessage: MESSAGE_RESPONSE_RECORDED_BODY,
-    songChoice: MTURK_SONG_ID,
   };
 
   async componentDidMount() {
-    [this.clockOffset] = await Promise.all([getClockOffset(), this.startMusicTrack()]);
+    this.clockOffset = await getClockOffset();
+    startMusic();
     this.scheduleNextPrompt();
     this.scheduleEndRecording();
   }
 
   componentWillUnmount() {
+    stopMusic();
     const { promptTimeoutId, songTimeoutId } = this.state;
     if (promptTimeoutId) {
       clearTimeout(promptTimeoutId);
@@ -47,39 +47,6 @@ export default class SynesthsiaScreen extends Component {
     if (songTimeoutId) {
       clearTimeout(songTimeoutId);
     }
-  }
-
-  startMusicTrack = async () => {
-
-    const musicSource = (() => {
-      switch (MTURK_SONG_ID) {
-        case "0":
-          return require('../assets/music/02_williams.wav');
-        case "1":
-          return require('../assets/music/03_grieg.wav');
-        case "2":
-          return require('../assets/music/04_beethoven.wav');
-        case "3":
-          return require('../assets/music/05_shostakovich.wav');
-        default:
-          console.error('MTURK_SONG_ID is invalid');
-          return '';
-      }
-    })();
-
-    console.debug("MTURK_SONG_ID:" + MTURK_SONG_ID, " Type:" + typeof (MTURK_SONG_ID));
-    
-    try {
-      const { sound: soundObject, soundStatus } = await Audio.Sound.createAsync(
-        musicSource,
-        { shouldPlay: true },
-      );
-      console.debug("music should be playing")
-    } catch (error) {
-      console.debug("error trying to play music:")
-      console.error(error)
-    }
-
   }
 
   scheduleEndRecording = () => {
