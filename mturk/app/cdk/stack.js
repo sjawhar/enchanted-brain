@@ -16,7 +16,7 @@ const AWS_REGION = cdk.Aws.REGION;
 const EXPO_TASK_COUNT = 1;
 const EXPO_TASK_CPU = 1024;
 const EXPO_TASK_MEMORY = 2048;
-const EXPO_TASK_PORT = 19000;
+const EXPO_TASK_PORT = 19001;
 
 /* eslint-disable no-new */
 
@@ -74,7 +74,7 @@ class AppStack extends cdk.Stack {
     appSecret.grantRead(choiceWriter);
     s3Bucket.grantPut(choiceWriter);
 
-    new apiGateway.LambdaRestApi(this, 'ChoiceWriterApi', {
+    const choiceWriterApi = new apiGateway.LambdaRestApi(this, 'ChoiceWriterApi', {
       restApiName: getResourceName(),
       handler: choiceWriter,
     });
@@ -145,9 +145,7 @@ class AppStack extends cdk.Stack {
       },
     });
 
-    // TODO
-    const expoImage = ecs.ContainerImage.fromAsset('../../client');
-
+    const expoImage = ecs.ContainerImage.fromAsset('cdk/image');
     const expoSecurityGroup = new ec2.SecurityGroup(this, 'ExpoSecurityGroup', {
       securityGroupName: getResourceName('expo'),
       vpc: expoVpc,
@@ -167,9 +165,11 @@ class AppStack extends cdk.Stack {
         cpu: EXPO_TASK_CPU,
         memoryLimitMiB: EXPO_TASK_MEMORY,
         environment: {
-          AWS_REGION,
-          MTURK_SONG_ID: songId,
+          MTURK_API_URL: choiceWriterApi.url,
+          MTURK_CHOICE_INTERVAL: '20',
+          MTURK_CHOICE_TIMEOUT: '5',
           MTURK_CHOICE_TYPE: choiceType,
+          MTURK_SONG_ID: songId,
         },
         logging: ecs.LogDriver.awsLogs({
           logGroup: expoLogGroup,
