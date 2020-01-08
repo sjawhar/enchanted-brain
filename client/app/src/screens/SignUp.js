@@ -12,7 +12,7 @@ class SignUpScreen extends Component {
     store.dispatch(actions.setDemographics(demographics));
     // TODO: Get from MTurk
     this.props.navigation.navigate({
-      routeName: 'Synesthesia',
+      routeName: 'Instructions',
       params: {
         choiceType: CHOICE_EMOTION_ANGER,
         choiceInverted: false,
@@ -25,6 +25,7 @@ class SignUpScreen extends Component {
   };
 
   render() {
+    console.debug("SIGN UP SCREEN RENDERED")
     return (
       <SignUp
         authState="signUp"
