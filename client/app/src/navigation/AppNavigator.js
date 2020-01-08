@@ -6,6 +6,7 @@ import MentalImageryScreen from '../screens/MentalImagery';
 import ResultsScreen from '../screens/Results';
 import WelcomeScreen from '../screens/Welcome';
 import SignUpScreen from '../screens/SignUp';
+import InstructionsScreen from '../screens/Instructions';
 
 export default createAppContainer(
   createSwitchNavigator(
@@ -18,6 +19,7 @@ export default createAppContainer(
       Chills: ChillsScreen,
       Results: ResultsScreen,
       SignUp: SignUpScreen,
+      Instructions: InstructionsScreen,
     },
     {
       headerMode: 'none',

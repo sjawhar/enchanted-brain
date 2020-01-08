@@ -9,8 +9,8 @@ import { getClockOffset, VIBRATION_PATTERN } from '../config';
 import { CHOICE_COLOR } from '../constants/Choices';
 import { startMusic, stopMusic } from '../services/musicPlayer';
 import {
-  MESSAGE_INSTRUCTION_COLOR,
-  MESSAGE_INSTRUCTION_EMOTION,
+  MESSAGE_PROMPT_COLOR,
+  MESSAGE_PROMPT_EMOTION,
   MESSAGE_RESPONSE_MISSED_BODY,
   MESSAGE_RESPONSE_MISSED_HEADER,
   MESSAGE_RESPONSE_RECORDED_BODY,
@@ -32,6 +32,7 @@ export default class SynesthsiaScreen extends Component {
   };
 
   async componentDidMount() {
+    console.debug("Synesthesia screen mounted")
     this.clockOffset = await getClockOffset();
     startMusic();
     this.scheduleNextPrompt();
@@ -110,8 +111,8 @@ export default class SynesthsiaScreen extends Component {
       waitingHeader: '',
       waitingMessage:
         this.props.navigation.state.params.choiceType === CHOICE_COLOR
-          ? MESSAGE_INSTRUCTION_COLOR
-          : MESSAGE_INSTRUCTION_EMOTION,
+          ? MESSAGE_PROMPT_COLOR
+          : MESSAGE_PROMPT_EMOTION,
       promptTimeoutId: setTimeout(this.showPrompt, timestamp - (Date.now() + this.clockOffset)),
     });
   };
