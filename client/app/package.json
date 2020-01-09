@@ -4,6 +4,7 @@
     "android": "expo start --android",
     "build:ios": "expo build:ios",
     "eject": "expo eject",
+    "export": "expo export",
     "format": "prettier-eslint --write \"+(src|test)/**/*.{js,json}\"",
     "ios": "expo start --ios",
     "lint": "eslint .",
