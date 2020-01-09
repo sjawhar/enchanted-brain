@@ -22,7 +22,7 @@ Please press enter after the bundler is running. To check, run the below command
 EOF
 read -p "Press enter when ready..." val
 
-urlsFile="$(mktemp)"
+urlsFile="app/dist/qr-code-urls.txt"
 
 for MTURK_CHOICE_TYPE in ${MTURK_VALID_CHOICE_TYPES//,/ }
 do

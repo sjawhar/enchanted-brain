@@ -9,7 +9,15 @@ As the MTurk app does not receive instructions from an API, its behavior is larg
 | MTURK_CHOICE_TYPE     | CHOICE_TYPE_EMOTION_ANGER \| CHOICE_TYPE_EMOTION_HAPPINESS                   |
 | MTURK_SONG_ID         | SONG_ANGRY_1 \| SONG_CALM_1 \| SONG_HAPPY_1 \| SONG_SAD_1                    |
 
-A different build of the mobile client is needed for each song / choice type combination. The apps can then be published to Expo or hosted on public servers, and each MTurk task will point to the build containing the song and choice type appropriate to that task.
+A different build of the mobile client is needed for each song / choice type combination. The apps can then be published to Expo or hosted on public servers, and each MTurk task will point to the builds containing the song and choice type appropriate to that task.
+
+## MTurk Setup
+1. Use the build script under the client directory to create builds for each Song / Choice Type combination.
+2. Upload the builds.
+3. Generate two QR codes for each build: one for Android and one for iOS. The QR code URLs are printed to the console at the end of the build script and saved in the dist directory.
+4. Create a new project in Amazon MTurk using the provided HTML template in mturk/hit.
+5. Update the CSV under mturk/hit to reflect the songs and choice types being tested.
+6. Create the HITs by uploading the CSV to MTurk and using the project you just created.
 
 ## Choices API
 User choices are submitted to an API endpoint, which validates and persists them. This is a very simple API, with only a single HTTP endpoint.
