@@ -7,7 +7,7 @@ import HexagonGrid from '../features/colors/HexagonGrid';
 import { store, actions } from '../state';
 import { getClockOffset, VIBRATION_PATTERN } from '../config';
 import { CHOICE_COLOR } from '../constants/Choices';
-import { startMusic, stopMusic } from '../services/musicPlayer';
+import { stopMusic } from '../services/musicPlayer';
 import {
   MESSAGE_PROMPT_COLOR,
   MESSAGE_PROMPT_EMOTION,
@@ -32,9 +32,7 @@ export default class SynesthsiaScreen extends Component {
   };
 
   async componentDidMount() {
-    console.debug("Synesthesia screen mounted")
     this.clockOffset = await getClockOffset();
-    startMusic();
     this.scheduleNextPrompt();
     this.scheduleEndRecording();
   }
