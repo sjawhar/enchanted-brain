@@ -4,13 +4,13 @@ let musicObject = null;
 
 const getSoundFile = songId => {
   switch (songId) {
-    case "0":
+    case '0':
       return require('../assets/music/02_williams.wav');
-    case "1":
+    case '1':
       return require('../assets/music/03_grieg.wav');
-    case "2":
+    case '2':
       return require('../assets/music/04_beethoven.wav');
-    case "3":
+    case '3':
       return require('../assets/music/05_shostakovich.wav');
     default:
       throw new Error(`Unknown song ${songId}`);
@@ -37,4 +37,4 @@ export const stopMusic = async () => {
   }
   await musicObject.stopAsync();
   musicObject = null;
-}
+};

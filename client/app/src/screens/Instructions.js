@@ -7,12 +7,16 @@ import { loadMusic, playMusic } from '../services/musicPlayer';
 import COLORS from '../constants/Colors';
 import Layout from '../constants/Layout';
 import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
-import { CHOICE_EMOTION_ANGER, CHOICE_EMOTION_HAPPINESS, CHOICE_COLOR, CHOICE_CHILLS } from '../constants/Choices';
+import {
+  CHOICE_CHILLS,
+  CHOICE_COLOR,
+  CHOICE_EMOTION_ANGER,
+  CHOICE_EMOTION_HAPPINESS,
+} from '../constants/Choices';
 
 import { MESSAGE_INSTRUCTION_EMOTION, MESSAGE_INSTRUCTION_CHILLS } from '../constants/Messages';
 
 export default class InstructionsScreen extends Component {
-
   state = {
     songDuration: null,
     isSongLoaded: false,
@@ -25,8 +29,13 @@ export default class InstructionsScreen extends Component {
 
   loadSong = async () => {
     const { songId } = this.props.navigation.state.params;
-    const songDuration = await loadMusic(songId);
-    this.setState({ isSongLoaded: true, songDuration });
+    try {
+      const songDuration = await loadMusic(songId);
+      this.setState({ isSongLoaded: true, songDuration });
+    } catch (error) {
+      console.error(error);
+      // TODO: Show error message
+    }
   };
 
   startSong = async () => {
@@ -42,7 +51,7 @@ export default class InstructionsScreen extends Component {
           startTime: startTime.toISOString(),
           endTime: new Date(startTime.valueOf() + this.state.songDuration).toISOString(),
         },
-      })
+      });
     } catch (error) {
       console.error(error);
       this.setState({ isSongPlaying: false });
@@ -50,7 +59,7 @@ export default class InstructionsScreen extends Component {
   };
 
   getInstructionMessage = () => {
-    const { choiceType } = this.props.navigation.state;
+    const { choiceType } = this.props.navigation.state.params;
     switch (choiceType) {
       case CHOICE_EMOTION_ANGER:
         return MESSAGE_INSTRUCTION_EMOTION;
@@ -63,7 +72,7 @@ export default class InstructionsScreen extends Component {
       default:
         throw new Error(`Unknown choice type ${choiceType}`);
     }
-  }
+  };
 
   render() {
     const { isSongPlaying, isSongLoaded } = this.state;
@@ -74,7 +83,7 @@ export default class InstructionsScreen extends Component {
           <Button
             disabled={isSongPlaying}
             buttonStyle={styles.button}
-            title={"Begin"}
+            title="Begin"
             onPress={this.startSong}
           />
         ) : (

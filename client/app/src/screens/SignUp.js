@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { MTURK_SONG_ID, MTURK_CHOICE_TYPE, MTURK_CHOICE_INTERVAL, MTURK_CHOICE_TIMEOUT } from 'react-native-dotenv';
+import {
+  MTURK_CHOICE_INTERVAL,
+  MTURK_CHOICE_TIMEOUT,
+  MTURK_CHOICE_TYPE,
+  MTURK_SONG_ID,
+} from 'react-native-dotenv';
 
 import SignUp, { STEP_DEMOGRAPHICS } from '../components/SignUp';
 import { store, actions } from '../state';
 import { COLOR_BACKGROUND_DARK } from '../constants/Colors';
-import { MESSAGE_WELCOME_BODY, MESSAGE_WELCOME_HEADER } from '../constants/Messages';
 
 class SignUpScreen extends Component {
   handleSubmit = ({ demographics }) => {

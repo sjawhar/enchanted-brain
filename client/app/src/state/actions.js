@@ -4,6 +4,7 @@ import { CHOICE_MADE } from '../constants/Events';
 
 export const SEND_CHOICE = 'SEND_CHOICE';
 export const sendChoice = choice => {
+  // TODO: Don't send if MTURK
   if (!(choice.choiceType === CHOICE_CHILLS && choice.choice === 0)) {
     concertApi.send({
       event: CHOICE_MADE,
