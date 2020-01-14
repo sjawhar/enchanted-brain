@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
-import { Button } from 'react-native-elements';
+import { ActivityIndicator, Text, View } from 'react-native';
+import { Button, withTheme } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import { loadMusic, playMusic } from '../services/musicPlayer';
 import COLORS from '../constants/Colors';
 import Layout from '../constants/Layout';
 import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
+import WaitingScreen from './Waiting';
+
 import {
   CHOICE_CHILLS,
   CHOICE_COLOR,
@@ -77,36 +79,33 @@ export default class InstructionsScreen extends Component {
   render() {
     const { isSongPlaying, isSongLoaded } = this.state;
     return (
-      <View style={styles.container}>
-        <Text>{this.getInstructionMessage()}</Text>
+      <WaitingScreen
+        messageText={this.getInstructionMessage()}>
         {isSongLoaded ? (
           <Button
             disabled={isSongPlaying}
             buttonStyle={styles.button}
-            title="Begin"
+            title="BEGIN"
             onPress={this.startSong}
           />
         ) : (
-          // TODO: Add nice loading UI
-          <Text>Loading...</Text>
-        )}
-      </View>
+            <ActivityIndicator size="large" color="white" style={styles.loader} />
+          )
+        }
+      </WaitingScreen>
     );
   }
 }
 
 const styles = EStyleSheet.create({
-  container: {
-    // flex: 1,
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 13,
-  },
   button: {
-    // width: '100%',
+    alignContent: 'center',
     marginTop: 24,
     backgroundColor: COLORS.primaryOrange,
   },
+  loader: {
+    marginTop: 24
+  }
 });
+
+
