@@ -23,6 +23,7 @@ export default class InstructionsScreen extends Component {
     songDuration: null,
     isSongLoaded: false,
     isSongPlaying: false,
+    isError: false,
   };
 
   componentDidMount() {
@@ -36,7 +37,7 @@ export default class InstructionsScreen extends Component {
       this.setState({ isSongLoaded: true, songDuration });
     } catch (error) {
       console.error(error);
-      // TODO: Show error message
+      this.setState({ isError: true });
     }
   };
 
@@ -47,7 +48,7 @@ export default class InstructionsScreen extends Component {
       await playMusic();
       const startTime = new Date();
       this.props.navigation.navigate({
-        routeName: 'Synesthesia', // TODO: Get from choiceType
+        routeName: params.choiceType == CHOICE_CHILLS ? 'Chills' : 'Synesthesia',
         params: {
           ...params,
           startTime: startTime.toISOString(),
@@ -88,10 +89,13 @@ export default class InstructionsScreen extends Component {
             title="BEGIN"
             onPress={this.startSong}
           />
+        ) : (this.state.isError ? (
+          <Text style={styles.errorText}>An error has occurred. Please try again.</Text>
         ) : (
             <ActivityIndicator size="large" color="white" style={styles.loader} />
-          )
+          ))
         }
+
       </WaitingScreen>
     );
   }
@@ -105,7 +109,14 @@ const styles = EStyleSheet.create({
   },
   loader: {
     marginTop: 24
-  }
+  },
+  errorText: {
+    color: 'white',
+    fontSize: 21,
+    fontWeight: 'bold',
+    marginTop: 18,
+    marginBottom: 6,
+  },
 });
 
 
