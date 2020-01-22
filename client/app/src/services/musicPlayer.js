@@ -19,16 +19,16 @@ const getSoundFile = songId => {
 
 export const loadMusic = async songId => {
   const music = new Audio.Sound();
-  const { durationMillis } = await music.loadAsync(getSoundFile(songId), { shouldPlay: false });
+  await music.loadAsync(getSoundFile(songId), { shouldPlay: false });
   musicObject = music;
-  return durationMillis;
 };
 
-export const playMusic = () => {
+export const playMusic = async () => {
   if (!musicObject) {
     return;
   }
-  musicObject.playAsync();
+  const { durationMillis } = await musicObject.playAsync();
+  return durationMillis;
 };
 
 export const stopMusic = async () => {
