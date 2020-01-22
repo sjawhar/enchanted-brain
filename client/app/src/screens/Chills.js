@@ -81,13 +81,7 @@ class ChillsScreen extends Component {
       Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
       this.setState({ songTimeoutId: null, isEnded: true }, () =>
-        this.props.navigation.navigate({
-          routeName: 'Welcome',
-          params: {
-            headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-            messageText: MESSAGE_STAGE_COMPLETE_BODY,
-          },
-        })
+      this.props.navigation.state.params.onEnd()
       );
       return;
     }

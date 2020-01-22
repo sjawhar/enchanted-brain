@@ -60,15 +60,7 @@ export default class SynesthsiaScreen extends Component {
       });
       return;
     }
-    InteractionManager.runAfterInteractions(() =>
-      this.props.navigation.navigate({
-        routeName: 'Welcome',
-        params: {
-          headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-          messageText: MESSAGE_STAGE_COMPLETE_BODY,
-        },
-      })
-    );
+    this.props.navigation.state.params.onEnd()
   };
 
   scheduleNextPrompt = () => {
