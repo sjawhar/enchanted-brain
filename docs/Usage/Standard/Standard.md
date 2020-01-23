@@ -22,7 +22,7 @@ All requests to APIs should include an `Authentication` header with the user's A
 ### Sign in/out
 Use AWS Cognito libraries.
 
-### Get list of songs
+### Get list of Songs
 **Request**  
 `GET /Songs`
 
@@ -42,13 +42,47 @@ Use AWS Cognito libraries.
 ]
 ```
 
-### Start a new listen
+### Get Aggregates for a Song
+**Request**  
+`GET /Songs/{songId}/Aggregates?choiceType`
+
+**Response**  
+`200 OK`
+```js
+[
+  {
+    id: String,
+    songId: String,
+    choiceType: String,
+    choices: [
+      {
+        songPosition: Number,
+        [choice]: count,
+        ...
+      },
+      ...
+    ],
+    updatedAt: String,
+  },
+  ...
+]
+```
+
+### Record a new Listen
 **Request**  
 `POST /Listens`
 ```js
 {
   songId: String,
   choiceType: String,
+  choices: [
+    {
+      songPosition: Number,
+      choice: String | Number,
+    },
+    ...
+  ],
+  listenedAt: String,
 }
 ```
 
@@ -58,85 +92,23 @@ Use AWS Cognito libraries.
 {
   id: String,
   songId: String,
+  userId: String,
   choiceType: String,
+  choices: [
+    {
+      songPosition: Number,
+      choice: String | Number,
+    },
+    ...
+  ],
+  listenedAt: String,
   createdAt: String,
 }
-````
-
-### Submit listen choice(s)
-**Request**  
-`PUT /Listens/:listenId/Choices`
-```js
-{
-  choiceType: String,
-  [choices: [           // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
-    {
-      timeOffset: Number,
-      choice: String,
-    },
-    ...
-  ]],
-  [choice: String],     // choiceType in [CHOICE_COMPOSITION, CHOICE_IMAGERY]
-}
 ```
 
-**Response**  
-`204 No Content`
-
-### Get aggregate choices for a song
+### Get list of Listens
 **Request**  
-`GET /Songs/:songId/Choices`
-
-**Response**  
-`200 OK`
-```js
-{
-  [colors: [
-    {
-      timeOffset: Number,
-      choices: {
-        '#AB0000': Number,
-        '#00AB00': Number,
-        '#0000AB': Number,
-        ...
-      },
-    },
-    ...
-  ]],
-  [emotions: [
-    {
-      timeOffset: Number,
-      choices: {
-        EMOTION_ANGER: Number,
-        EMOTION_JOY: Number,
-        EMOTION_SADNESS: Number,
-        ...
-      },
-    },
-    ...
-  ]],
-  [chills: [
-    {
-      timeOffset: Number,
-      chillRatio: Number,       // Percentage of respondents experiencing chills
-    },
-    ...
-  ]],
-  [imagery: {
-    String: Number,             // Key is the word to display in the word cloud
-    [word]: count,              // Value is the number of responses mentioning that word
-    ...
-  }],
-  [composition: {
-    COMPOSITION_RATIONAL: count,
-    COMPOSITION_INTUITIVE: count,
-  }],
-}
-```
-
-### Get list of listens for a song
-**Request**  
-`GET /Songs/:songId/Listens`
+`GET /Users/{userId}/Listens?songId`
 
 **Response**  
 `200 OK`  
@@ -147,25 +119,31 @@ Use AWS Cognito libraries.
     songId: String,
     choiceType: String,
     createdAt: String,
-    [choices: [           // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
-      {
-        timeOffset: Number,
-        choice: String,
-      },
-      ...
-    ]],
-    [choice: String],     // choiceType in [CHOICE_COMPOSITION, CHOICE_IMAGERY]
   },
   ...
 ]
 ```
 
-### Get choice(s) for a listen
+### Get a Listen
 **Request**  
-`GET /Listens/:listenId/Choices`
+`GET /Listens/{listenId}`
 
 **Response**  
-Same as request body for [submitting listen choice(s)](#submit-listen-choices).
+```js
+{
+  id: String,
+  songId: String,
+  date: String,
+  choiceType: String,
+  choices: [
+    {
+      songPosition: Number,
+      choice: Number || String,
+    }.
+    ...
+  ],
+}
+```
 
 ## Data Storage
 ### List of Songs
@@ -198,10 +176,10 @@ Same as request body for [submitting listen choice(s)](#submit-listen-choices).
   choiceType: String,       // CHOICE_COLOR || CHOICE_EMOTION || CHOICE_CHILLS || CHOICE_IMAGERY || CHOICE_COMPOSITION
   [choices: {               // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
     Number: String,         // Key is milliseconds since start of song
-    [timeOffset]: choice,   // Value is the choice value
+    [songPosition]: choice,   // Value is the choice value
     ...
   }],
-  [choice: String],         // choiceType in [CHOICE_IMAGERY, CHOICE_COMPOSITION]
+  [choice: String || Number],         // choiceType in [CHOICE_IMAGERY, CHOICE_COMPOSITION]
 }
 ```
 
@@ -212,7 +190,7 @@ Same as request body for [submitting listen choice(s)](#submit-listen-choices).
   listenId: 'AGGREGATE',
   [colors: {
     Number: Map,
-    [timeOffset]: {
+    [songPosition]: {
       '#AB0000': Number,
       '#00AB00': Number,
       '#0000AB': Number,
@@ -222,7 +200,7 @@ Same as request body for [submitting listen choice(s)](#submit-listen-choices).
   }],
   [emotions: {
     Number: Map,
-    [timeOffset]: {
+    [songPosition]: {
       EMOTION_ANGER: Number,
       EMOTION_JOY: Number,
       EMOTION_SADNESS: Number,
@@ -232,7 +210,7 @@ Same as request body for [submitting listen choice(s)](#submit-listen-choices).
   }],
   [chills: {
     Number: Number,             // Key is milliseconds since the start of the song
-    [timeOffset]: chillRatio,   // Value is percentage of respondents experiencing chills
+    [songPosition]: chillRatio,   // Value is percentage of respondents experiencing chills
     ...
   }],
   [imagery: {
