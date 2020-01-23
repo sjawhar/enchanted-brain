@@ -9,6 +9,7 @@ import { getClockOffset } from '../config';
 import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
+import { stopMusic } from '../services/musicPlayer';
 import {
   MESSAGE_INSTRUCTION_CHILLS,
   MESSAGE_STAGE_COMPLETE_BODY,
@@ -50,6 +51,7 @@ class ChillsScreen extends Component {
   }
 
   componentWillUnmount() {
+    stopMusic();
     const { panTimeoutId, songTimeoutId } = this.state;
     if (panTimeoutId) {
       clearTimeout(panTimeoutId);
