@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
-import { Button, withTheme } from 'react-native-elements';
+import { ActivityIndicator, Text } from 'react-native';
+import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import { loadMusic, playMusic } from '../services/musicPlayer';
 import COLORS from '../constants/Colors';
-import Layout from '../constants/Layout';
-import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
 import WaitingScreen from './Waiting';
 
 import {
@@ -16,7 +14,11 @@ import {
   CHOICE_EMOTION_HAPPINESS,
 } from '../constants/Choices';
 
-import { MESSAGE_INSTRUCTION_EMOTION, MESSAGE_INSTRUCTION_CHILLS } from '../constants/Messages';
+import {
+  MESSAGE_INSTRUCTION_CHILLS,
+  MESSAGE_INSTRUCTION_EMOTION,
+  MESSAGE_INSTRUCTION_COLOR,
+} from '../constants/Messages';
 
 export default class InstructionsScreen extends Component {
   state = {
@@ -46,7 +48,7 @@ export default class InstructionsScreen extends Component {
       const songDuration = await playMusic();
       const startTime = new Date();
       this.props.navigation.navigate({
-        routeName: params.choiceType == CHOICE_CHILLS ? 'Chills' : 'Synesthesia',
+        routeName: params.choiceType === CHOICE_CHILLS ? 'Chills' : 'Synesthesia',
         params: {
           ...params,
           startTime: startTime.toISOString(),
@@ -70,15 +72,14 @@ export default class InstructionsScreen extends Component {
       case CHOICE_CHILLS:
         return MESSAGE_INSTRUCTION_CHILLS;
       default:
-        throw new Error(`Unknown choice type ${choiceType}`);
+        throw new Error(`Unknown choice type ${this.props.navigation.state.params.choiceType}`);
     }
   };
 
   render() {
     const { isSongPlaying, isSongLoaded } = this.state;
     return (
-      <WaitingScreen
-        messageText={this.getInstructionMessage()}>
+      <WaitingScreen messageText={this.getInstructionMessage()}>
         {isSongLoaded ? (
           <Button
             disabled={isSongPlaying}
@@ -86,13 +87,11 @@ export default class InstructionsScreen extends Component {
             title="BEGIN"
             onPress={this.startSong}
           />
-        ) : (this.state.isError ? (
+        ) : this.state.isError ? (
           <Text style={styles.errorText}>An error has occurred. Please try again.</Text>
         ) : (
-            <ActivityIndicator size="large" color="white" style={styles.loader} />
-          ))
-        }
-
+          <ActivityIndicator size="large" color="white" style={styles.loader} />
+        )}
       </WaitingScreen>
     );
   }
@@ -105,7 +104,7 @@ const styles = EStyleSheet.create({
     backgroundColor: COLORS.primaryOrange,
   },
   loader: {
-    marginTop: 24
+    marginTop: 24,
   },
   errorText: {
     color: 'white',
@@ -115,5 +114,3 @@ const styles = EStyleSheet.create({
     marginBottom: 6,
   },
 });
-
-
