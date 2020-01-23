@@ -62,7 +62,8 @@ export default class InstructionsScreen extends Component {
   };
 
   getInstructionMessage = () => {
-    switch (this.props.navigation.state.params.choiceType) {
+    const { choiceType } = this.props.navigation.state.params;
+    switch (choiceType) {
       case CHOICE_EMOTION_ANGER:
         return MESSAGE_INSTRUCTION_EMOTION;
       case CHOICE_EMOTION_HAPPINESS:
@@ -72,7 +73,7 @@ export default class InstructionsScreen extends Component {
       case CHOICE_CHILLS:
         return MESSAGE_INSTRUCTION_CHILLS;
       default:
-        throw new Error(`Unknown choice type ${this.props.navigation.state.params.choiceType}`);
+        throw new Error(`Unknown choice type ${choiceType}`);
     }
   };
 
