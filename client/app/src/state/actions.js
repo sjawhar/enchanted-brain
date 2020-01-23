@@ -1,10 +1,15 @@
+import { AMPLIFY_AUTH_DISABLE } from 'react-native-dotenv';
 import concertApi from '../api/concertApi';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import { CHOICE_MADE } from '../constants/Events';
 
 export const SEND_CHOICE = 'SEND_CHOICE';
 export const sendChoice = choice => {
-  if (!(choice.choiceType === CHOICE_CHILLS && choice.choice === 0)) {
+  // doesn't send if MTURK
+  if (
+    AMPLIFY_AUTH_DISABLE !== 'true' &&
+    !(choice.choiceType === CHOICE_CHILLS && choice.choice === 0)
+  ) {
     concertApi.send({
       event: CHOICE_MADE,
       data: choice,
