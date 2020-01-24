@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import EStyleSheet from 'react-native-extended-stylesheet';
 import {
   MTURK_CHOICE_INTERVAL,
   MTURK_CHOICE_TIMEOUT,
@@ -11,7 +10,6 @@ import {
 
 import SignUp, { STEP_DEMOGRAPHICS } from '../components/SignUp';
 import { store, actions } from '../state';
-import { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 
 class SignUpScreen extends Component {
   handleSubmit = ({ demographics }) => {
@@ -79,16 +77,5 @@ class SignUpScreen extends Component {
     );
   }
 }
-
-const styles = EStyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLOR_BACKGROUND_DARK,
-    paddingHorizontal: 13,
-  },
-});
 
 export default SignUpScreen;

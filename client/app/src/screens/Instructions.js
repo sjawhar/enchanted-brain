@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
-import { Button, withTheme } from 'react-native-elements';
+import { ActivityIndicator, Text } from 'react-native';
+import { Button } from 'react-native-elements';
 import EStyleSheet from 'react-native-extended-stylesheet';
 
 import { loadMusic, playMusic } from '../services/musicPlayer';
 import COLORS from '../constants/Colors';
-import Layout from '../constants/Layout';
-import LANGUAGES, { LANGUAGE_EN, LANGUAGE_FR } from '../languages';
 import WaitingScreen from './Waiting';
 
 import {
@@ -16,11 +14,14 @@ import {
   CHOICE_EMOTION_HAPPINESS,
 } from '../constants/Choices';
 
-import { MESSAGE_INSTRUCTION_EMOTION, MESSAGE_INSTRUCTION_CHILLS } from '../constants/Messages';
+import {
+  MESSAGE_INSTRUCTION_CHILLS,
+  MESSAGE_INSTRUCTION_EMOTION,
+  MESSAGE_INSTRUCTION_COLOR,
+} from '../constants/Messages';
 
 export default class InstructionsScreen extends Component {
   state = {
-    songDuration: null,
     isSongLoaded: false,
     isSongPlaying: false,
     isError: false,
@@ -31,10 +32,9 @@ export default class InstructionsScreen extends Component {
   }
 
   loadSong = async () => {
-    const { songId } = this.props.navigation.state.params;
     try {
-      const songDuration = await loadMusic(songId);
-      this.setState({ isSongLoaded: true, songDuration });
+      await loadMusic(this.props.navigation.state.params.songId);
+      this.setState({ isSongLoaded: true });
     } catch (error) {
       console.error(error);
       this.setState({ isError: true });
@@ -45,14 +45,14 @@ export default class InstructionsScreen extends Component {
     const { params } = this.props.navigation.state;
     this.setState({ isSongPlaying: true });
     try {
-      await playMusic();
+      const songDuration = await playMusic();
       const startTime = new Date();
       this.props.navigation.navigate({
-        routeName: params.choiceType == CHOICE_CHILLS ? 'Chills' : 'Synesthesia',
+        routeName: params.choiceType === CHOICE_CHILLS ? 'Chills' : 'Synesthesia',
         params: {
           ...params,
           startTime: startTime.toISOString(),
-          endTime: new Date(startTime.valueOf() + this.state.songDuration).toISOString(),
+          endTime: new Date(startTime.valueOf() + songDuration).toISOString(),
         },
       });
     } catch (error) {
@@ -80,8 +80,7 @@ export default class InstructionsScreen extends Component {
   render() {
     const { isSongPlaying, isSongLoaded } = this.state;
     return (
-      <WaitingScreen
-        messageText={this.getInstructionMessage()}>
+      <WaitingScreen messageText={this.getInstructionMessage()}>
         {isSongLoaded ? (
           <Button
             disabled={isSongPlaying}
@@ -89,13 +88,11 @@ export default class InstructionsScreen extends Component {
             title="BEGIN"
             onPress={this.startSong}
           />
-        ) : (this.state.isError ? (
+        ) : this.state.isError ? (
           <Text style={styles.errorText}>An error has occurred. Please try again.</Text>
         ) : (
-            <ActivityIndicator size="large" color="white" style={styles.loader} />
-          ))
-        }
-
+          <ActivityIndicator size="large" color="white" style={styles.loader} />
+        )}
       </WaitingScreen>
     );
   }
@@ -108,7 +105,7 @@ const styles = EStyleSheet.create({
     backgroundColor: COLORS.primaryOrange,
   },
   loader: {
-    marginTop: 24
+    marginTop: 24,
   },
   errorText: {
     color: 'white',
@@ -118,5 +115,3 @@ const styles = EStyleSheet.create({
     marginBottom: 6,
   },
 });
-
-
