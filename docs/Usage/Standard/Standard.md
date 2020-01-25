@@ -51,7 +51,6 @@ Use AWS Cognito libraries.
 ```js
 [
   {
-    id: String,
     songId: String,
     choiceType: String,
     choices: [
@@ -108,7 +107,7 @@ Use AWS Cognito libraries.
 
 ### Get list of Listens
 **Request**  
-`GET /Users/{userId}/Listens?songId`
+`GET /Listens?songId`
 
 **Response**  
 `200 OK`  
@@ -117,7 +116,9 @@ Use AWS Cognito libraries.
   {
     id: String,
     songId: String,
+    userId: String,
     choiceType: String,
+    listenedAt: String,
     createdAt: String,
   },
   ...
@@ -133,7 +134,7 @@ Use AWS Cognito libraries.
 {
   id: String,
   songId: String,
-  date: String,
+  listenedAt: String,
   choiceType: String,
   choices: [
     {
@@ -146,81 +147,52 @@ Use AWS Cognito libraries.
 ```
 
 ## Data Storage
-### List of Songs
-````js
-{
-  songId: 'SONG_LIST',
-  listenId: 'SONG_LIST',
-  songs: [String, ...],         // List of songIds
-}
-````
-
-### Song information
+### Song
 ```js
 {
-  songId: String,               // Partition key
-  listenId: 'SONG_INFO',        // Range key
+  userId: 'SONGS',
+  listenId: soongId,
   choiceTypes: [String, ...],   // List of choice types valid for this song
   mediaUrl: String,             // Cached by app for playback
   title: String,                // Helpful for in-app displays
   artist: String,               // Helpful for in-app displays
   length: Number,               // Helpful for in-app displays
+  updatedAt: String,
+  createdAt: String,
 }
 ```
 
-### User choices
+### Listen
 ```js
 {
-  songId: String,
-  listenId: String,         // Compound key: userId$timestamp
-  choiceType: String,       // CHOICE_COLOR || CHOICE_EMOTION || CHOICE_CHILLS || CHOICE_IMAGERY || CHOICE_COMPOSITION
-  [choices: {               // choiceType in [CHOICE_COLOR, CHOICE_EMOTION, CHOICE_CHILLS]
-    Number: String,         // Key is milliseconds since start of song
-    [songPosition]: choice,   // Value is the choice value
+  userId: String,
+  listenId: [songId, listenedAt].join('$'),
+  choiceType: String,           // CHOICE_COLOR || CHOICE_EMOTION_ANGER || CHOICE_EMOTION_HAPPINESS || CHOICE_CHILLS
+  choices: {
+    String: String,             // Key is milliseconds since start of song
+    [songPosition]: choice,     // Value is the choice value
     ...
-  }],
-  [choice: String || Number],         // choiceType in [CHOICE_IMAGERY, CHOICE_COMPOSITION]
+  },
+  createdAt: String,
 }
 ```
 
 ### Aggregated choices
 ```js
 {
-  songId: String,
-  listenId: 'AGGREGATE',
-  [colors: {
-    Number: Map,
-    [songPosition]: {
-      '#AB0000': Number,
-      '#00AB00': Number,
-      '#0000AB': Number,
+  userId: 'AGGREGATES',
+  listenId: [songId, choiceType].join('$'),
+  choices: {
+    [songPosition]: {   // CHOICE_COLOR
+      [color]: count,
       ...
     },
-    ...
-  }],
-  [emotions: {
-    Number: Map,
-    [songPosition]: {
-      EMOTION_ANGER: Number,
-      EMOTION_JOY: Number,
-      EMOTION_SADNESS: Number,
-      ...
+    [songPosition]: {   // CHOICE_CHILLS || CHOICE_EMOTION_ANGER || CHOICE_EMOTION_HAPPINESS
+      count: count,
+      sum: sum,
     },
     ...
-  }],
-  [chills: {
-    Number: Number,             // Key is milliseconds since the start of the song
-    [songPosition]: chillRatio,   // Value is percentage of respondents experiencing chills
-    ...
-  }],
-  [imagery: {
-    String: Number,             // Key is the word to display in the word cloud
-    [word]: count,              // Value is the number of responses mentioning that word
-    ...
-  }],
-  [composition: {
-    COMPOSITION_RATIONAL: count,
-    COMPOSITION_INTUITIVE: count,
-  }],
+  },
+  updatedAt: String,
 }
 ```
