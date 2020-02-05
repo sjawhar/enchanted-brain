@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { InteractionManager, Vibration } from 'react-native';
+import { Vibration } from 'react-native';
 
 import EmotionPicker from './EmotionPicker';
 import WaitingScreen from './Waiting';
@@ -15,7 +15,6 @@ import {
   MESSAGE_RESPONSE_MISSED_HEADER,
   MESSAGE_RESPONSE_RECORDED_BODY,
   MESSAGE_RESPONSE_RECORDED_HEADER,
-  MESSAGE_STAGE_COMPLETE_BODY,
   MESSAGE_STAGE_COMPLETE_HEADER,
 } from '../constants/Messages';
 
@@ -60,7 +59,7 @@ export default class SynesthsiaScreen extends Component {
       });
       return;
     }
-    this.props.navigation.state.params.onEnd()
+    this.props.navigation.state.params.onEnd();
   };
 
   scheduleNextPrompt = () => {

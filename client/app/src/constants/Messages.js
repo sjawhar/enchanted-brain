@@ -18,6 +18,9 @@ export const MESSAGE_RESPONSE_RECORDED_HEADER = 'Response recorded';
 export const MESSAGE_STAGE_COMPLETE_BODY = 'Please enjoy the next stage of the concert.';
 export const MESSAGE_STAGE_COMPLETE_HEADER = 'Get Enchanted!';
 
+export const MESSAGE_THANK_YOU_HEADER = 'Thank You!';
+export const MESSAGE_THANK_YOU_BODY = 'Copy the following ID into MTurk';
+
 export const MESSAGE_WELCOME_BODY =
   'Please enjoy the performance. We will ask for any mental images this music may have evoked in you.';
 export const MESSAGE_WELCOME_HEADER = 'Welcome to the Enchanted Brain!';

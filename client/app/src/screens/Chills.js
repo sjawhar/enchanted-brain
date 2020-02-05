@@ -10,11 +10,7 @@ import COLORS, { COLOR_BACKGROUND_DARK } from '../constants/Colors';
 import { CHOICE_CHILLS } from '../constants/Choices';
 import Layout from '../constants/Layout';
 import { stopMusic } from '../services/musicPlayer';
-import {
-  MESSAGE_INSTRUCTION_CHILLS,
-  MESSAGE_STAGE_COMPLETE_BODY,
-  MESSAGE_STAGE_COMPLETE_HEADER,
-} from '../constants/Messages';
+import { MESSAGE_INSTRUCTION_CHILLS } from '../constants/Messages';
 
 const VIEW_HEIGHT = Layout.window.height - Constants.statusBarHeight;
 const INPUT_HEIGHT = 0.8 * VIEW_HEIGHT;
@@ -81,7 +77,7 @@ class ChillsScreen extends Component {
       Date.parse(this.props.navigation.state.params.endTime) - (Date.now() + this.clockOffset);
     if (waitingTime <= 1) {
       this.setState({ songTimeoutId: null, isEnded: true }, () =>
-      this.props.navigation.state.params.onEnd()
+        this.props.navigation.state.params.onEnd()
       );
       return;
     }

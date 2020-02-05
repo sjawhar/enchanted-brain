@@ -7,6 +7,7 @@ import ResultsScreen from '../screens/Results';
 import WelcomeScreen from '../screens/Welcome';
 import SignUpScreen from '../screens/SignUp';
 import InstructionsScreen from '../screens/Instructions';
+import ThankYouScreen from '../screens/ThankYou';
 
 export default createAppContainer(
   createSwitchNavigator(
@@ -20,6 +21,7 @@ export default createAppContainer(
       Results: ResultsScreen,
       SignUp: SignUpScreen,
       Instructions: InstructionsScreen,
+      ThankYou: ThankYouScreen,
     },
     {
       headerMode: 'none',
