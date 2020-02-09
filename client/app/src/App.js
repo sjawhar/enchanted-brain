@@ -1,5 +1,5 @@
 import React from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
+import { InteractionManager, StatusBar, StyleSheet, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import Amplify, { Auth, I18n } from 'aws-amplify';
@@ -31,6 +31,7 @@ import {
   STAGE_END,
   STAGE_WAITING,
 } from './constants/Stages';
+import { MESSAGE_STAGE_COMPLETE_BODY, MESSAGE_STAGE_COMPLETE_HEADER } from './constants/Messages';
 
 // ** Dynamic Fontsize Calculations * //
 const SCREEN_WIDTH = layout.window.width;
@@ -181,6 +182,15 @@ class App extends React.Component {
         onDisconnect: canConnect && this.handleDisconnect,
         stageId,
         ...stageData,
+        onEnd: InteractionManager.runAfterInteractions(() =>
+          NavigationService.navigate({
+            routeName: 'Welcome',
+            params: {
+              headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+              messageText: MESSAGE_STAGE_COMPLETE_BODY,
+            },
+          })
+        ),
       })
     );
   };

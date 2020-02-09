@@ -42,10 +42,19 @@ export default class ThankYouScreen extends Component {
     };
 
     if (MTURK_API_STUB === 'true') {
-      console.log(fetchParams);
+      console.debug('FETCH params:', fetchParams);
       return;
     }
-    fetch(MTURK_API_URL, fetchParams);
+
+    fetch(MTURK_API_URL, fetchParams)
+      .then(response => {
+        if (!response.ok) {
+          console.debug('FETCH response status:', response.status);
+        }
+      })
+      .catch(error => {
+        console.debug('FETCH error:', error);
+      });
   }
 
   copyToClipboard = async () => {
