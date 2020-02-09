@@ -1,5 +1,7 @@
 ## Standard
-TODO
+[[resources/standard-app-flow.png]]
+
+For more information on the API calls, see the [Concert Usage](Concert) section.
 
 ## Concert
 ### Overall
