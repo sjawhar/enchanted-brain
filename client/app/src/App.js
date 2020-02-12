@@ -182,15 +182,16 @@ class App extends React.Component {
         onDisconnect: canConnect && this.handleDisconnect,
         stageId,
         ...stageData,
-        onEnd: InteractionManager.runAfterInteractions(() =>
-          NavigationService.navigate({
-            routeName: 'Welcome',
-            params: {
-              headerText: MESSAGE_STAGE_COMPLETE_HEADER,
-              messageText: MESSAGE_STAGE_COMPLETE_BODY,
-            },
-          })
-        ),
+        onEnd: () =>
+          InteractionManager.runAfterInteractions(() =>
+            NavigationService.navigate({
+              routeName: 'Welcome',
+              params: {
+                headerText: MESSAGE_STAGE_COMPLETE_HEADER,
+                messageText: MESSAGE_STAGE_COMPLETE_BODY,
+              },
+            })
+          ),
       })
     );
   };

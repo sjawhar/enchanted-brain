@@ -16,7 +16,7 @@ export default class ThankYouScreen extends Component {
     uuid: null,
   };
 
-  componentWillMount() {
+  async componentWillMount() {
     const id = uuidv4();
     this.setState({ uuid: id });
 
@@ -46,15 +46,14 @@ export default class ThankYouScreen extends Component {
       return;
     }
 
-    fetch(MTURK_API_URL, fetchParams)
-      .then(response => {
-        if (!response.ok) {
-          console.debug('FETCH response status:', response.status);
-        }
-      })
-      .catch(error => {
-        console.debug('FETCH error:', error);
-      });
+    try {
+      const response = await fetch(MTURK_API_URL, fetchParams);
+      if (!response.ok) {
+        throw response;
+      }
+    } catch (error) {
+      console.debug('FETCH error:', error);
+    }
   }
 
   copyToClipboard = async () => {
