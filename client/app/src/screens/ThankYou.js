@@ -10,6 +10,12 @@ import WaitingScreen from './Waiting';
 import { store } from '../state';
 
 import { MESSAGE_THANK_YOU_HEADER, MESSAGE_THANK_YOU_BODY } from '../constants/Messages';
+import {
+  CHOICE_CHILLS,
+  CHOICE_COLOR,
+  CHOICE_EMOTION_ANGER,
+  CHOICE_EMOTION_HAPPINESS,
+} from '../constants/Choices';
 
 export default class ThankYouScreen extends Component {
   state = {
@@ -29,6 +35,7 @@ export default class ThankYouScreen extends Component {
     } = this.props.navigation.state.params;
 
     const { demographics, choices } = store.getState();
+    const choicesArray = this.reformatChoices(choices, choiceType);
 
     const fetchParams = {
       method: 'POST',
@@ -43,7 +50,7 @@ export default class ThankYouScreen extends Component {
         interval,
         timeout,
         demographics,
-        choices,
+        choices: choicesArray,
       }),
     };
 
@@ -60,6 +67,33 @@ export default class ThankYouScreen extends Component {
     } catch (error) {
       console.debug('FETCH error:', error);
     }
+  }
+
+  reformatChoices(choicesBefore, choiceType) {
+    let choicesWithinType;
+
+    switch (choiceType) {
+      case CHOICE_CHILLS:
+        choicesWithinType = choicesBefore['chills'];
+        break;
+      case CHOICE_COLOR:
+        choicesWithinType = choicesBefore['colors'];
+        break;
+      case CHOICE_EMOTION_HAPPINESS:
+      case CHOICE_EMOTION_ANGER:
+        choicesWithinType = choicesBefore['emotions'];
+        break;
+      default:
+        throw new Error(`Unknown choice type ${choiceType}`);
+    }
+
+    const choicesAfter = [];
+
+    for (let [key, value] of Object.entries(choicesWithinType)) {
+      choicesAfter.push({ timestamp: key, choice: value.choice });
+    }
+
+    return choicesAfter;
   }
 
   copyToClipboard = async () => {
