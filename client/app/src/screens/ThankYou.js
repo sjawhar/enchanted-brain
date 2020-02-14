@@ -20,7 +20,13 @@ export default class ThankYouScreen extends Component {
     const id = uuidv4();
     this.setState({ uuid: id });
 
-    const { songId, choiceType, choiceInverted, interval, timeout } = this.props.navigation.state;
+    const {
+      songId,
+      choiceType,
+      choiceInverted,
+      interval,
+      timeout,
+    } = this.props.navigation.state.params;
 
     const { demographics, choices } = store.getState();
 
