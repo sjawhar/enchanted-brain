@@ -10,21 +10,16 @@ import WaitingScreen from './Waiting';
 import { store } from '../state';
 
 import { MESSAGE_THANK_YOU_HEADER, MESSAGE_THANK_YOU_BODY } from '../constants/Messages';
-import {
-  CHOICE_CHILLS,
-  CHOICE_COLOR,
-  CHOICE_EMOTION_ANGER,
-  CHOICE_EMOTION_HAPPINESS,
-} from '../constants/Choices';
+import { getChoiceKey } from '../constants/Choices';
 
 export default class ThankYouScreen extends Component {
   state = {
-    uuid: null,
+    token: null,
   };
 
   async componentWillMount() {
-    const id = uuidv4();
-    this.setState({ uuid: id });
+    const token = uuidv4();
+    this.setState({ token });
 
     const {
       songId,
@@ -34,33 +29,35 @@ export default class ThankYouScreen extends Component {
       timeout,
     } = this.props.navigation.state.params;
 
-    const { demographics, choices } = store.getState();
-    const choicesArray = this.reformatChoices(choices, choiceType);
+    const { demographics } = store.getState();
 
-    const fetchParams = {
-      method: 'POST',
-      headers: {
-        authentication: 'Bearer ' + MTURK_APP_SECRET,
+    const fetchParams = [
+      MTURK_API_URL,
+      {
+        method: 'POST',
+        headers: {
+          authentication: `Bearer ${MTURK_APP_SECRET}`,
+        },
+        body: JSON.stringify({
+          id: token,
+          songId,
+          choiceType,
+          choiceInverted,
+          interval,
+          timeout,
+          demographics,
+          choices: this.getChoices(),
+        }),
       },
-      body: JSON.stringify({
-        id,
-        songId,
-        choiceType,
-        choiceInverted,
-        interval,
-        timeout,
-        demographics,
-        choices: choicesArray,
-      }),
-    };
+    ];
 
     if (MTURK_API_STUB === 'true') {
-      console.debug('FETCH params:', fetchParams);
+      console.debug('FETCH params:', ...fetchParams);
       return;
     }
 
     try {
-      const response = await fetch(MTURK_API_URL, fetchParams);
+      const response = await fetch(...fetchParams);
       if (!response.ok) {
         throw response;
       }
@@ -69,47 +66,26 @@ export default class ThankYouScreen extends Component {
     }
   }
 
-  reformatChoices(choicesBefore, choiceType) {
-    let choicesWithinType;
-
-    switch (choiceType) {
-      case CHOICE_CHILLS:
-        choicesWithinType = choicesBefore['chills'];
-        break;
-      case CHOICE_COLOR:
-        choicesWithinType = choicesBefore['colors'];
-        break;
-      case CHOICE_EMOTION_HAPPINESS:
-      case CHOICE_EMOTION_ANGER:
-        choicesWithinType = choicesBefore['emotions'];
-        break;
-      default:
-        throw new Error(`Unknown choice type ${choiceType}`);
-    }
-
-    const choicesAfter = [];
-
-    for (let [key, value] of Object.entries(choicesWithinType)) {
-      choicesAfter.push({ timestamp: key, choice: value.choice });
-    }
-
-    return choicesAfter;
+  getChoices() {
+    const choiceKey = getChoiceKey(this.props.navigation.state.params.choiceType);
+    return Object.entries(store.getState().choices[choiceKey])
+      .map(([timestamp, { choice }]) => ({
+        timestamp,
+        choice,
+      }))
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   }
 
-  copyToClipboard = async () => {
-    await Clipboard.setString(this.state.uuid);
-  };
-
   render() {
-    const id = this.state.uuid;
+    const { token } = this.state;
     return (
       <WaitingScreen headerText={MESSAGE_THANK_YOU_HEADER} messageText={MESSAGE_THANK_YOU_BODY}>
         <View>
-          <Text style={styles.idText}>{id}</Text>
+          <Text style={styles.idText}>{token}</Text>
           <Button
             buttonStyle={styles.button}
             title="COPY TO CLIPBOARD"
-            onPress={this.copyToClipboard}
+            onPress={() => Clipboard.setString(token)}
           />
         </View>
       </WaitingScreen>
