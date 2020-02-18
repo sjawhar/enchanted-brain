@@ -12,14 +12,22 @@ import { store, actions } from '../state';
 class SignUpScreen extends Component {
   handleSubmit = ({ demographics }) => {
     store.dispatch(actions.setDemographics(demographics));
+    const params = {
+      songId: MTURK_SONG_ID,
+      choiceType: MTURK_CHOICE_TYPE,
+      choiceInverted: Math.random() > 0.5,
+      interval: MTURK_CHOICE_INTERVAL,
+      timeout: MTURK_CHOICE_TIMEOUT,
+    };
     this.props.navigation.navigate({
       routeName: 'Instructions',
       params: {
-        songId: MTURK_SONG_ID,
-        choiceType: MTURK_CHOICE_TYPE,
-        choiceInverted: Math.random() > 0.5,
-        interval: MTURK_CHOICE_INTERVAL,
-        timeout: MTURK_CHOICE_TIMEOUT,
+        ...params,
+        onEnd: () =>
+          this.props.navigation.navigate({
+            routeName: 'ThankYou',
+            params,
+          }),
       },
     });
   };

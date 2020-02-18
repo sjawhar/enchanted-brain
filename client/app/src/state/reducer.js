@@ -6,12 +6,7 @@ import {
   SET_LANGUAGE,
   SET_UID,
 } from './actions';
-import {
-  CHOICE_CHILLS,
-  CHOICE_COLOR,
-  CHOICE_EMOTION_ANGER,
-  CHOICE_EMOTION_HAPPINESS,
-} from '../constants/Choices';
+import { CHOICE_COLOR, getChoiceKey } from '../constants/Choices';
 import { LANGUAGE_FR } from '../languages';
 
 const INITIAL_STATE = () => ({
@@ -36,20 +31,8 @@ const reducer = (state, action) => {
     case SEND_CHOICE: {
       const { choices, ...otherState } = state;
       const { timestamp, ...choice } = payload.choice;
-      switch (choice.choiceType) {
-        case CHOICE_CHILLS:
-          choices.chills[timestamp] = choice;
-          break;
-        case CHOICE_COLOR:
-          choices.colors[timestamp] = choice;
-          break;
-        case CHOICE_EMOTION_HAPPINESS:
-        case CHOICE_EMOTION_ANGER:
-          choices.emotions[timestamp] = choice;
-          break;
-        default:
-          throw new Error(`Unknown choice type ${choice.choiceType}`);
-      }
+      const choiceKey = getChoiceKey(choice.choiceType);
+      choices[choiceKey][timestamp] = choice;
       return { choices, ...otherState };
     }
     case SET_CHOICE_TYPE: {
