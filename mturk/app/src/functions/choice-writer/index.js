@@ -155,7 +155,7 @@ const saveSample = sample => {
     .putObject({
       Body: body,
       Bucket: ENCHANTED_BRAIN_S3_BUCKET_NAME,
-      Key: `${songId}/${choiceType}/${id}.json`,
+      Key: `Choices/${songId}/${choiceType}/${id}.json`,
       ContentType: 'application/json',
       ContentMD5: crypto
         .createHash('md5')

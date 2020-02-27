@@ -14,7 +14,7 @@ then
   REGION_FLAG="--region ${REGION_FLAG}"
 fi
 
-S3_BUCKET="thecybermonk-${ENVIRONMENT}-cloudformation-artifacts"
+S3_BUCKET="neurotech-foundation-${ENVIRONMENT}-cloudformation-artifacts"
 OUTPUT_TEMPLATE="cloudformation-generated.yml"
 
 pushd concert

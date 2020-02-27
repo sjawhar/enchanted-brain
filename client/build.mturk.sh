@@ -2,13 +2,14 @@
 set -euf -o pipefail
 
 MTURK_API_URL="${MTURK_API_URL:-}"
+MTURK_APP_SECRET="${MTURK_APP_SECRET:-}"
 MTURK_VALID_CHOICE_TYPES="${MTURK_VALID_CHOICE_TYPES:-}"
 MTURK_VALID_SONG_IDS="${MTURK_VALID_SONG_IDS:-}"
-APP_HOST="sjawhar.github.io/enchanted-brain"
+S3_BUCKET_URL="${S3_BUCKET_URL:-}"
 
-if [ -z "${MTURK_API_URL}" ] || [ -z "${MTURK_VALID_CHOICE_TYPES}" ] || [ -z "${MTURK_VALID_SONG_IDS}" ]
+if [ -z "${MTURK_API_URL}" ] || [ -z "${MTURK_APP_SECRET}" ] || [ -z "${MTURK_VALID_CHOICE_TYPES}" ] || [ -z "${MTURK_VALID_SONG_IDS}" ] || [ -z "${S3_BUCKET_URL}" ]
 then
-    echo 'Please specify the following variables: MTURK_API_URL, MTURK_VALID_CHOICE_TYPES, MTURK_VALID_SONG_IDS'
+    echo 'Please specify the following variables: MTURK_API_URL, MTURK_APP_SECRET, MTURK_VALID_CHOICE_TYPES, MTURK_VALID_SONG_IDS, S3_BUCKET_URL'
     exit 1
 fi
 
@@ -35,6 +36,8 @@ AMPLIFY_AUTH_USER_POOL_ID=
 AMPLIFY_AUTH_WEB_CLIENT_ID=
 CONCERT_START_TIME=
 MTURK_API_URL=${MTURK_API_URL}
+MTURK_API_STUB=${MTURK_API_STUB:-false}
+MTURK_APP_SECRET=${MTURK_APP_SECRET}
 MTURK_CHOICE_INTERVAL=${MTURK_CHOICE_INTERVAL:-20}
 MTURK_CHOICE_TIMEOUT=${MTURK_CHOICE_TIMEOUT:-5}
 MTURK_CHOICE_TYPE=${MTURK_CHOICE_TYPE}
@@ -44,7 +47,7 @@ WEBSOCKET_API_URL=
 EOF
 
         subFolder="${MTURK_SONG_ID}/${MTURK_CHOICE_TYPE}"
-        publicUrl="${APP_HOST}/${subFolder}"
+        publicUrl="${S3_BUCKET_URL}/Builds/${subFolder}"
         distFolder="dist/${subFolder}"
 
         rm -rf "app/${distFolder}"

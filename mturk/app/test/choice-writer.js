@@ -223,7 +223,7 @@ test('If all checks pass, file is saved to S3 in expected location', async t => 
     putObject.calledWithExactly({
       Body: event.body,
       Bucket: TEST_S3_BUCKET,
-      Key: `${songId}/${choiceType}/${id}.json`,
+      Key: `Choices/${songId}/${choiceType}/${id}.json`,
       ContentMD5: 'IyWxRiZLxktnLX5jm3vl9A==',
       ContentType: 'application/json',
     }),

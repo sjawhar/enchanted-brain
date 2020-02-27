@@ -35,6 +35,17 @@ Resources:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: alias/aws/s3
 
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub ${S3Bucket.Arn}/Builds/*
+            Principal: '*'
+
   AppSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -69,15 +80,15 @@ Resources:
           Statement:
             - Effect: Allow
               Action: s3:PutObject
-              Resource: !Sub ${S3Bucket.Arn}/*
+              Resource: !Sub ${S3Bucket.Arn}/Choices/*
         - AWSSecretsManagerGetSecretValuePolicy:
             SecretArn: !Ref AppSecret
 
 
 Outputs:
 
-  ServerlessRestApiId:
-    Value: !Ref ServerlessRestApi
+  ChoiceWriterUrl:
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/Choices
 
-  ServerlessRestApiUrl:
-    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}
+  S3BucketUrl:
+    Value: !Ref S3Bucket.DomainName
