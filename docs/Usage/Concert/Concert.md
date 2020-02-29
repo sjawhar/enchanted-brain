@@ -33,7 +33,7 @@ The websocket API will also be used to guide the mobile app through the concert 
 
 ### Authentication
 There are two methods by which you can authenticate when connecting to the websocket server:
-* Include the user's JWT in the `Authentication` header and include a random unique value in the `token` query string parameter (recommended)
+* Include the user's JWT in the `Authorization` header and include a random unique value in the `token` query string parameter (recommended)
 * Include the user's JWT in the `token` query string parameter
 
 ### Connecting

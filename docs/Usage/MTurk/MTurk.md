@@ -40,7 +40,7 @@ User choices are submitted to an API endpoint, which validates and persists them
   },
   choices: [
     {
-      timestamp: String,
+      songPosition: Number,     // Milliseconds since start of song
       choice: Number,
     },
     ...
@@ -53,6 +53,6 @@ The value of the `id` attribute should be a UUID that the client generates for e
 Each user submission is saved to an S3 bucket as `Choices/${songId}/${choiceType}/${id}.json`
 
 ### Authentication
-Requests to the Choices API must include the app secret as a Bearer token in the `Authentication` header. For example: `Authentication: Bearer super-secret-string`.
+Requests to the Choices API must include the app secret as a Bearer token in the `Authorization` header. For example: `Authorization: Bearer super-secret-string`.
 
 The app secret is created in AWS Secrets Manager under `${Environment}/enchanted-brain/mturk/app-secret` when the CloudFormation stack is deployed.

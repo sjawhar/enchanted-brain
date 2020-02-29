@@ -17,7 +17,7 @@ TODO
 TODO
 
 ## API contract
-All requests to APIs should include an `Authentication` header with the user's AWS Cognito ID JWT
+All requests to APIs should include an `Authorization` header with the user's AWS Cognito ID JWT
 
 ### Sign in/out
 Use AWS Cognito libraries.

@@ -20,7 +20,6 @@ Parameters:
     Description: List of valid song IDs
     Type: CommaDelimitedList
 
-
 Resources:
 
   S3Bucket:
@@ -32,8 +31,7 @@ Resources:
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
-              SSEAlgorithm: aws:kms
-              KMSMasterKeyID: alias/aws/s3
+              SSEAlgorithm: AES256
 
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
@@ -87,8 +85,11 @@ Resources:
 
 Outputs:
 
+  AppSecret:
+    Value: !Ref AppSecret
+
   ChoiceWriterUrl:
     Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/Choices
 
   S3BucketUrl:
-    Value: !Ref S3Bucket.DomainName
+    Value: !GetAtt S3Bucket.DomainName

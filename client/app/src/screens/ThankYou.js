@@ -36,7 +36,7 @@ export default class ThankYouScreen extends Component {
       {
         method: 'POST',
         headers: {
-          authentication: `Bearer ${MTURK_APP_SECRET}`,
+          authorization: `Bearer ${MTURK_APP_SECRET}`,
         },
         body: JSON.stringify({
           id: token,

@@ -16,8 +16,8 @@ class SignUpScreen extends Component {
       songId: MTURK_SONG_ID,
       choiceType: MTURK_CHOICE_TYPE,
       choiceInverted: Math.random() > 0.5,
-      interval: MTURK_CHOICE_INTERVAL,
-      timeout: MTURK_CHOICE_TIMEOUT,
+      interval: parseInt(MTURK_CHOICE_INTERVAL, 10),
+      timeout: parseInt(MTURK_CHOICE_TIMEOUT, 10),
     };
     this.props.navigation.navigate({
       routeName: 'Instructions',
