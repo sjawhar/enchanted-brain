@@ -15,9 +15,9 @@
       "3": "Difficulté fréquente ou définitive"
     },
     "gender": {
-      "male": "Homme",
-      "female": "Femme",
-      "other": "Autre"
+      "GENDER_MALE": "Homme",
+      "GENDER_FEMALE": "Femme",
+      "GENDER_OTHER": "Autre"
     }
   },
   "fields": {

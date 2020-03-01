@@ -10,7 +10,10 @@ import LANGUAGES from '../../languages';
 
 const COUNTRIES = Object.entries(getCodeList())
   .sort(([_, a], [__, b]) => a.localeCompare(b))
-  .reduce((countries, [code, name]) => Object.assign(countries, { [code]: name }), {});
+  .reduce(
+    (countries, [code, name]) => Object.assign(countries, { [code.toUpperCase()]: name }),
+    {}
+  );
 
 export default class Demographics extends Component {
   getFormProps = () => {

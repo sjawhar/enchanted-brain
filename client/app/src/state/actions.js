@@ -38,9 +38,14 @@ export const setChoiceType = choiceType => ({
 });
 
 export const SET_DEMOGRAPHICS = 'SET_DEMOGRAPHICS';
-export const setDemographics = demographics => ({
+export const setDemographics = ({ colorPerception, ...demographics }) => ({
   type: SET_DEMOGRAPHICS,
-  payload: { demographics },
+  payload: {
+    demographics: {
+      colorPerception: parseInt(colorPerception),
+      ...demographics,
+    },
+  },
 });
 
 export const SET_LANGUAGE = 'SET_LANGUAGE';
