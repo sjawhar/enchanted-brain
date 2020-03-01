@@ -154,6 +154,7 @@ class ChillsScreen extends Component {
         choice: parseFloat(parseFloat(choice).toFixed(2)),
         choiceType: CHOICE_CHILLS,
         timestamp: new Date(timestamp).toISOString(),
+        songPosition: timestamp - Date.parse(this.props.navigation.state.params.startTime),
       })
     );
 

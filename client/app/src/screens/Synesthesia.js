@@ -131,11 +131,13 @@ export default class SynesthsiaScreen extends Component {
     Vibration.cancel();
 
     if (isChoice) {
+      const { timestamp } = this.state;
       store.dispatch(
         actions.sendChoice({
           choiceType,
           choice,
-          timestamp: new Date(this.state.timestamp).toISOString(),
+          timestamp: new Date(timestamp).toISOString(),
+          songPosition: timestamp - Date.parse(this.props.navigation.state.params.startTime),
         })
       );
     }

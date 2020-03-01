@@ -68,12 +68,12 @@ export default class ThankYouScreen extends Component {
 
   getChoices() {
     const choiceKey = getChoiceKey(this.props.navigation.state.params.choiceType);
-    return Object.entries(store.getState().choices[choiceKey])
-      .map(([timestamp, { choice }]) => ({
-        timestamp,
+    return Object.values(store.getState().choices[choiceKey])
+      .map(({ choice, songPosition }) => ({
         choice,
+        songPosition,
       }))
-      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+      .sort((a, b) => a.songPosition - b.songPosition);
   }
 
   render() {

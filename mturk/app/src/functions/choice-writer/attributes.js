@@ -11,5 +11,5 @@ exports.ATTR_GENDER = 'gender';
 exports.ATTR_ID = 'id';
 exports.ATTR_INTERVAL = 'interval';
 exports.ATTR_SONG_ID = 'songId';
+exports.ATTR_SONG_POSITION = 'songPosition';
 exports.ATTR_TIMEOUT = 'timeout';
-exports.ATTR_TIMESTAMP = 'timestamp';

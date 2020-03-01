@@ -3,9 +3,9 @@ const crypto = require('crypto');
 const { getError, getErrorResponse } = require('./utils');
 const {
   ATTR_AGE,
-  ATTR_CHOICE,
   ATTR_CHOICE_INVERTED,
   ATTR_CHOICE_TYPE,
+  ATTR_CHOICE,
   ATTR_CHOICES,
   ATTR_COLOR_PERCEPTION,
   ATTR_COUNTRY_OF_BIRTH,
@@ -15,8 +15,8 @@ const {
   ATTR_ID,
   ATTR_INTERVAL,
   ATTR_SONG_ID,
+  ATTR_SONG_POSITION,
   ATTR_TIMEOUT,
-  ATTR_TIMESTAMP,
 } = require('./attributes');
 
 const {
@@ -30,7 +30,6 @@ const VALID_CHOICE_TYPES = ENCHANTED_BRAIN_VALID_CHOICE_TYPES.split(',');
 const VALID_SONG_IDS = ENCHANTED_BRAIN_VALID_SONG_IDS.split(',');
 const VALID_GENDERS = ['GENDER_MALE', 'GENDER_FEMALE', 'GENDER_OTHER'];
 const VALID_UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
-const VALID_TIME_WINDOW = 10 * 60 * 1000;
 
 const s3 = new aws.S3();
 const secretsManager = new aws.SecretsManager();
@@ -109,15 +108,12 @@ const validateChoices = choices => {
   if (!(choices instanceof Array) || choices.length === 0) {
     throw getError('choices must be a non-empty array');
   }
-  const maxChoiceTime = Date.now() + VALID_TIME_WINDOW;
-  const minChoiceTime = Date.now() - VALID_TIME_WINDOW;
-  choices.forEach(({ [ATTR_CHOICE]: choice, [ATTR_TIMESTAMP]: timestamp }) => {
+  choices.forEach(({ [ATTR_CHOICE]: choice, [ATTR_SONG_POSITION]: songPosition }) => {
     if (typeof choice !== 'number' || choice % 1 || choice < -2 || choice > 2) {
       throw getError([ATTR_CHOICE, choice, 'Expected an integer between -2 and 2']);
     }
-    const choiceTime = Date.parse(timestamp);
-    if (Number.isNaN(choiceTime) || choiceTime < minChoiceTime || choiceTime > maxChoiceTime) {
-      throw getError([ATTR_TIMESTAMP, timestamp, 'Expected a valid, recent datetime']);
+    if (typeof songPosition !== 'number' || !Number.isInteger(songPosition) || songPosition <= 0) {
+      throw getError([ATTR_SONG_POSITION, songPosition, 'Expected a positive integer']);
     }
   });
 };

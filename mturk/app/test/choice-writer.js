@@ -6,7 +6,7 @@ const TEST_APP_SECRET = 'test-app-secret';
 const TEST_APP_SECRET_ARN = 'arn:aws:test:secrets/test-app-secret';
 const TEST_S3_BUCKET = 'test-s3-bucket';
 const CHOICE_VALID = {
-  timestamp: '2019-12-20T11:16:00.000Z',
+  songPosition: 20000,
   choice: 1,
 };
 
@@ -83,10 +83,6 @@ test.before(() => {
     ENCHANTED_BRAIN_S3_BUCKET_NAME: TEST_S3_BUCKET,
     ENCHANTED_BRAIN_VALID_CHOICE_TYPES: 'CHOICE_TYPE_TEST,CHOICE_TYPE_TEST_TWO',
     ENCHANTED_BRAIN_VALID_SONG_IDS: 'SONG_TEST_1,SONG_TEST_2',
-  });
-  sinon.useFakeTimers({
-    now: Date.parse(CHOICE_VALID.timestamp),
-    toFake: ['Date'],
   });
   getSecretValue.resolves({ SecretString: TEST_APP_SECRET });
   ({ handler } = require('../src/functions/choice-writer')); // eslint-disable-line global-require
@@ -195,10 +191,10 @@ test(
   { statusCode: 422, message: 'choices must be a non-empty array' },
 );
 test(
-  'If choices[].timestamp is not a date, returns 422',
+  'If choices[].songPosition is not a positive integer, returns 422',
   macroErrorResponse,
-  { choices: [CHOICE_VALID, { ...CHOICE_VALID, timestamp: 'invalid' }] },
-  { statusCode: 422, message: 'timestamp' },
+  { choices: [CHOICE_VALID, { ...CHOICE_VALID, songPosition: -3 }] },
+  { statusCode: 422, message: 'songPosition' },
 );
 test(
   'If choices[].choice attribute is not an integer between -2 and 2, returns 422',
@@ -224,7 +220,7 @@ test('If all checks pass, file is saved to S3 in expected location', async t => 
       Body: event.body,
       Bucket: TEST_S3_BUCKET,
       Key: `Choices/${songId}/${choiceType}/${id}.json`,
-      ContentMD5: 'IyWxRiZLxktnLX5jm3vl9A==',
+      ContentMD5: '4a9MCVI6UqidpWpWkwR+tw==',
       ContentType: 'application/json',
     }),
     JSON.stringify(putObject.args, null, 2),
