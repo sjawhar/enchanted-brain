@@ -62,9 +62,8 @@ describe('root reducer', () => {
 
   describe(actions.SET_DEMOGRAPHICS, () => {
     it('should set demographics', () => {
-      const expected = { foo: 'bar' };
-      const state = reducer(undefined, actions.setDemographics(expected));
-      expect(state.demographics).toEqual(expected);
+      const state = reducer(undefined, actions.setDemographics({ colorPerception: '0' }));
+      expect(state.demographics).toEqual({ colorPerception: 0 });
     });
   });
 
